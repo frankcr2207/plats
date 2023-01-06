@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+		<link rel="stylesheet" href="css/toastr.min.css" >
+		<link rel="stylesheet" href="css/main.css" >
+		<style type="text/css">
+		  .selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } input{border: none;} #datosAbogado label{width: 100px}
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="abogado:${solicitante}" id="datosAbogado" class="datosAbogado">
+				<h6><strong>DATOS DE ABOGADO</strong></h6>
+				<div class="form-row">
+					<div style="width:70%; font-size: 12px">
+						<input th:value="${formulario}" class="formulario" id="formulario" type="hidden">
+						<label><strong>DNI: </strong></label><input th:value="${abogado.s_dni}" class="dniSolicitante" id="dni" readonly="readonly" size="20" >&nbsp;&nbsp;&nbsp;<br>
+						<label><strong>NOMBRES: </strong></label><input th:value="${abogado.nombresCompletos}" class="nombres" id="nombres" readonly="readonly" size="40"><br>
+					</div>
+					<div style="width:30%; font-size: 12px">
+						<form class="formFinalizar" method="post">
+							<input type="hidden" th:value="${abogado.nombresCompletos}" id="nombres" name="nombresCompletos">
+							<input type="hidden" class="idSolicitud" name="idSolicitud" th:value="${idSolicitud}">
+							<button type="submit" class="btn btn-success btnFinalizar"><strong>FINALIZAR</strong></button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<br>
+			<table style="font-size:11px;" class="table table-hover table-sm tablaExpedientes" id="tablaExpedientes">
+				<thead>
+					<tr>
+						<th><label style="font-size: 12px">LISTA DE EXPEDIENTES DE LA SOLICITUD</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="hidden" class="formulario" th:value="${formulario}"></th>
+						<th align="center"><button onclick="actualizar()" class="btn btn-outline-success btn-sm"><i class='fas fa-sync-alt fa-lg'></i></button></th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: default" th:each="expediente:${expedientes}" id="filasExpedientes" class="filasExpedientes">	
+						<td style="display: none" th:text="${expediente.id_correlativo}"></td>
+						<td style="vertical-align:middle;"><span th:text="${expediente.expedienteCompleto}"></span></td>
+						<td th:switch="${expediente.s_estado_expediente}" align="center">
+                           	<label class="switch">
+                           	<span th:case="'A'" ><img src="img/visto.png" align="middle" th:src="@{img/visto.png}" width="22"/></span>
+                           	<span th:case="'N'" ><img src="img/error.png" align="middle" th:src="@{img/error.png}" width="22"/></span>
+                           	<span th:case="'I'" ><img src="img/exp.png" align="middle" th:src="@{img/exp.png}" width="22"/></span>
+                           	<span th:case="'R'" ><img src="img/sinvisto.png" align="middle" th:src="@{img/sinvisto.png}" width="22"/></span>
+                           	<span th:case="'X'" ><img src="img/sinvisto.png" align="middle" th:src="@{img/sinvisto.png}" width="22"/></span>
+							</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<div class="modal fade modalLoader" id="modalLoader" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		    	<div class="loaderSol" id="loaderSol" style="width: 100%; height: 100%;" >
+					<div style="width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top:50px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/pj.jpg" width="80px">
+							</div><br>
+							<p><strong>PROCESANDO, ESPERE POR FAVOR!</strong></p>
+							<div class="lds-ellipsis">
+								<div></div>
+								<div></div>
+								<div></div>
+								<div></div>
+							</div>
+						</div>
+					</div>
+				</div>
+		    </div>
+		  </div>
+		</div>
+
+	    <script type="text/javascript">
+			
+	 	$("#tablaExpedientes #filasExpedientes").click(function(){
+	 		$(this).addClass('selected').siblings().removeClass('selected');
+	 		
+	   		toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+		   	var value=$(this).find('td:first').html();
+
+    		var url='buscarExpediente';
+    		url = url + '/' + value + '/' + $(".dniSolicitante").val();
+   			$(".detalleObjetos").load(url);
+			
+		});	
+	    </script>
+	    <script type="text/javascript">
+	    	function actualizar(){
+		    	$(".detalleObjetos").empty();
+		    	var url3 = $('.formulario').val();
+	   			$(".listaObjetos").load(url3);
+	   			toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.success("REGISTROS ACTUALIZADOS!!");
+	   		}
+	    </script>
+	    <script src="js/jquery-target.js"></script>
+	    
+	</body>
+</html>

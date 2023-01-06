@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+		<link rel="stylesheet" href="css/toastr.min.css" >
+		<style type="text/css">
+		  .selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<label id="lblRows" style="font-weight: bold"></label>
+			<table style="font-size:11px" class="table table-hover table-sm tablaDirectorio" id="tablaDirectorio">
+				<thead>
+					<tr>
+						<th><strong>DNI</strong></th>
+						<th><strong>NOMBRES</strong></th>
+						<th><strong>APELLIDOS</strong></th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer" th:each="fila:${lista}" id="filasDirectorio" class="filasDirectorio">
+						<td th:text="${fila.s_dni}"></td>
+						<td th:text="${fila.s_nombres}">
+						<td th:text="${fila.s_apellidos}">
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+			
+	 	$("#tablaDirectorio #filasDirectorio").click(function(){
+	 		$(this).addClass('selected').siblings().removeClass('selected');
+	   		toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+		   	var value=$(this).find('td:first').html();
+
+		   	$(".detalleObjetos").empty();
+		   	$.get( "verDetalleDirectorio", { value: value} )
+		    .done(function( data ) {
+		    	$(".detalleObjetos").html(data);
+		    })
+		});	
+	</script>   
+	<script type="text/javascript"> 
+		var oRows = document.getElementById('tablaDirectorio').getElementsByTagName('tr'); 
+		var iRowCount = oRows.length - 1; 
+		document.getElementById('lblRows').innerHTML = 'Registros encontrados: ' + iRowCount;
+	</script>
+</body>
+</html>

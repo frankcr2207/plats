@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/printThis.js" th:src="@{js/printThis.js}"></script>
+	<script type="text/javascript" src="js/jquery.richtext.js"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/main.css" >
+	<link rel="stylesheet" href="css/richtext.min.css">
+	<link rel="stylesheet" href="css/estiloPrint.css">
+	<style type="text/css" media="print">
+		@media print {
+		.contenido {height: 100%;}
+		#listaObjetos {display:none;}
+		#btnResponder {display:none;}
+		#btnImprimir {display:none;}
+		#btnVerRespuesta {display:none;}
+		#btnDerivar {display:none;}
+		#btnResolver {display:none;}
+		#menu {display:none;}
+		.taObsResolucion {display:none;}
+		.lblObsResolucion {display:none;}
+		
+	</style>
+	<style type="text/css">
+		.loader{
+        	display: none;
+        	background-color:white;
+	   		opacity:1;
+	   		filter:alpha(opacity=60); /* IE < 9.0 */
+      	}
+		#solicitud input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+    	#datosSolicitud label, .modalDerivar label, .modalDevolver label{
+    		width: 100px;
+    	}
+    	.select2-results__option { 
+	  font-size: 10px;
+	}
+	</style>
+	
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="dato:${detalle}" id="datosSolicitud" class="datosSolicitud">
+				<h6><strong>DATOS DEL PEDIDO</strong></h6>
+				<div class="form-row">
+					<div style="width:70%; font-size: 11px">
+						<input th:value="${dato.n_id_acceso}" id="id" type="hidden" class="id">
+						
+						<label><strong>FECHA: </strong></label><input style="font-weight: bold" th:value="${dato.fechaRegistro}" id="nombres" readonly="readonly" size="20">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="window.print();" id="btnImprimir" class="btn btn-outline-dark btn-sm" style="margin:auto"><i class='fas fa-print fa-lg'></i></button><br>
+						<label><strong>SOLICITANTE: </strong></label><input style="font-weight: bold" th:value="${dato.s_nombre_razon_social}" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>DNI: </strong></label><input th:value="${dato.s_dni}" id="documento" readonly="readonly" size="20" ><br>
+						<label><strong>FUNCIONARIO: </strong></label><input th:value="${dato.s_funcionario_responsable}" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>TIPO: </strong></label><input th:value="${dato.s_tipo_persona}" id="documento" readonly="readonly" size="20" ><br>
+						<label style="width: 120px"><strong>CELULAR/CORREO: </strong></label><input style="font-weight: bold" th:value="${dato.s_telefono_email}" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>RUC: </strong></label><input th:value="${dato.s_ruc}" id="tipoDocumento" readonly="readonly" size="20" value=""><br>
+						<label><strong>DIRECCION: </strong></label><input th:value="${dato.s_direccion}" readonly="readonly" size="65" value=""><br>
+						<label><strong>DEPARTAMENTO: </strong></label><input th:value="${dato.s_departamento}" readonly="readonly" size="40" value=""><br>
+						<label><strong>PROVINCIA: </strong></label><input th:value="${dato.s_provincia}" readonly="readonly" size="40" value=""><br>
+						<label><strong>DISTRITO: </strong></label><input th:value="${dato.s_distrito}" readonly="readonly" size="40" value=""><br>
+						<label><strong>DEPENDENCIA: </strong></label><input th:value="${dato.s_dependencia}" readonly="readonly" size="65" value=""><br>
+						<label><strong>F. ENTREGA: </strong></label><input th:value="${dato.s_forma_entrega}" readonly="readonly" size="65" value=""><br>
+						<label><strong>DETALLE: </strong></label><input th:value="${dato.s_forma_entrega_texto}" readonly="readonly" size="65" value=""><br>
+						<div class="input-group">
+						  <div class="input-group-prepend">
+						    <span class="input-group-text">INFORM.</span>
+						  </div>
+						  <textarea style="height: 150px; font-size: 11px;" class="form-control" aria-label="With textarea" th:text="${dato.x_informacion_solicitada}" readonly="readonly"></textarea><br>
+						  
+						</div>
+						<label style="width: 130px" th:if="${dato.s_file_pdf != '' and dato.s_file_pdf != null}" ><strong>ADJUNTO</strong></label>
+						<button type="button" th:if="${dato.s_file_pdf != '' and dato.s_file_pdf != null}" onclick="verAdjunto()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button>
+					
+					</div>
+					<div style="width:30%;" align="center" >
+
+						<div th:if="${dato.s_estado == 'P'}">
+							<button class="btn btn-success" id="btnResponder" style="margin:auto" data-toggle="modal" data-target="#modalRespuestaCJ"><strong><i class='fas fa-envelope'></i>&nbsp;RESPONDER</strong></button><br><br>
+						</div>
+						<div th:if="${dato.s_estado == 'A'}">
+							<button style="cursor: default; margin:auto" class="btn btn-primary" id="btnVerRespuesta"><strong><i class='fas fa-envelope'></i>&nbsp;ATENDIDO</strong></button>
+						</div>
+						<div th:if="${dato.s_estado == 'O'}">
+							<button style="cursor: default; margin:auto" class="btn btn-danger"><strong><i class='fas fa-exclamation'></i>&nbsp;OBSERVADO</strong></button><br><br>
+						</div>
+						
+					</div>
+				</div><hr>
+
+				<hr>
+				<div style="font-size: 11px;" th:if="${dato.s_estado == 'A' || dato.s_estado == 'O' || dato.b_reporte == true}">
+					<label style="width: 200px"><strong>ATENDIDO EL <span th:text="${dato.fechaRespuesta}"></span></strong></label><br>
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">MENSAJE</span>
+					  </div>
+					  <textarea style="height: 150px; font-size: 11px;" class="form-control" aria-label="With textarea" th:text="${dato.s_respuesta}" readonly="readonly"></textarea><br>
+					  
+					</div><br>
+					<label th:if="${dato.s_file_pdf_respuesta != '' and dato.s_file_pdf_respuesta != null}" ><strong>ADJUNTO</strong></label>
+					<button type="button" th:if="${dato.s_file_pdf_respuesta != '' and dato.s_file_pdf_respuesta != null}" onclick="verAjuntoRespuesta()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button><br>
+					<label style="width: 350px" th:if="${dato.b_reporte == true}" ><strong>* Documento generado automaticamente</strong></label>
+							
+				</div>
+			</div>
+		</div>
+	</div>
+                
+	<div class="modal fade modalRespuestaCJ" id="modalRespuestaCJ" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog">
+		    <div class="modal-content" th:each="dato:${detalle}">
+		    	<div class="loader" id="loader" style="width: 100%; height: 100%;  position: absolute; z-index: 10000;" >
+					<div style="position: relative; width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top:90px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/corteAQP.png" width="200">
+							</div><br>
+							<p><strong>ENVIANDO, ESPERE POR FAVOR!</strong></p>
+								<img alt="" src="img/send-small.gif">
+							<br><br><br><br><br><br>
+						</div>
+					</div>
+				</div>
+		    <form class="formRespuestaAI" action="" method="post" enctype="multipart/form-data" id="formRespuestaAI">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel"><strong>RESPUESTA</strong></h5>
+		        <button style="display:none;" type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      
+		      		<div class="modal-body" style="font-size: 12px">
+		      			<input class="solicitud" type="hidden" id="idSolicitud" name="idSolicitud" th:value="${dato.n_id_acceso}">
+		      			<label style="width: 90px"><strong>SOLICITANTE: </strong></label><input th:value="${dato.s_nombre_razon_social}" id="solicitanteRespuesta" name="solicitanteRespuesta" readonly="readonly" size="40" ><br>
+		      			<input type="hidden" id="txtReporte" th:value="${dato.b_reporte}">
+		      			<label style="width: 90px"><strong>ACCIÓN: </strong></label><select id="lstAccion" name="accion">
+		      				<option value="0">SELECCIONE ...</option>
+		      				<option value="A">ACEPTAR</option>
+		      				<option value="O">OBSERVAR</option>
+		      			</select><br>
+		      			<div class="input-group">
+						  <div class="input-group-prepend">
+						    <span class="input-group-text">RESPUESTA</span>
+						  </div>
+						  <textarea style="height: 130px" class="form-control"  required id="textoRespuesta" name="textoRespuesta" aria-label="With textarea"></textarea>
+						</div><br>
+						<label style="font-size: 12px"><strong>Archivo adjunto opcional. (Formato PDF)</strong></label>
+						<input style="width: 300px;" accept=".pdf" type="file" class="form-control-file" id="adjunto" name="adjunto"><br>
+						<label style="font-size: 12px; font-weight: bold"><input type="checkbox" id="prorroga" name="prorroga" > Prorroga</label><br> 
+		      		</div>
+		      	
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+			        <button type="button" class="btn btn-primary btnEnviarRespuestaAI"><strong><i class='far fa-paper-plane'></i>&nbsp;ENVIAR</strong></button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+	
+	<div class="modal fade modalSesion" id="modalSesion" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">ATENCIÓN</h5>
+
+	      </div>
+	      <div class="modal-body">
+	      	<h6>La sesión ha caducado, por favor haga click en el botón OK.</h6>
+	        <a class="btn btn-success" href="/">OK</a>
+	      </div>
+	      <div class="modal-footer">
+
+	      </div>
+	    </div>
+	  </div>
+	</div>
+
+	<script type="text/javascript">
+	$(document).ready(function(){
+		if($('#txtReporte').val() == 'true'){
+			$('#adjunto').hide();
+		}
+		else{
+			$('#adjunto').show();
+		}
+	})
+	
+	
+	$(".btnEnviarRespuestaAI").click(function() {
+		if($('#lstAccion').val() == '0'){
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.warning("DEBE ELEGIR ACCION!!");
+			return false;
+		}
+		
+		if($('#textoRespuesta').val() == ''){
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.warning("DEBE CONSIGNAR RESPUESTA!!");
+			return false;
+		}
+			
+		var form = document.getElementById('formRespuestaAI');
+		var formData = new FormData(form);
+		$.ajax({
+			type:"POST",
+			url:"enviarRespuestaAI",
+			data:formData,
+			cache:false,
+			dataType:"json",
+			contentType:false,
+			processData:false,
+			beforeSend:function(){
+	            $('.loader').show();
+	        },
+			success:function(response) {
+				if(response.Status == 200){ 
+					$(".detalleObjetos").empty();
+					$(".listaObjetos").load('ACCESOINFORMACION');
+					$('.loader').hide();
+					$(".modalRespuestaCJ").modal('hide');
+					$('body').removeClass('modal-open');
+					$('.modal-backdrop').remove();
+					Swal.fire(
+						  'RESPUESTA ENVIADA!!',
+						  'Click en OK para continuar!',
+						  'success'
+						);
+				}
+				else if(response.Status == 400){
+					$('.loader').hide();
+					$(".modalRespuestaCJ").modal("hide");
+					Swal.fire({
+						  icon: 'info',
+						  title: 'ATENCIÓN',
+						  text: 'El registro ya fue atendido, actualice la lista!!',
+						  
+					});
+				}
+				else if(response.Status == 300){
+					$('.loader').hide();
+					$(".modalRespuestaCJ").modal("hide");
+					Swal.fire({
+						  icon: 'info',
+						  title: 'ATENCIÓN',
+						  text: 'Sin conexion al servidor FTP!!',
+						  
+						});
+				}
+				else {
+					$('.loader').hide();
+					$(".modalRespuestaCJ").modal("hide");
+					Swal.fire({
+						  icon: 'error',
+						  title: 'ATENCIÓN',
+						  text: 'Algo salió mal, no se pudo enviar la información.!!',
+						  
+						});
+				}
+			}
+		
+		});
+	});	
+	
+	function verAdjunto(){	
+		var url='verPDFAccesoInfo';
+			url = url + '/' + $('.id').val();
+		window.open(url,'nuevaVentana','width=600, height=630, toolbar=0, location=0');
+	};
+	
+	
+	function verAjuntoRespuesta(){	
+		var url='verPDFRespuestaAccesoInfo';
+			url = url + '/' + $('.id').val();
+		window.open(url,'nuevaVentana','width=600, height=630');
+	};
+		
+	</script>
+</body>
+</html>

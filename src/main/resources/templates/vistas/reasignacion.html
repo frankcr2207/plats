@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8">
+<title>CDM - Sistema de gestión de solicitudes</title>
+	<link rel="icon" type="img/jpg" href="img/pj.jpg" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+ 	<link rel="stylesheet" href="css/bootstrap-select.min.css">
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/estilo2.css" >
+	
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/jquery-3.5.1.js"></script>
+	<script src="js/popper.min.js" th:src="@{js/popper.min.js}"></script>
+	<script src="js/bootstrap.min.js"></script>
+  
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/funciones.js" th:src="@{js/funciones.js}"></script>
+	<script src="js/iconos.js"></script>
+	<script src="js/bootstrap-select.min.js"></script>
+	<style type="text/css">
+		#grupoChk label{
+			font-size: 11px;
+		}
+		input{
+	    	border:0;
+		    border-bottom: 1px solid #009CBF;
+		    font-size: 11px";
+	    }
+	</style>
+	
+</head>
+<body>
+	<div  style="background-color: #4E0000;">
+			<div id="cabecera" style="padding-top: 10px;padding-bottom: 1px" align="center">
+				<a href="/" style="text-decoration:none;"><img alt="ayuda" src="img/pj.svg" width="20px">&nbsp;&nbsp;&nbsp;</a><a style="color:white;  text-decoration:none;" href="principal"><strong>CORTE SUPERIOR DE JUSTICIA DE AREQUIPA</strong></a>
+				<p style="color: white;font-size:15px;"><strong>REDISTRIBUCION ALEATORIA DE EXPEDIENTES (Inhibiciones u otros)</strong></p>
+			</div>
+	</div>
+	<div style="background-color: #790000; padding:0px; border-bottom: 4px solid #C4C4C4;">
+		<div class="form-row" id="menu">
+			 <div style="width: 75%; padding-top: 5px">
+			 </div>
+
+		</div>
+	</div><div id="divReporte" class="divReporte"></div>
+	<div style="width: 90%;  height: 80%; margin: auto;"><br><input type="hidden" class="formulario" th:value="${formulario}"><input type="hidden" id="sedeOrigen" th:value="${sedeOrigen}">
+			
+			<input id="txtBuscarAudiencia" name="txtBuscarAudiencia" type="text" style="text-transform:uppercase;" class="txtBuscarAudiencia" placeholder="Filtre aquí ..."/><br><br>
+			<table style="font-size:10px" class="table table-hover table-sm">	
+				<thead>
+					<tr>
+						<th>EXPEDIENTE</th>
+						<th>ORIGEN</th>
+						<th>DESTINO</th>
+						<th>USUARIO</th>
+						<th>OBSERVACION</th>
+						
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer; font-size:10px" th:each="reg:${lista}" id="filaAudiencias" class="filaAudiencias">
+						<td ><strong style="font-size: 14px;">EXP. <span th:text="${reg.expediente}"></span></strong><br><strong>F. REGISTRO: </strong><span th:text="${reg.fechaRegistro}"></span></td>
+						<td ><span th:text="${reg.s_sede}"></span> <br> <span th:text="${reg.x_nom_instancia}"></span></td>
+						<td ><span th:text="${reg.sedeDestino}"></span> <br> <span th:text="${reg.insDestino}"></span></td>
+						<td ><span th:text="${reg.nombresCompletos}"></span></td>
+						<td ><span th:text="${reg.s_observacion}"></span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		
+		
+	<footer style="background-color: black;  left: 0;  bottom: 0;  width: 100%; position: fixed; color: white;  text-align: center;">		
+		<div style="     margin:0px auto ;   width:100%;   overflow: hidden; padding-top: 10px">
+			<p style="color: white; font-size: 10px"> Corte Superior de Justicia de Arequipa  - Plaza España S/N - Arequipa - Peru<br> &copy; CSJAR - 2020 - Todos los derechos reservados </p>
+		</div>
+	</footer>
+
+
+</body>
+</html>

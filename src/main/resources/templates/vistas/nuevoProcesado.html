@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+</head>
+<body>
+	<div style="width:100%; height: 100%; margin: auto">
+		<div id="divContenedor" style="width: 100%; height:100%; margin: auto; float: left;" class="card card-body">	
+			<div style="font-size: 12px; font-weight: bold;">
+				<h6 style="font-weight: bold;">DATOS DEL PROCESADO</h6>
+				<input type="radio" id="rboPeruano" checked name="rboNacionalidad" value="P">
+				<label for="html">PERUANO</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="radio" id="rboExtranjero" name="rboNacionalidad" value="O">
+				<label for="html">EXTRANJERO (Deberá ingresar manualmente todos los datos)</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div id="divBuscarDNI"><label>DNI: </label>&nbsp;&nbsp;<input autofocus size="8" onkeypress="return numbersonly(event)" id="txtBuscarDni" type="text" maxlength="8"> <button class="btn btn-info btn-sm" id="btnBuscar" type="button"><i class="fas fa-fingerprint fa-lg"></i></button></div>
+				<hr>	
+				<div id="divDatosPersonales">
+				<label id="lblTipoDoc" style="display: none;">TIPO DOC:</label>&nbsp;&nbsp;
+				<select id="lstTipoDoc" style="display: none; margin-right: 5px;"><option value="0">SELECCIONE.</option><option value="2">C.I.</option><option value="3">C.E.</option><option value="4">P.T.P.</option></select>
+				<label>DOCUMENTO: </label>&nbsp;&nbsp;<input readonly type="text" id="txtDniNuevo" onkeypress="return numbersonly(event)" maxlength="12"><br>
+				<label>NOMBRES: </label>&nbsp;&nbsp;<input class="text-uppercase" type="text" id="txtNombres" readonly onkeypress="return lettersonly(event)" size="40">&nbsp;&nbsp;&nbsp;
+				<label>APELLIDOS: </label>&nbsp;&nbsp;<input class="text-uppercase" type="text" id="txtApellidos" readonly onkeypress="return lettersonly(event)" size="40">&nbsp;&nbsp;&nbsp;
+				<label>FECHA NAC.: </label>&nbsp;&nbsp;<input type="date" id="txtNacimiento" readonly><br></div>
+				<label>CELULAR: </label>&nbsp;&nbsp;<input id="txtCelular" type="text">&nbsp;&nbsp;&nbsp;
+				<label>DIRECCION: </label>&nbsp;&nbsp;<input class="text-uppercase" id="txtDireccion" type="text" size="100">&nbsp;&nbsp;&nbsp;
+				<label id="lblNacionalidad" style="display: none;">NACIONALIDAD: </label>&nbsp;&nbsp;
+				<select id="lstPaises" style="width: 300px; display: none;" >
+					<option value="0">SELECCIONE ...</option>
+					<option th:each="pais: ${paises}" 
+     				th:value="${pais.id_pais}" th:text="${pais.s_pais}" ></option>
+				</select>
+				<hr>
+				<h6 style="font-weight: bold;">DATOS DEL EXPDIENTE</h6>
+				<label>EXPEDIENTE: </label>&nbsp;&nbsp;<input type="text" id="txtExpediente">&nbsp;&nbsp;&nbsp;
+				<label>SEDE: </label>&nbsp;&nbsp;
+				<select id="lstSedes" style="width: 300px">
+					<option value="0">SELECCIONE ...</option>
+					<option th:each="sede: ${sedes}" 
+     				th:value="${sede.c_sede}" th:text="${sede.s_sede}" ></option>
+				</select>&nbsp;&nbsp;&nbsp;
+				<label>INSTANCIAS: </label>&nbsp;&nbsp;
+				<select id="lstInstancias" style="width: 300px">
+					<option value="0">SELECCIONE ...</option>
+				</select><br>
+				<label>ESPECIALISTA: </label>&nbsp;&nbsp;
+				<select id="lstEspecialistas" style="width: 300px">
+					<option value="0">SELECCIONE ...</option>
+					<option th:each="sec: ${secretarios}" 
+     				th:value="${sec.id_secretario}" th:text="${sec.nombresCompletos}" ></option>
+				</select>&nbsp;&nbsp;&nbsp;
+				<label>REGLAS IMPUESTAS: </label>&nbsp;&nbsp;<input type="text" size="60" id="txtReglas" class="text-uppercase"><br>
+				<hr>
+				<div align="center">
+					<button type="button" class="btn btn-secondary btn-sm" id="btnCancelar"><i class="fas fa-times"></i>&nbsp;CANCELAR</button>
+					<button type="button" class="btn btn-primary" id="btnGuardar"><i class="fas fa-save"></i>&nbsp;GUARDAR</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="js/funciones.js"></script>	
+	<script type="text/javascript">
+	
+		$("#btnBuscar").click(function(){
+			$.get('WSTokenSigsol/'+ $('#txtBuscarDni').val(), 
+				function (usuario, status) {
+					if(usuario.dni == 'NN'){
+						toastr.clear();
+						toastr.options = {
+							"closeButton":true,
+							"progressBar": true,
+							"positionClass":"toast-topcenter-right"
+						};
+						toastr.warning("No se encontraron datos!!");		
+						return false;
+			    	}
+					else if (usuario.dni == 'XX'){
+						toastr.clear();
+						toastr.options = {
+							"closeButton":true,
+							"progressBar": true,
+							"positionClass":"toast-topcenter-right"
+						};
+						toastr.danger("Sin acceso a RENIEC, intente en unos minutos!!");		
+						return false;
+					}
+					else{
+						$('#txtDniNuevo').val($('#txtBuscarDni').val());
+				        $('#txtNombres').val(usuario.nombres);
+				        $('#txtApellidos').val(usuario.paterno + ' ' + usuario.materno);
+				        var result = (usuario.nacimiento).split("/");
+				        var dia = result[0];
+				        var mes = result[1];
+				        var anio = result[2];
+				        $('#txtNacimiento').val(anio+'-'+mes+'-'+dia);
+					}
+				}
+			);
+			$('#txtDni').val(''); 
+		});
+	
+		$('#rboPeruano').change(function(){
+			$('#divBuscarDNI').show();
+			$('#divDatosPersonales input').prop('readonly', true);
+			$('#lstPaises').hide();
+			$('#lblNacionalidad').hide();
+			$('#lstTipoDoc').hide();
+			$('#lblTipoDoc').hide();
+			$('#txtBuscarDni').focus();
+		});
+		
+		$('#rboExtranjero').change(function(){
+			$('#divBuscarDNI').hide();
+			$('#divDatosPersonales input').prop('readonly', false);
+			$('#divDatosPersonales input').val('');
+			$('#lblNacionalidad').show();
+			$('#lstPaises').show();
+			$('#lstTipoDoc').show();
+			$('#lblTipoDoc').show();
+			$('#txtDniNuevo').focus();
+		});
+		
+		$("#lstSedes").change(function() {
+			
+	  		var sede = $(this).find(":selected").val();
+	  		var json = {
+	   			"id" : sede
+	  		};
+	
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "obtInstanciasNCPP",
+	       		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        timeout : 600000,
+		        success : function(data) {
+		         	var html = '';
+		         	var len = data.length;
+		         	html += '';
+		         	if(len > 0){
+		         		html += '<option style="font-size: 11px" value="0">SELECCIONE ...</option>';
+		         		for (var i = 0; i < len; i++) {
+			         		html += '<option style="font-size: 11px" value="' + data[i].c_instancia + '">' + data[i].x_nom_instancia+ '</option>';
+				        }
+		         	}
+		         	else
+		         		html += '<option style="font-size: 11px" value="0">SIN JUZGADOS ASIGNADOS</option>';
+		         	
+			        $('#lstInstancias').html(html);
+		        },
+	        	error : function(e) {
+	        	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo cargar juzgados.!!',
+					});
+		     	}
+	      	});
+		});
+		
+		$("#btnGuardar").click(function() {	
+	  		var dni = $('#txtDniNuevo').val();
+	  		var nom = $('#txtNombres').val();
+	  		var ape = $('#txtApellidos').val();
+	  		var nac = $('#txtNacimiento').val();
+	  		var cel = $('#txtCelular').val();
+	  		var dir = $('#txtDireccion').val();
+	  		var pais = null, tipo = null;
+	  		var exp = $('#txtExpediente').val();
+	  		var sede = $('#lstSedes').val();
+	  		var inst = $('#lstInstancias').val();
+	  		var espe = $('#lstEspecialistas').val();
+	  		var regl = $('#txtReglas').val();
+	  		
+	  		if($("#rboPeruano").is(':checked')){
+	  			pais = 141;
+	  			tipo = 1;
+	  		}
+	  		if($("#rboExtranjero").is(':checked')){
+	  			pais = $('#lstPaises').val();
+	  			tipo = $('#lstTipoDoc').val();
+	  		}
+			
+			if($('#divDatosPersonales input').val() == '' || exp == '' || sede == '0' || espe == '0' || regl == '' || ($("#rboExtranjero").is(':checked') && pais == '0')){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE INGRESAR TODOS LOS CAMPOS!!");		
+				return false;
+			}
+	  		
+	  		var json = {
+	  			"tipo" : tipo, "dni" : dni, "nombres" : nom, "apellidos" : ape, "nacimiento" : nac, "celular" : cel, "direccion" : dir, "pais" : pais, "expediente" : exp, "sede" : sede, "instancia" : inst, "especialista" : espe, "reglas" : regl
+	  		};
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "guardarNuevoProcesado",
+	       		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        success : function(response) {
+					if(response.Status == 200){
+						limpiar();
+						Swal.fire(
+							'DATOS GUARDADOS CON ÉXITO!!',
+							'Click en OK para continuar!',
+							'success'
+						);			
+					}
+					else if(response.Status == 300){
+						toastr.clear();
+						toastr.options = {
+							"closeButton":true,
+							"progressBar": true,
+							"positionClass":"toast-topcenter-right"
+						};
+						toastr.warning("DOCUMENTO YA ESTA REGISTRADO, VERIFIQUE!!");		
+					}
+					else{
+						toastr.clear();
+						toastr.options = {
+							"closeButton":true,
+							"progressBar": true,
+							"positionClass":"toast-topcenter-right"
+						};
+						toastr.error("NO SE PUDO GUARDAR, CONSULTE CON INFORMATICA!!");		
+					}
+		        }
+	      	});
+		});
+		$('#btnCancelar').click(function(){
+			limpiar();
+		});
+		
+		function limpiar(){
+			$('#divContenedor input').val('');
+			$('#divContenedor select').val('0');
+			$('#rboPeruano').prop('checked', true);
+			$('#rboExtranjero').prop('checked', false);
+			$('#divBuscarDNI').show();
+			$('#divDatosPersonales input').prop('readonly', true);
+			$('#lblNacionalidad').hide();
+			$('#lstPaises').hide();
+			$('#lstTipoDoc').hide();
+			$('#lblTipoDoc').hide();
+		};
+	</script>
+</body>
+</html>

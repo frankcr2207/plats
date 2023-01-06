@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+		<link rel="stylesheet" href="css/toastr.min.css" >
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div class="" role="document">
+				  <form id="formNuevoUsuario" class="formNuevoUsuario" action="" method="post" enctype="multipart/form-data">
+				    <div class="modal-content">
+				      <div class="modal-header">
+				        <h5 class="modal-title" id="exampleModalLabel">DATOS DE USUARIO</h5>
+
+				      </div>
+				      <div class="modal-body">
+				      		<input type="hidden" th:value="${formulario}" id="formulario" class="formulario"/>
+				      		<span th:text="${mensaje}"></span>
+				        	<div  class="form-row">
+	                        	<div class="form-group col-md-3">
+			                        <label>DNI </label>
+			                        <input name="dniUsuarioNuevo" readonly="readonly" id="dni" th:value="${dni}" class="form-control form-control-sm dniUsuarioNuevo">
+			                	</div>
+
+			                </div>
+			                
+	                        <div class="form-row">
+			                    <div class="form-group col-md-4">
+			                        <label>NOMBRES </label>
+			                        <input  value=""  th:value="${nombres}" readonly="readonly" type="text" name="nombresUsuarioNuevo" id="nombres" class="form-control form-control-sm nombresUsuarioNuevo" >
+			                    </div>
+			                    <div class="form-group col-md-4">
+			                    	<label>APELLIDO PATERNO </label>
+	                        		<input value=""  th:value="${paterno}" readonly="readonly" type="text" name="paternoUsuarioNuevo" id="apellido_paterno" class="form-control form-control-sm paternoUsuarioNuevo">
+			                    </div>
+			                    <div class="form-group col-md-4">
+			                        <label>APELLIDO MATERNO</label>
+			                        <input value=""  th:value="${materno}" readonly="readonly" type="text" name="maternoUsuarioNuevo" id="apellido_materno" class="form-control form-control-sm maternoUsuarioNuevo">
+			                	</div>
+			                </div>
+			                
+	                        
+	                        <div class="form-row">
+	                        	
+	                        	<div class="form-group col-md-4">
+			                        <label>USUARIO </label>
+			                        <input onkeypress="return lettersonlywithoutspace(event)" style="text-transform:uppercase;" required type="text" name="c_usuarioNuevo" id="c_usuario" class="form-control form-control-sm c_usuarioNuevo">
+			                	</div>
+							  	<div class="form-group col-md-4">
+							  		<label>PERFIL </label>
+							      	<select id="perfil" name="perfilUsuarioNuevo" class="form-control form-control-sm perfilUsuarioNuevo">
+							      		<option th:each="perf: ${perfil}" 
+				       						th:value="${perf.idperfil}" th:text="${perf.s_perfil}" ></option>
+							     	</select>
+							    </div> 
+							    <div class="form-group col-md-2">
+							  		<label>HABILITADO</label>
+							      	<select id="estado" name="estadoUsuarioNuevo" class="form-control form-control-sm estadoUsuarioNuevo">
+							      		<option>S</option>
+							      		<option>N</option>
+							     	</select>
+							    </div> 
+								<div class="form-group col-md-4">
+			                    	<label>CORREO</label>
+	                        		<input value=""  type="text" name="correoUsuarioNuevo" id="correo" class="form-control form-control-sm correoUsuarioNuevo">
+			                    </div>
+			                    <div class="form-group col-md-3">
+			                        <label>TELÉFONO</label>
+			                        <input value=""  type="text" name="telefonoUsuarioNuevo" id="telefono" class="form-control form-control-sm telefonoUsuarioNuevo">
+			                	</div>
+							</div>
+				      </div>
+				      <div class="modal-footer">
+				        <button type="button" onclick="cancelar()" class="btn btn-secondary btn-sm" data-dismiss="modal">CANCELAR</button>
+				        <button th:if="${btnGuardar == 1}" type="button" class="btn btn-success btnGuardarNuevoUsuario"><strong>GUARDAR</strong></button>
+				      </div>
+				    </div>
+				    </form>
+				  </div>
+		</div>
+	</div>
+	
+	<script src="js/jquery-source.js"></script>
+	<script src="js/usuario.js" th:src="@{js/usuario.js}"></script>
+	<script type="text/javascript">
+		$(".btnGuardarNuevoUsuario").click(function() {
+			var usuario = $('.c_usuarioNuevo').val();
+			var perfil= $('.perfilUsuarioNuevo').val();
+			var nombres = $('.nombresUsuarioNuevo').val() + ' ' + $('.paternoUsuarioNuevo').val() + ' '+ $('.maternoUsuarioNuevo').val();
+			if(usuario.length < 4){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("Usuario inválido!!");
+				return false;
+			}
+
+			Swal.fire({
+				title: 'Seguro guardar nuevo usuario?',
+				text: "",
+				icon: 'question',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'SI, GUARDAR!'
+			}).then((result) => {
+				if (result.value) {
+						
+						$(function () {
+						    var token = $("input[name='_csrf']").val();
+						    var header = "X-CSRF-TOKEN";
+						    $(document).ajaxSend(function(e, xhr, options) {
+						        xhr.setRequestHeader(header, token);
+						    });
+						});
+						var form = document.getElementById('formNuevoUsuario');
+						var formData = new FormData(form);
+						$.ajax({
+							type:"POST",
+							url:"guardarNuevoUsuario",
+							data:formData,
+							cache:false,
+							dataType:"json",
+							contentType:false,
+							processData:false,
+							success:function(response) {
+								if(response.Status == 200){ 
+
+									$(".detalleObjetos").empty();
+									var url=$('.formulario').val();
+									$(".listaObjetos").load(url);
+									
+									if(perfil == '10'){
+										Swal.fire({
+											title: 'Usuario registrado con éxito!!',
+											text: "Desea agregar instancias ahora?",
+											icon: 'success',
+											showCancelButton: true,
+											confirmButtonColor: '#3085d6',
+											cancelButtonColor: '#d33',
+											confirmButtonText: 'SI, Agregar!'
+										}).then((result) => {
+											if (result.value) {
+												verPermisosSecretario(usuario,nombres);
+											}
+										})
+									}
+									if(perfil == '5'){
+										Swal.fire({
+											  title: 'Usuario agregado con exito, puede gestionar ...',
+											  showDenyButton: true,
+											  showCancelButton: true,
+											  confirmButtonText: `CDM`,
+											  denyButtonText: `CDG`,
+											}).then((result) => {
+											  if (result.isConfirmed) {
+												  verPermisosCDM(usuario);
+											  } else if (result.isDenied) {
+												  verPermisosCDG(usuario);
+											  }
+											})
+									}
+									else{
+										Swal.fire(
+											'Usuario registrado con éxito!!',
+											'Click en OK para continuar!',
+											'success'
+										);
+									}
+									
+								}
+								else if(response.Status == 400){
+
+									Swal.fire({
+										  icon: 'info',
+										  title: 'ATENCIÓN',
+										  text: 'NOMBRE DE USUARIO YA EXISTE, VERIFICAR!!',
+										  
+										});
+								}
+								else {
+
+									Swal.fire({
+										  icon: 'error',
+										  title: 'ATENCIÓN',
+										  text: 'Ooops, algo salió mal, no se pudo enviar la información.!!',
+										  
+										});
+								}
+							}
+						
+						});
+
+				}
+			})
+
+		});
+		
+		function verPermisosCDM(value){
+		   	$(".detalleObjetos").empty();
+		   	var url='obtenerCDMAsignados';
+			url = url + '/' + value;
+			$(".detalleObjetos").load(url);
+		};
+
+		function verPermisosCDG(value){
+		   	$(".detalleObjetos").empty();
+		   	var url='obtenerCDGAsignados';
+			url = url + '/' + value;
+			$(".detalleObjetos").load(url);
+		};
+	</script>
+	    <script type="text/javascript">
+			function cancelar(){	
+	    		$(".detalleObjetos").empty();
+			}
+	    </script>
+</body>
+</html>

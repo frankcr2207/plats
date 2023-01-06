@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Insert title here</title>
+<style type="text/css">
+	@media print {
+		#menu {display:none;}
+		.divRepGen{display:none;}
+	}
+</style>
+</head>
+<body>
+	<div style="witdh: 90%">
+		<div class="card card-body divRepGen" style="width: 100%">
+			<div class="form-row">
+				<div>
+					<select id="listaOrganos">
+						<option value="0">SELECCIONE ...</option>
+						<option th:each="organo: ${organos}" 
+     						th:value="${organo.n_id_sou}" th:text="${organo.oojj}" ></option>
+					</select>
+				</div>
+			</div><br>
+			<div id="filtroReporte" class="filtroReporte" style="width: 100%">
+			</div>
+		</div>
+	</div>
+
+<script type="text/javascript">
+	
+	$('#listaOrganos').change(function(){
+		var id = $(this).find(":selected").val();
+		if(id == '0'){
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.warning("SELECCIONE ORGANO JURISDICCIONAL!!");
+			return false;
+		}
+		var json = {
+       			"id" : id
+      		};
+        $.ajax({
+        	type : "POST",
+       		contentType : "application/json",
+       		url : "obtReporteCDG",
+       		data : JSON.stringify(json),
+	        dataType : 'json',
+	        cache : false,
+	        timeout : 600000,
+	        success : function(data) {
+	        	var html = '<h6><strong>REPORTE POR ORGANO JURISDICCIONAL</strong></h6>';
+	         	var len = data.length;
+	         	html += '<table style="font-size:11px" class="table table-hover table-sm"><tr><th>TIPO DOCUMENTO</th><th>EXPEDIENTE</th><th>SEDE</th><th>ORGANO</th><th>INSTANCIA</th><th>USUARIO</th><th>FECHA</th><th>RETRASO</th></tr>';
+	         	for (var i = 0; i < len; i++) {
+	         		html += '<tr><td>' + data[i].documento + '</td><td>' + data[i].expediente+ '</td><td>' + data[i].estado + '</td><td>' + data[i].cdm + '</td><td>' + data[i].instancia + '</td><td>' + data[i].nombres + '</td><td>' + data[i].fecha + '</td><td>' + data[i].nacimiento + '</td></tr>';
+		        }
+	         	html += '</table>';
+		        $('.filtroReporte').html(html);
+	        },
+        	error : function(e) {
+        	 	Swal.fire({
+				  	icon: 'error',
+				  	title: 'ATENCIÓN',
+				  	text: 'No se pudo cargar el reporte.!!',
+				});
+	     	}
+      	});
+	});
+</script>
+</body>
+</html>

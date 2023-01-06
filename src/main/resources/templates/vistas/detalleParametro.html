@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<style type="text/css">
+			#solicitud input{
+		    	border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	#solicitud #valor{
+		    	border:0;
+		    	border-bottom: 1px solid #BE0000; 
+		    	text-align:center";
+	    	}
+	    	
+	    	.modalSolicitante input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	.modalWebService input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	#modalRespuestaAbogado input{
+		    	border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	#datosAud label{
+	    	width: 100px;
+	    }
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			
+			<div th:each="dato:${detalles}" id="datosAud" class="datosAud">
+				<h6><strong>DATOS DEL PARÁMETRO</strong></h6><br>
+				<form class="updateAud">
+				<div class="form-row">
+					<div style="width:70%; font-size: 12px">
+						<input th:value="${formulario}" class="formulario" id="formulario" type="hidden">
+						<label><strong>CÓDIGO: </strong></label><input th:value="${dato.id}" class="cod" readonly="readonly" size="10" >&nbsp;&nbsp;&nbsp;<br>
+						<label><strong>DESCRIPCIÓN: </strong></label><input th:value="${dato.descripcion}" readonly="readonly" size="30"><br>
+						<label><strong>VALOR: </strong></label><input th:value="${dato.valor}" id="valor" class="valor" size="45"><br>
+					</div>
+					<div style="width:30%;" align="center">
+						<button type="button" class="btn btn-success actParam" style="margin:auto"><strong><i class='fas fa-save'></i>&nbsp;GUARDAR</strong></button><br><br>
+					</div>
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script src="js/jquery-target.js"></script> 
+</body>
+</html>

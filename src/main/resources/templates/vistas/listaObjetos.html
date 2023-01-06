@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<style type="text/css">
+	  	.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+	  	input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+    	}
+    	input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div class="form-row">
+				<div th:if="${formulario == 'PENDIENTESCDM' or formulario == 'PENDIENTES' or formulario == 'DERIVADOS'}" class="form-row">
+				<div><input onfocus="this.removeAttribute('readonly');" readonly id="x_nombres" name="x_nombres" type="text" style="text-transform:uppercase;" class="x_nombres" placeholder="Nombres o Exped."/></div>&nbsp;&nbsp;
+				<div><input id="x_inicio" name="x_inicio" class="x_inicio" type="date"/></div>&nbsp;&nbsp;
+				<div><input id="x_fin" name="x_fin" class="x_fin" type="date"/></div>&nbsp;&nbsp;
+				<div><button type="button" onclick="buscarSolicitud()" class="btn btn-outline-primary btn-sm"><i class='fas fa-search'></i></button></div>
+				</div>
+				<div th:if="${formulario == 'DOCUMENTAL' or formulario == 'DEVOLUCION' or formulario == 'EXPEDICION' or formulario == 'COPIAS' or formulario == 'ENDOSE' or formulario == 'LECTURA'}">
+				<div><input onfocus="this.removeAttribute('readonly');" readonly id="txtBuscarSolicitud" name="txtBuscarSolicitud" type="text" style="text-transform:uppercase;" class="txtBuscarSolicitud" placeholder="Ingrese texto ..."/><br></div>
+				</div>
+			</div>
+			<table style="font-size:11px" class="table table-hover table-sm tablaSolicitudes" id="tablaSolicitudes">
+				<thead>
+					<tr>
+						<th></th>
+						<th><strong><label style="font-size: 12px" th:text="${tipo}"></label></strong> - <strong><label id="lblRows" style="font-size: 12px"></label></strong><input type="hidden" class="formulario" th:value="${formulario}"></th>
+						<th align="center"><button onclick="actualizar()" class="btn btn-outline-success btn-sm"><i class='fas fa-sync-alt fa-lg'></i></button></th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer" th:each="solicitud:${solicitudes}" id="filasSolicitudes" class="filasSolicitudes">
+						<td th:text="${solicitud.n_id}"></td>
+						<td style="display: none" th:text="${solicitud.s_estado}">
+						<td><strong>SOLICITADO: <span th:text="${solicitud.fecha}"></span> - DE:  <span th:text="${solicitud.nombresCompletos}"></span></strong><br><i th:text="${solicitud.s_cdm}"></i> &nbsp;-&nbsp;  <strong><span th:text="${solicitud.form}"></span></strong><br>
+						<strong> EXP: </strong> <span th:text="${solicitud.n_expediente}"></span> - <span th:text="${solicitud.x_nom_instancia}"></span><span sec:authorize="hasRole('ADMINISTRADOR-CDM')"><br><strong>ASISTENTE CDM: </strong><span th:text="${solicitud.nombreAsistente}"></span></span></td>
+						<td th:switch="${solicitud.s_estado}" align="center">
+                           	<label class="switch">
+                           	<span th:case="'N'" ><img src="img/mensaje.png" align="middle" th:src="@{img/mensaje.png}" width="25"/><br>NUEVO</span>
+                           	<span th:case="'E'" ><img src="img/email.png" align="middle" th:src="@{img/email.png}" width="25"/><br>PENDIENTE</span>
+                           	<span th:case="'A'" ><img src="img/enviado.png" align="middle" th:src="@{img/enviado.png}" width="28"/><br>ATENDIDO</span>
+                           	<span th:case="'D'" ><img src="img/red.png" align="middle" th:src="@{img/red.png}" width="27"/><br>DERIVADO</span>
+                           	<span th:case="'R'" ><img src="img/green.png" align="middle" th:src="@{img/green.png}" width="27"/><br>RESUELTO</span>
+                           	<span th:case="'X'" ><i class="fas fa-exclamation-circle fa-2x" style="color:red"></i><br>DEVUELTO</span>
+							</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script src="js/jquery-func.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var rowCount = $('#tablaSolicitudes tr').length;
+	    	document.getElementById('lblRows').innerHTML = 'Registros: ' + (rowCount-1);
+	    	$('.txtBuscarSolicitud').val('');
+	    });
+		$(document).ready(function () {  
+		    (function ($) {
+		        $('.txtBuscarSolicitud').keyup(function () {
+		             var rex = new RegExp($(this).val(), 'i');
+		             $('.buscar tr').hide();
+		             $('.buscar tr').filter(function () {
+		               return rex.test($(this).text());
+		             }).show();
+		        })
+		    }(jQuery));
+		});
+	</script>
+</body>
+</html>

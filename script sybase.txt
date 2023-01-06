@@ -1,0 +1,64 @@
+//PARA OBTENER N_UNICO
+
+SELECT instancia_expediente.n_unico, instancia_expediente.n_incidente, expediente.x_formato
+FROM instancia_expediente , instancia , expediente 
+WHERE ( instancia.c_distrito = instancia_expediente.c_distrito ) 
+and  ( instancia.c_provincia = instancia_expediente.c_provincia ) 
+and  ( instancia.c_instancia = instancia_expediente.c_instancia )
+and  ( instancia_expediente.n_unico = expediente.n_unico )
+and  ( instancia_expediente.n_incidente = expediente.n_incidente )
+and  ( ( instancia_expediente.l_ultimo = 'S' ) 
+AND  ( instancia_expediente.l_ultimo_c_org = 'S' )
+AND  ( instancia_expediente.n_expediente = 7906 )
+AND  ( instancia_expediente.n_ano = 2018) 
+AND  ( instancia_expediente.n_incidente = 64) 
+AND  ( instancia_expediente.c_instancia = '044' )  )
+
+
+// PARA OBTENER INSTANCIAS SOLO PENAL
+
+select i.* from instancia i, especialidad_instancia ei where i.l_sij='S'  and i.c_instancia=ei.c_instancia and ei.c_especialidad='PE' and i.c_org_jurisd in ('02','03')
+
+
+// PARA OBTENER DATOS AUDIENCIA A PARTIR DEL N_UNIC, N_SECUENCIA Y FECHA DE LA AUDIENCIA
+
+SELECT DISTINCT
+		x_formato AS num_expediente,
+		Convert(Char(8), f_inicio, 108) as h_inicio,
+		Convert(Char(8), f_termino, 108) as h_termino, 
+		x_audiencia,
+		x_instancia,
+		x_sala_audiencia,
+		secuencia,
+		n_ano,
+		x_jueces,
+		x_secretario=(select x_nom_usuario from usuario NOHOLDLOCK where c_usuario=t.cod_secretario),
+		x_partes_1,
+		x_partes_2,
+		x_delito
+		FROM (
+		SELECT 
+		a.secuencia,
+		a.n_ano,
+		a.f_inicio,
+		a.f_termino,
+		a.x_formato,
+		x_sala_audiencia=(select x_descripcion from sala_audiencia NOHOLDLOCK where n_sala=ap.n_sala),
+		x_instancia=(select x_nom_instancia from instancia NOHOLDLOCK where c_distrito=a.c_distrito and c_provincia=ap.c_provincia and c_instancia=ap.c_instancia),
+		cod_secretario=(select c_usuario from asignado_a NOHOLDLOCK where n_unico=a.n_unico and n_incidente=a.n_incidente and f_ingreso=a.f_ingreso and l_ultimo_instancia='S'),
+		x_partes_1=(select list(x_descripcion) from agenda_parte NOHOLDLOCK where n_ano=a.n_ano and secuencia=a.secuencia and l_activo='S' and l_tipo_parte in ('AGR','DTE','SOL')) ,
+		x_partes_2=(select list(x_descripcion) from agenda_parte NOHOLDLOCK where n_ano=a.n_ano and secuencia=a.secuencia and l_activo='S' and l_tipo_parte in ('IMP','INC','DDO')) ,
+		x_jueces=(select list(x_nom_usuario) from usuario u NOHOLDLOCK inner join agenda_usuario au NOHOLDLOCK on u.c_usuario=au.c_usuario and au.l_activo='S' and au.n_ano=a.n_ano and au.secuencia=a.secuencia and u.c_perfil in ('01','24')),
+
+		x_delito=(select x_desc_delito from delito NOHOLDLOCK where c_delito=a.c_delito),
+		x_audiencia=(select x_desc_audiencia from tipo_audiencia NOHOLDLOCK where c_audiencia=ap.c_audiencia)
+
+		FROM 	agenda a NOHOLDLOCK 
+		INNER JOIN audiencia_programacion ap NOHOLDLOCK ON ap.n_sala=a.n_sala AND ap.c_audiencia=a.c_audiencia AND ap.n_programacion=a.n_programacion
+		INNER JOIN asistente_sala  asa NOHOLDLOCK ON asa.l_activo='S'	and asa.n_sala=ap.n_sala
+		WHERE 
+		a.c_sede='0401' AND (a.x_formato	LIKE '%PE%') AND 
+		--a.n_sala IN (33,1,2,53,44,52,34,3,4) AND 
+		(a.n_unico = 2018079060401837 and a.n_incidente = 64 and a.f_inicio like '2020-06-04%')	
+		 and a.l_pendiente<>'A' ) t ORDER BY x_sala_audiencia,h_inicio
+

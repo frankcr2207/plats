@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="icon" type="img/jpg" href="img/pj.jpg" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+ 	<link rel="stylesheet" href="css/bootstrap-select.min.css">
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/estilo.css" >
+	
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/jquery-3.5.1.js"></script>
+	<script src="js/popper.min.js" th:src="@{js/popper.min.js}"></script>
+	<script src="js/bootstrap.min.js"></script>
+  
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/funciones.js" th:src="@{js/funciones.js}"></script>
+	<script src="js/iconos.js"></script>
+	<script src="js/bootstrap-select.min.js"></script>
+	
+</head>
+<body>
+	
+	<div class="modal fade" id="modalError" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">ATENCIÓN</h5>
+
+	      </div>
+	      <div class="modal-body">
+	      	<h6>La sesión ha caducado, por favor haga click en el botón OK.</h6>
+	        <a class="btn btn-success" href="/SIGSOL">OK</a>
+	      </div>
+	      <div class="modal-footer">
+
+	      </div>
+	    </div>
+	  </div>
+	</div>
+<script type="text/javascript">
+	$( document ).ready(function() {
+	    $('#modalError').modal('toggle')
+	});
+</script>
+</body>
+</html>

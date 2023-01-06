@@ -1,0 +1,16 @@
+@charset "ISO-8859-1";
+
+	#datosSolicitud input{
+    	border:0;
+		border-bottom: 1px solid #009CBF;
+    }
+    input:focus{
+		outline:none !important;
+    	outline-width: 0 !important;
+   		box-shadow: none;
+    	-moz-box-shadow: none;
+    	-webkit-box-shadow: none;
+    }
+   	#datosSolicitud label, .modalDerivar label{
+   		width: 100px;
+   	}

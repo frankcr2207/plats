@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/main.css">
+	<style type="text/css">
+		.loader{
+	        display: none;
+	        background-color:white;
+		   	opacity:1;
+		   	filter:alpha(opacity=60); /* IE < 9.0 */
+	    }
+		#datosAbogado input{
+	    	border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	.modalSolicitante input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	.modalWebService input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	#modalRespuestadato input{
+	    	border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	#datosAbogado label{
+    	width: 120px;
+    }
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+
+			<div th:each="dato:${abogado}" id="datosAbogado" class="datosAbogado">
+				<h6><strong>DATOS DEL ABOGADO</strong></h6>
+				<div class="form-row">
+					<div style="width:100%; font-size: 12px">
+						<input th:value="${formulario}" class="formulario" id="formulario" type="hidden">
+						<label><strong>DNI: </strong></label><input th:value="${dato.s_dni}" class="dni" id="dni" readonly="readonly" size="20" >&nbsp;&nbsp;&nbsp;<br>
+						<label><strong>NOMBRES: </strong></label><input th:value="${dato.nombresCompletos}" class="nombres" id="nombres" readonly="readonly" size="50"><br>
+						<label><strong>CORREO: </strong></label><input th:value="${dato.s_correo}" id="colegiatura" readonly="readonly" size="50"><br>
+						<label><strong>CELULAR: </strong></label><input th:value="${dato.n_celular}" id="colegiatura" readonly="readonly" size="15">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<label><strong>TEL. FIJO: </strong></label><input th:value="${dato.n_fijo}" id="colegiatura" readonly="readonly" size="15"><br>
+						<label><strong>CAS. ELECTRON.: </strong></label><input th:value="${dato.s_casilla_electronica}" id="colegiatura" readonly="readonly" size="15">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<label><strong>COLEGIATURA: </strong></label><input th:value="${dato.n_colegiatura}" id="colegiatura" readonly="readonly" size="15"><br>
+						<label><strong>COLEGIO: </strong></label><input th:value="${dato.s_colegio}" id="colegiatura" readonly="readonly" size="50"><br>
+						<label><strong>DOM. PROCESAL: </strong></label><input th:value="${dato.s_domicilio_procesal}" id="colegiatura" readonly="readonly" size="70"><br>
+						<label><strong>INDEPENDIENTE: </strong></label><input th:value="${dato.s_independiente}" id="colegiatura" readonly="readonly" size="5"><br>
+						<label><strong>INSTITUCIÓN: </strong></label><input th:value="${dato.s_institucion}" id="colegiatura" readonly="readonly" size="50"><br>
+						<label><strong>CAS. JUDICIAL: </strong></label><input th:value="${dato.s_casilla_judicial}" id="colegiatura" readonly="readonly" size="20"><br>
+					</div><br>
+					<div class="form-row" style="width: 100%"><br><br>
+						<div style="width: 20%"></div>
+						<div style="width: 80%"><br>
+						<table style="font-size:11px" class="table table-hover table-sm">
+							<thead>
+								<tr>
+									<th><strong>ESPECIALIDADES</strong></th>
+								</tr>
+							</thead>
+							<tbody class="buscar">
+								<tr style="cursor: default" th:each="fila:${especialidades}" id="filasDirectorio" class="filasDirectorio">
+									<td th:text="${fila.s_especialidad}"></td>
+								</tr>
+							</tbody>
+						</table>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		
+	</div>
+
+</body>
+</html>

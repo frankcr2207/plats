@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	
+	<style type="text/css">
+		.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; }
+		#camposBusqueda label{
+		  	font-weight: bold;
+			font-size:12px;
+		} 
+	</style>
+
+</head>
+<body>
+	
+	<div th:fragment="divReportePersonal" >
+	<div><button type="button" class="btn btn-outline-dark btn-sm btnImprimirReporte"><i class='fas fa-print'></i>&nbsp;Imprimir</button></div>
+		<div  id="reporte" class="card card-body">
+			
+			<table style="font-size:11px; width:100%" class="table table-hover table-sm reporteSolicitudes" id="reporteSolicitudes">
+				<thead>
+					<tr>
+						<th sec:authorize="hasRole('COORDINADOR-CDM')">ENCARGADO</th>
+						<th>SOLICITANTE</th>
+						<th>CELULAR</th>
+						<th>ATENCIÓN</th>
+						<th>TIPO</th>
+						<th>EXPEDIENTE</th>
+						<th>DETALLE</th>
+						<th>CITA DIA 1</th>
+						<th>CITA DIA 2</th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: default" th:each="solicitud:${solicitudes}" id="filasSolicitudes" class="filasSolicitudes">
+						<td sec:authorize="hasRole('COORDINADOR-CDM')" th:text="${solicitud.encargado}"></td>
+						<td th:text="${solicitud.nombresCompletos}"></td>
+						<td th:text="${solicitud.s_celular}"></td>
+						<td th:text="${solicitud.fechaAtendido}"></td>
+						<td th:text="${solicitud.form}"></td>
+						<td><span th:text="${solicitud.x_nom_instancia}"></span>&nbsp;-&nbsp;EXP: <span th:text="${solicitud.n_expediente}"></span></td>
+						<td th:text="${solicitud.detalle}"></td>
+						<td th:text="${solicitud.agenda1}"></td>
+						<td th:text="${solicitud.agenda2}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('.btnImprimirReporte').on('click', function(){
+				var ficha = document.getElementById('reporte');
+	    		//var fichaOriginal = document.body.innerHTML;
+	    		//document.body.innerHTML = ficha;
+	    		//window.print();
+	    		//document.body.innerHTML = fichaOriginal;
+	    		var ventimp = window.open('','popimpr');
+	    		ventimp.document.write(ficha.innerHTML);
+	    		ventimp.document.close();
+	    		ventimp.print();
+	    		ventimp.close();
+			});
+		});
+	</script>
+</body>
+</html>

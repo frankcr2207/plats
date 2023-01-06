@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<style type="text/css">
+		input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+	</style>
+</head>
+<body>
+	<div th:fragment="reporte">
+		
+		<div class="form-row" style="width: 60%; margin: auto;">
+			<div style="width: 20%" align="left">
+				<img alt="" src="img/corte2.png">
+			</div>
+			<div style="width: 60%" align="center"><br>
+				<h5><strong>CORTE SUPERIOR DE JUSTICIA DE AREQUIPA<br>ELECCIONES SUB CAFAE - PERIODO 2020 - 2022</strong></h5>
+			</div>
+			<div style="width: 20%" align="right">
+				<img alt="" src="img/cafae.jpeg">
+			</div>
+		</div>
+		<div id="divTablaCafae">
+			<div style="width: 60%; margin: auto;" align="center">
+				<h6><strong>LISTA DE ELECTORES QUE NO VOTARON. <label id="lblRows"></label></strong></h6>
+			</div>
+			<div style="width: 60%; margin: auto;">
+				<div class="card crad-body">
+					<table style="font-size:11px" class="table table-hover table-sm tbElectores" id="tbElectores" >	
+						<thead>
+							<tr>
+								<th>DNI</th>
+								<th style="vertical-align:middle;text-align: center">NOMBRES</th>			
+							</tr>
+						</thead>
+						<tbody class="buscar">
+							<tr style="cursor: pointer; font-size:11px" th:each="elector:${electores}">
+								<td th:text="${elector.s_dni}"></td>
+								<td style="text-align: center" th:text="${elector.s_nombres}"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		var rowCount = $('#tbElectores tr').length;
+    	document.getElementById('lblRows').innerHTML = 'Registros: ' + (rowCount-1);
+    });
+	</script>
+</body>
+</html>

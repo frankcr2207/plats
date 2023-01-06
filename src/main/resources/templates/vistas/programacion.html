@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<script src="js/jquery.calendar3.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
+	<link href='fullcalendar/core/main.min.css' rel='stylesheet' />
+  	<link href='fullcalendar/daygrid/main.min.css' rel='stylesheet' />
+  	<link href='fullcalendar/timegrid/main.min.css' rel='stylesheet' />
+  	<link href='fullcalendar/list/main.min.css' rel='stylesheet' />
+  	<link href='fullcalendar/bootstrap/main.min.css' rel='stylesheet' />
+	
+	<script src='fullcalendar/core/main.min.js'></script>
+  	<script src='fullcalendar/daygrid/main.min.js'></script>
+  	<script src='fullcalendar/timegrid/main.min.js'></script>
+  	<script src='fullcalendar/list/main.min.js'></script>
+  	<script src='fullcalendar/bootstrap/main.min.js'></script>
+	
+	<script src='js/iconos.js'></script>
+	<style type="text/css">
+	
+		#divProgramacion label{
+	    		font-weight: bold;
+	    		font-size: 12px;
+	    	}
+	    select, input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	</style>
+	
+<style>
+
+	#calendar {
+/* 		float: right; */
+        margin: 0 auto;
+		width: 100%;
+		background-color: #FFFFFF;
+		  border-radius: 6px;
+        box-shadow: 0 1px 2px #C3C3C3;
+		-webkit-box-shadow: 0px 0px 21px 2px rgba(0,0,0,0.18);
+		-moz-box-shadow: 0px 0px 21px 2px rgba(0,0,0,0.18);
+		box-shadow: 0px 0px 21px 2px rgba(0,0,0,0.18);
+		}
+
+</style>
+
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%; margin: auto" id="divProgramacion">
+			<div style="width: 30%; height:100%; margin: auto; float: left;" class="card card-body">	
+				<div>
+					<label>ELIJA SEDE: </label><br>
+					<select id="lstSedesProgramacion" style="width: 350px">
+						<option style="font-size: 12px" value="0">SELECCIONE ...</option>
+						<option style="font-size: 12px" th:each="sede: ${sedes}" 
+	     				th:value="${sede.id_sede}" th:text="${sede.nombre_sede}" ></option>
+					</select>
+					<br><br>
+					<label>USUARIO: </label><br>
+					<select id="lstUsuariosProgramacion" style="width: 350px">
+						<option style="font-size: 11px" value="0">SELECCIONE ...</option>
+					</select><br>
+					<hr style="height:1px" color="#911A00">
+					<div class="form-row">
+						<div style="width: 50%; margin: auto;">
+							<input type="radio" id="rboPorDia" checked name="rboPorDia" value="1">
+							<label for="html">POR DIA(s)</label><br>
+							<div class="form-row">
+							<div>
+							<input maxlength="0" size="12" type="text" id="txtDias" placeholder="Click aqui" class=" date"/>&nbsp;
+							<button type="button" class="btn btn-warning btn-sm"><i class="fas fa-eraser" id="btnLimpiar"></i></button>
+							</div>
+							</div>
+						</div>
+						<div style="width: 50%; margin: auto;">
+							<input type="radio" id="rboMesCompleto" name="rboMesCompleto" value="0">
+							<label for="html">MES COMPLETO</label><br>
+							<input readonly type="month" id="txtMes" class=""/>
+						</div>
+						
+					</div>
+					<hr>
+					<div align="center">
+					<button type="button" class="btn btn-primary btn-sm" id="btnGuardarTurno"><i class="fas fa-save"></i>&nbsp;GUARDAR TURNO</button>
+					</div>
+				</div>
+			</div>
+			<div style="width: 70%; height:100%; margin: auto; float: left;" class="card card-body">
+				<div id="calendar" style="overflow-y: scroll;">
+				</div>
+			</div>
+		</div>	
+	</div>
+	
+	<div class="modal fade modalTituloEvento" id="modalTituloEvento"  tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered">
+	    <div class="modal-content">
+	      	<div class="modal-body">
+	      		<h6><strong>TURNO</strong></h6>
+	      		<hr>
+	      		<div align="center">
+	      			<input id="txtIdTurno" type="hidden">
+	      			<div class="divFechaEvento">
+			  		</div>
+			  		<div class="divTituloEvento">
+			  		</div>
+			  	</div>
+			</div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;SALIR</button>
+	        <button type="button" class="btn btn-danger btn-sm" id="btnAnularTurno"><i class='fas fa-minus fa-lg'></i>&nbsp;ELIMINAR</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalEspera" id="modalEspera" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered">
+	    <div class="modal-content">
+	      	<div class="modal-body">
+	      		<div align="center">
+	      			<div class="loader" id="loader" style="width: 100%; height: 300px;" >
+					<div style="position: relative; width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top: 25px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/corteAQP.png" width="200">
+							</div><br>
+								<img alt="" src="img/calendar-small.gif"><br><br>
+							<p><strong>GUARDANDO ...</strong></p>
+							<br><br><br><br><br><br>
+						</div>
+					</div>
+				</div>
+			  	</div>
+			</div>
+	      <div class="modal-footer">
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<script type="text/javascript">
+	
+		$(document).ready(function(){
+
+			$('.date').datepicker({
+				  multidate: true,
+				  format: 'yyyy-mm-dd',
+				  language: 'es'
+			});
+			$('#btnLimpiar').click(function(){
+				var $dates = $('.date').datepicker();
+				$dates.datepicker('setDate', null);
+			});
+			$('#rboPorDia').change(function(){
+				$('#txtDias').prop('disabled',false);
+				$('#txtMes').prop('readonly',true);
+				$('#txtMes').val('');
+				$('#rboMesCompleto').prop('checked', false);
+			});
+			$('#rboMesCompleto').change(function(){
+				var $dates = $('.date').datepicker();
+				$dates.datepicker('setDate', null);
+				$('#txtDias').prop('disabled',true);
+				$('#txtMes').prop('readonly',false);
+				$('#rboPorDia').prop('checked', false);
+			});
+			$('.date').on('keydown', function (e){
+                try {                
+                    if ((e.keyCode == 8 || e.keyCode == 46))
+                        return false;
+                    else
+                        return true;               
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            });  
+	    })
+	    
+	    $('#btnGuardarTurno').click(function(){
+	    	var tipo;
+	    	var fechas;
+	    	var sede = $('#lstSedesProgramacion').val();
+			var usuario = $('#lstUsuariosProgramacion').val();
+	    	
+	    	
+	    	if(($(".date").val() == '' && $("#txtMes").val() == '') || sede == '0' || usuario == '0'){
+	    		toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE INGRESAR INFORMACION!!");
+	    		return false;
+	    	}
+	    	else{
+	    		if($("#rboPorDia").is(':checked')) {  
+		    		tipo = 'D';
+		            fechas = $('.date').val();
+		        } 
+		    	else if ($("#rboMesCompleto").is(':checked')){  
+		    		tipo = 'M';
+		    		fechas = $('#txtMes').val();
+		        }
+	    		
+	    		
+    			var json = {
+   				   	"sede": sede,
+   				   	"usuario" : usuario,
+   				   	"tipo"	: tipo,
+   				   	"fechas" : fechas
+   				};
+    	      	$.ajax({
+    	       		type : "POST",
+    	       		contentType : "application/json",
+    	       		data : JSON.stringify(json),
+    	       		url : "guardarTurno",
+    	       		dataType : 'json',
+    	    		cache:false,
+    	    		beforeSend: function(){
+    	    			$('#modalEspera').modal('show');
+    	    		},
+    		        success : function(response) {
+    		        	$('#modalEspera').modal('hide');
+    		        	if(response.Status == 200){ 
+    		        		var $dates = $('.date').datepicker();
+    						$dates.datepicker('setDate', null);
+    		        		$('#txtDias').prop('disabled',false);
+    						$('#txtMes').prop('readonly',true);
+    						$('#txtMes').val('');
+    						$('#rboMesCompleto').prop('checked', false);
+    						$('#rboPorDia').prop('checked', true);
+    						$('#calendar').empty();
+    						obtenerTurnos(sede);
+    						toastr.clear();
+    						toastr.options = {
+    							"closeButton":true,
+    							"progressBar": true,
+    							"positionClass":"toast-bottom-left"
+    						};
+    						toastr.success("TURNOS ASIGNADOS!!");
+    					}
+    		        	else{
+    		        		toastr.clear();
+    						toastr.options = {
+    							"closeButton":true,
+    							"progressBar": true,
+    							"positionClass":"toast-bottom-left"
+    						};
+    						toastr.warning("TURNO DUPLICADO, REVISE!!");
+    		        	}
+    		        }
+    	      	});	
+	    	}
+	    	
+	    });
+		
+		$('#btnAnularTurno').click(function(){
+			var evento = $('#txtIdTurno').val();
+			var sede = $('#lstSedesProgramacion').val();	
+   			var json = {
+  				"id" : evento
+  			};
+   	      	$.ajax({
+   	       		type : "POST",
+   	       		contentType : "application/json",
+   	       		data : JSON.stringify(json),
+   	       		url : "eliminarTurno",
+   	       		dataType : 'json',
+   	    		cache:false,
+   		        success : function(response) {
+   		        	$('#modalTituloEvento').modal('hide');
+   		        	if(response.Status == 200){ 
+   						$('#calendar').empty();
+   						obtenerTurnos(sede);
+   			        	toastr.clear();
+						toastr.options = {
+							"closeButton":true,
+							"progressBar": true,
+							"positionClass":"toast-bottom-left"
+						};
+						toastr.success("TURNO ELIMINADO CON ÉXITO!!");
+   					}
+   		        	else{
+   		        		toastr.clear();
+						toastr.options = {
+							"closeButton":true,
+							"progressBar": true,
+							"positionClass":"toast-bottom-left"
+						};
+						toastr.danger("NO SE PUDO ELIMINAR EL TURNO!!");
+   		        	}
+   		        }
+   	      	});	
+	    	
+	    });
+	</script>
+	<script type="text/javascript">
+	
+		$("#lstSedesProgramacion").change(function() {
+			
+			$('#calendar').empty();
+      		var sede = $(this).find(":selected").val();
+      		var json = {
+       			"id" : sede
+      		};
+      		obtenerTurnos(sede);
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "obtenerUsuariosSede",
+	       		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        timeout : 600000,
+		        success : function(data) {
+		         	var html = '';
+		         	var len = data.length;
+		         	html += '';
+		         	if(len > 0){
+		         		for (var i = 0; i < len; i++) {
+			         		html += '<option style="font-size: 11px" value="' + data[i].user + '">' + data[i].nombres + '</option>';
+				        }
+		         	}
+		         	else
+		         		html += '<option style="font-size: 11px" value="0">SIN USUARIOS ASIGNADOS</option>';
+		         	
+			        $('#lstUsuariosProgramacion').html(html);
+		        },
+	        	error : function(e) {
+	        	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo cargar usuarios.!!',
+					});
+		     	}
+	      	});
+    	});
+	
+		
+
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" href="css/loader.css" >
+	<style type="text/css">
+	  	.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+	  	input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+    	}
+    	input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+	    
+		.animated {
+		  animation: blinker 1s linear infinite;
+		}
+		
+		@keyframes blinker {
+		  50% {
+		    opacity: 0;
+		  }
+		}
+		
+	</style>
+</head>
+<body>
+	
+<div style="witdh: 90%">
+		<div class="card card-body" style="width: 80%; margin: auto">
+			<div class="form-row">	
+				<Strong>Sede: </Strong>&nbsp;&nbsp;&nbsp; <select id="lstSede" style="max-width:30%; height:20px">
+				    <option value="0">Seleccione ...</option>
+				    <option th:each="sede : ${sedes}" th:value="${sede.id}" th:text="${sede.denominacion}"></option>
+				</select>&nbsp;&nbsp;&nbsp;
+				<Strong>Ingrese Fechas: </Strong>&nbsp;&nbsp;&nbsp;<input type="date" id="txtInicio">&nbsp;&nbsp;&nbsp;<input type="date" id="txtFin">&nbsp;&nbsp;&nbsp;
+				<Strong>Estado: </Strong>&nbsp;&nbsp;&nbsp;<select id="lstEstado" style="height:20px"><option value=false>PENDIENTES</option><option value=true>TODOS</option></select>
+				&nbsp;&nbsp;&nbsp;<button class="btn btn-info btn-sm" type="button" id="btnBuscar"><i class="fas fa-search"></i></button>
+			</div><hr>
+			<input type="hidden" id="txtSede">
+			<div class="card" id="divActas" style="width: 100%">
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade modal-fullscreen" id="modalArchivo" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-xl" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel">ARCHIVO</h5>
+		      </div>
+		      <div class="modal-body">
+		      	<div id="divArchivo"></div>
+		      </div>
+		      <div class="modal-footer">
+		      <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CERRAR</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	
+	<div class="modal fade modalEspera" id="modalEspera" data-backdrop="static" data-keyboard="false" tabindex="-5" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+		    <div class="modal-content">
+			    <div class="modal-body" align="justify">
+			      	<div style="width:100%; height:100%">
+		      			<div style=" margin: auto;" >
+							<div style="position: relative; width: 100%; height: 100%;">
+								<div style="background-color: white; width: 100%; height: 100%; padding-top:15px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+									<div align="center">
+										<img alt="ayuda" src="img/corte.png" width="250px">
+									</div><br>
+
+									<div class="col-sm-2" style="height: 150px">
+						                <div class="container">
+										      <div class="wrapper">
+										        <div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										</div>
+										<div class="text">
+										<p><strong>CONSULTANDO ...</strong></p></div>
+										</div>
+						            </div>
+								</div>
+							</div>
+						</div>
+	            	</div>
+			    </div>
+			</div>
+		</div>
+	</div>
+		
+	<script type="text/javascript">
+	
+	$('#btnBuscar').click(function(){
+		if($('#lstSede').val() == '0' || $('#txtInicio').val() == '' || $('#txtFin').val() == ''){
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.warning("Debe ingresar todos los campos");
+			return false;
+		}
+		var delay = 2000;
+		$("#txtSede").val($("#lstSede").val());
+		$.ajax({
+			url: 'getConteoActasSij?sede=' + $('#lstSede').val() + '&fechaInicio=' +  $('#txtInicio').val() + '&fechaFin=' +  $('#txtFin').val() + '&estado=' +  $('#lstEstado').val(),
+			method: 'GET',
+			beforeSend : function(){
+				$("#modalEspera").modal('show');
+			},
+			success : function(data) {
+				setTimeout(function() {
+					$("#modalEspera").modal('hide');
+					var html = "";
+					for (var i = 0; i < data.length; i++) {
+						html += '<h4><span class="badge badge-info"><strong>' + data[i].nombres + ' ' + data[i].apellidos + '</strong></span></h4>';
+						html += "<table style='font-size: 11px;'class='table table-sm'><tr><th>F. AUDIENCIA</th><th>F. CREACIÓN</th><th>EXPEDIENTE</th><th>JUZGADO</th><th>ESTADO</th><th>ACTA</th></tr>";
+		         	    for (var j = 0; j < data[i].audienciaActas.length; j++) {
+		         	    	var estado;
+		         	    	if(data[i].audienciaActas[j].estado == true)
+		         	    		estado = "<h6><span class='badge badge-success'>CORRECTO</span></h6>";
+		         	    	else
+		         	    		estado = "<h6><span class='badge badge-danger'>PENDIENTE</span></h6>";
+			         	    html += "<tr><td>" + data[i].audienciaActas[j].fecAudiencia + '</td>' + 
+			         	    	'<td>' + data[i].audienciaActas[j].fecCreacion + '</td>' +
+			         	    	'<td>' + data[i].audienciaActas[j].expediente + '</td>' +
+			         	    	'<td>' + data[i].audienciaActas[j].instancia + '</td>' + 
+			         	    	'<td>' + estado + '</td>' + 
+			         	    	"<td><button type='button' class='btn btn-outline-primary btn-sm' onclick='descargarDocumento(\"" + $("#txtSede").val() + "\",\"" + data[i].audienciaActas[j].fecDescargo + "\",\"" +data[i].audienciaActas[j].documento + "\")'><i class='fas fa-file-word fa-lg'></i></button></td></tr>";
+		         	    }
+		         	    html += "</table><hr>";
+		         	}
+					$('#divActas').html(html);
+			    }, delay);
+				
+			},
+			error : function(response) {
+				var r = jQuery.parseJSON(response.responseText);
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.error(r.message);
+				$("#modalEspera").modal('hide');
+			}
+	       
+		});
+	});
+	</script>
+	<script type="text/javascript">
+		function descargarDocumento(sede, descargo, documento){
+			$('#divArchivo').empty();
+			$.ajax({
+				url: 'getActaSij?sede=' + sede + '&descargo=' +  descargo + '&documento=' + documento,
+				method: 'GET',
+				xhrFields: {
+			        responseType: 'blob'
+			    },
+				success : function(blob, status, xhr) {
+					var filename = "";
+			        var disposition = xhr.getResponseHeader('Content-Disposition');
+			        if (disposition && disposition.indexOf('attachment') !== -1) {
+			            var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+			            var matches = filenameRegex.exec(disposition);
+			            if (matches != null && matches[1]){
+			            	filename = matches[1].replace(/['"]/g, '');
+			            }
+			        }
+
+			        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+			            window.navigator.msSaveBlob(blob, filename);
+			        } else {
+			            var URL = window.URL || window.webkitURL;
+			            var downloadUrl = URL.createObjectURL(blob);
+
+			            if (filename) {
+			                var a = document.createElement("a");
+			                if (typeof a.download === 'undefined') {
+			                    window.location.href = downloadUrl;
+			                } else {
+			                    a.href = downloadUrl;
+			                    a.download = filename;
+			                    document.body.appendChild(a);
+			                    a.click();
+			                }
+			            } else {
+			                window.location.href = downloadUrl;
+			            }
+
+			            setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100);
+			        }
+			        toastr.clear();
+			        toastr.options = {
+			            "closeButton":true,
+			            "progressBar": true,
+			            "positionClass":"toast-bottom-left"
+			        };
+			        toastr.success("SU ARCHIVO SE DESCARGARÁ AQUÍ!");
+				},
+				error : function(response) {
+					var r = jQuery.parseJSON(response.responseText);
+					toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.error(r.message);
+				}
+			});
+		}
+	</script>
+</body>
+</html>

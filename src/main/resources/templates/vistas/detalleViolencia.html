@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/printThis.js" th:src="@{js/printThis.js}"></script>
+	<script type="text/javascript" src="js/jquery.richtext.js"></script>
+	<link rel="stylesheet" href="css/main.css" >
+	<link rel="stylesheet" href="css/richtext.min.css">
+	<link rel="stylesheet" href="css/estiloPrint.css">
+	
+	<style type="text/css" media="print">
+		@media print {
+		.contenido {height: 100%;}
+		#listaObjetos {display:none;}
+		#btnResponder {display:none;}
+		#btnImprimir {display:none;}
+		#btnVerRespuesta {display:none;}
+		#btnDerivar {display:none;}
+		#btnResolver {display:none;}
+		#menu {display:none;}
+		.taObsResolucion {display:none;}
+		.lblObsResolucion {display:none;}
+		
+	</style>
+	<style type="text/css">
+		.loader{
+        	display: none;
+        	background-color:white;
+	   		opacity:1;
+	   		filter:alpha(opacity=60); /* IE < 9.0 */
+      	}
+		#solicitud input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+    	#datosSolicitud label, .modalDerivar label, .modalDevolver label{
+    		width: 100px;
+    	}
+    	.select2-results__option { 
+	  		font-size: 10px;
+		}
+	</style>
+	
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="dato:${detalle}" id="datosSolicitud" class="datosSolicitud">
+				<h6><strong>DEMANDA NUEVA VIOLENCIA FAMILIAR</strong></h6>
+				<div class="form-row">
+					<div style="width:70%; font-size: 11px">
+						<input th:value="${dato.n_id_violencia}" id="id" type="hidden" class="id">
+						
+						<label><strong>FECHA: </strong></label><input style="font-weight: bold" th:value="${dato.fechaIngreso}" id="nombres" readonly="readonly" size="20">&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-outline-primary btn-sm btnReniec" ><i class='fas fa-fingerprint fa-lg'></i>&nbsp;</button>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="window.print();" id="btnImprimir" class="btn btn-outline-dark btn-sm" style="margin:auto"><i class='fas fa-print fa-lg'></i></button><br>
+						<label><strong>NOMBRES: </strong></label><input style="font-weight: bold" th:value="${dato.s_nombres} + ' ' + ${dato.s_paterno} + ' ' + ${dato.s_materno}" id="nombres" readonly="readonly" size="40"><br>
+					</div>
+					<div style="width:30%;" align="center" >
+						
+						<div th:if="${dato.c_usuario_csjar == sesion && (dato.s_estado == 'P' || dato.s_estado == 'T')}">
+							<button class="btn btn-primary" id="btnResponder" style="margin:auto" data-toggle="modal" data-target="#modalRespuestaVF"><strong><i class='fas fa-envelope'></i>&nbsp;RESPONDER</strong></button><br><br>
+						</div>
+
+						<div th:if="${dato.s_estado == 'A'}">
+							<button style="margin:auto" class="btn btn-success"><strong><i class='fas fa-check-circle'></i>&nbsp;ATENDIDO POR<br><span th:text="${dato.c_usuario_csjar}"></span></strong></button><br><br>
+						</div>
+						
+						<div th:if="${dato.s_estado == 'T' && dato.c_usuario_csjar != sesion}">
+							<button type="button" class="btn btn-warning btn-sm"><strong><i class='fas fa-exclamation-circle'></i>&nbsp;LA SOLICITUD<br>ESTA SIENDO TRAMITADA<br>POR <span th:text="${dato.c_usuario_csjar}"></span></strong></button><br><br>
+						</div>
+										
+					</div>
+				</div><hr>
+				
+				<div><label style="font-size: 11px"><strong>DEMANDA: </strong></label><button onclick="verPDFViolencia(1)" type="button" class="btn btn-outline-danger btn-sm"><i class="fas fa-download"></i>&nbsp;VER</button></div>
+				<div th:if="${dato.s_file_medio_probatorio_pdf != ''}" ><label style="font-size: 11px"><strong>M. PROBATORIO: </strong></label><button onclick="verPDFViolencia(2)" type="button" class="btn btn-outline-danger btn-sm"><i class="fas fa-download"></i>&nbsp;VER</button></div>
+				<hr>
+
+				<div style="font-size: 11px;" th:if="${dato.s_estado == 'A' || dato.s_estado == 'R'}">
+					<label th:if="${dato.s_estado == 'A'}"><strong>EXP: </strong></label><input th:value="${dato.x_expediente}" id="nombres" readonly="readonly" size="40"><br>
+					<label th:if="${dato.s_estado == 'A'}"><strong>INSTANCIA: </strong></label><input th:value="${instancia}" id="nombres" readonly="readonly" size="60"><br>
+					<label style="width: 200px"><strong>ATENDIDO EL <span th:text="${dato.fechaAtencion}"></span></strong></label><br>
+					<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">OBS.</span>
+					  </div>
+					  <textarea style="height: 100px; font-size: 11px;" class="form-control" aria-label="With textarea" th:text="${dato.x_observacion_ingreso}" readonly="readonly"></textarea><br>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+                
+	<div class="modal fade modalRespuestaVF" id="modalRespuestaVF" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog">
+		    <div class="modal-content" th:each="dato:${detalle}">
+		    	<div class="loader" id="loader" style="width: 100%; height: 100%;  position: absolute; z-index: 10000;" >
+					<div style="position: relative; width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top:90px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/corteAQP.png" width="200">
+							</div><br>
+							<p><strong>ENVIANDO, ESPERE POR FAVOR!</strong></p>
+								<img alt="" src="img/send-small.gif">
+							<br><br><br><br><br><br>
+						</div>
+					</div>
+				</div>
+		    <form class="formRespuestaVF" action="" method="post" enctype="multipart/form-data" id="formRespuestaVF">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">RESPUESTA</h5>
+		        <button style="display:none;" type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      
+				<div class="modal-body" style="font-size: 12px">
+					<input class="idViolencia" type="hidden" id="idViolencia" name="idViolencia" th:value="${dato.n_id_violencia}">
+		      		<label style="width: 90px"><strong>DEMANDATE: </strong></label><input th:value="${dato.s_nombres}" id="solicitanteRespuesta" name="solicitanteRespuesta" readonly="readonly" size="40" ><hr>
+	      			<label style="width: 90px"><strong>ACCIÓN: </strong></label><select id="lstAccion" name="accion">
+	      				<option value="0">SELECCIONE ...</option>
+	      				<option value="A">ACEPTAR</option>
+	      				<option value="R">RECHAZAR</option>
+	      			</select><br>
+	      			<div id="divAceptar" style="display: none;">
+	      				<label style="width: 140px"><strong>COD DIGITALIZACION: </strong></label><input accept=".pdf" style="text-align: right;" type="file" id="adjunto" name="adjunto" ><br>
+			     		<label style="width: 140px; font-weight: bold;">INSTANCIA:</label>
+			     		<select style="width: 300px" id="instancia" name="instancia">
+			      			<option value="0">SELECCIONE ...</option> 
+			      			<option th:each="instancia: ${instancias}" 
+		     					th:value="${instancia.c_instancia}" th:text="${instancia.x_nom_instancia}" ></option>
+			     		</select><br>
+	      				<label style="width: 140px"><strong>EXPEDIENTE: </strong></label><input style="text-align: right;" maxlength="5" onkeypress="return numbersonly(event)" id="numExp" name="numExp" size="2">-<span th:text="${dato.anio}"></span>-<input maxlength="2" style="text-align: center; width: 20px;" onkeypress="return numbersonly(event)" id="cuaExp" name="cuaExp">-<input maxlength="4" style="text-align: right;" onkeypress="return numbersonly(event)" id="ubiExp" name="ubiExp" size="1">-JR-FT-<input maxlength="2" onkeypress="return numbersonly(event)" id="juzExp" name="juzExp" size="1"><br>
+	      				<input type="hidden" th:value="${dato.anio}" id="txtAnio">
+	      			</div> 
+	      			<div>
+	      				<div class="input-group">
+					  	<div class="input-group-prepend">
+					    <span class="input-group-text">OBS.</span>
+					  	</div>
+					  	<textarea style="height: 130px; font-size: 12px" class="form-control"  required  name="respuesta" id="textoRespuesta" aria-label="With textarea"></textarea>
+						</div>
+	      			</div>		
+		      	</div>
+		      	
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+			        <button type="button" class="btn btn-primary btnEnviarRespuestaVF"><strong><i class='far fa-paper-plane'></i>&nbsp;FINALIZAR</strong></button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+	
+		<script src="js/funciones.js"></script>	
+	<script type="text/javascript">
+		$(document).ready(function(){ 	
+			$("#tablaAdjuntos").tableDnD();
+		});
+	</script>
+	<script type="text/javascript">
+		$('#lstAccion').change(function(){
+			var accion = $(this).find(":selected").val();
+			if(accion == 'R'){
+				$('#divAceptar').hide();
+				$('#adjunto').val('');
+			}
+			else if(accion == '0')
+				$('#divAceptar').hide();
+			else
+				$('#divAceptar').show();
+			
+		});
+		$(".btnEnviarRespuestaVF").click(function() {
+			
+			if(($('#divAceptar input').val() == '' && $('#lstAccion').val() == 'A') || $('#textoRespuesta').val() == '' || ($('#instancia').val() == '0' && $('#lstAccion').val() == 'A')){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE COMPLETAR TODOS LOS CAMPOS!!");
+				return false;
+			}
+
+			var form = document.getElementById('formRespuestaVF');
+			var formData = new FormData(form);
+	
+			formData.append('expediente', $('#numExp').val() + '-' + $('#txtAnio').val() + '-' + $('#cuaExp').val() + '-' + $('#ubiExp').val() + '-JR-FT-' + $('#juzExp').val());
+			$.ajax({
+				type:"POST",
+				url:"enviarRespuestaVF",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				beforeSend:function(){
+		            $('.loader').show();
+		        },
+				success:function(response) {
+					if(response.Status == 200){ 
+						$(".detalleObjetos").empty();
+						$(".listaObjetos").load('VIOLENCIAFAMILIAR');
+						$('.loader').hide();
+						$(".formRespuestaVF").modal('hide');
+						$('body').removeClass('modal-open');
+						$('.modal-backdrop').remove();
+						
+						Swal.fire(
+						  'DEMANDA GESTIONADA CON EXITO!!',
+						  'Click en OK para continuar!',
+						  'success'
+						);
+						
+					}
+					else if(response.Status == 400){
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'El registro ya fue atendido, actualice la lista!!',
+							  
+						});
+					}
+					else if(response.Status == 300){
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'Sin conexion al servidor FTP local!!',
+							  
+							});
+					}
+					else if(response.Status == 350){
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'No se pudo recuperar el Cod de digotalizacion, verifique documento!!',
+							  
+							});
+					}
+					else if(response.Status == 270){
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'No se pudo unir los documentos, comuniquese con informatica!!',
+							  
+							});
+					}
+					else if(response.Status == 290){
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'Sin conexion al repositorio FTP de la sede, comuniquese con informatica!!',
+							  
+							});
+					}
+					else if(response.Status == 250){
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'No se pudo enviar los documentos al repositorio SIJ, comuniquese con informatica!!',
+							  
+							});
+					}
+					else if(response.Status == 230){
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'Aun no ha abierto la demanda PDF, descarguela!!',
+							  
+							});
+					}
+					else {
+						$('.loader').hide();
+						$(".formRespuestaVF").modal("hide");
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'Algo salió mal, no se pudo enviar la información.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		});	
+		
+		
+		
+		function actualizar(){
+			$(".detalleObjetos").empty();
+			$(".listaObjetos").load('VIOLENCIAFAMILIAR');
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("REGISTROS ACTUALIZADOS!!");
+		};
+		
+		
+		function verPDFViolencia(campo){	
+			var url='verPDFViolencia';
+				url = url + '/' +  campo + '/' + $('.id').val();
+			window.open(url,'nuevaVentana','width=600, height=630');
+		};
+		
+	</script>
+	
+</body>
+</html>

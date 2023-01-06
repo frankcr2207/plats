@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>CDM - Sistema de gestión de solicitudes</title>
+	<link rel="icon" type="img/jpg" href="img/pj.jpg" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+ 	<link rel="stylesheet" href="css/bootstrap-select.min.css">
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/estilo2.css" >
+	
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/jquery-3.5.1.js"></script>
+	<script src="js/popper.min.js" th:src="@{js/popper.min.js}"></script>
+	<script src="js/bootstrap.min.js"></script>
+  
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/funciones.js" th:src="@{js/funciones.js}"></script>
+	<script src="js/iconos.js"></script>
+	<script src="js/bootstrap-select.min.js"></script>
+	<style type="text/css">
+		#grupoChk label{
+			font-size: 11px;
+		}
+	</style>
+	
+</head>
+<body>
+	<div  style="background-color: #4E0000;">
+			<div id="cabecera" style="padding-top: 10px;padding-bottom: 1px" align="center">
+				<a href="/" style="text-decoration:none;"><img alt="ayuda" src="img/pj.svg" width="20px">&nbsp;&nbsp;&nbsp;</a><a style="color:white;  text-decoration:none;" href="principal"><strong>CORTE SUPERIOR DE JUSTICIA DE AREQUIPA</strong></a>
+				<p style="color: white;font-size:15px;"><strong>Cálculo de Fechas</strong></p>
+			</div>
+	</div>
+	<div style="background-color: #790000; padding:0px; border-bottom: 4px solid #C4C4C4;">
+		<div class="form-row" id="menu">
+			 <div style="width: 75%; padding-top: 5px">
+			 </div>
+u
+		</div>
+	</div>
+	<div id="divCalculo" class="divCalculo">
+		<div style="width: 80%; margin: auto; padding-top: 10px">
+			<div class="form-row">
+				<div style="width: 50%; margin: auto;">
+					<label>Ingrese fecha inicial</label>
+					<input type="date" class="txtFecha"><br>
+					<label>Ahora datos a calcular</label>
+			
+					<div class="form-row">
+						<div style="width: 50%">
+							<input type="text" class="txtDia" placeholder="Ingrese dias"><br>
+							<input type="text" class="txtMes" placeholder="Ingrese meses"><br>
+							<input type="text" class="txtAnio" placeholder="Ingrese años"><br>
+						</div>
+						<div style="width: 50%">
+							<select class="lstOperacion">
+								<option value="1">ADICIONAR</option>
+								<option value="0">QUITAR</option>
+							</select><br><br>
+							<button class="btn btn-primary btn-sm btnCalcular">CALCULAR</button><br>
+						</div>
+					</div>
+					<label>EL RESULTADO ES: </label>
+					<input type="text" class="txtResultado" readonly>
+				</div>
+				<div style="width: 50%; margin: auto;">
+					<div class="form-row">
+						<div style="width: 50%; margin: auto;">
+							<label>Ingrese fecha</label><br>
+							<input type="text" class="txtAnioInicial">
+							<input type="text" class="txtMesInicial">
+							<input type="text" class="txtDiaInicial"><br>
+							<label>Ingrese parametros a restar</label><br>
+							<input type="text" class="txtAnioFinal">
+							<input type="text" class="txtMesFinal">
+							<input type="text" class="txtDiaFinal"><br>
+							<label id="lblResultadoResta"></label><br>
+							
+						</div>
+						<div style="width: 50%; margin: auto;">
+							<button class="btn btn-primary btn-sm btnRestar">RESTAR</button>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<footer style="background-color: black;  left: 0;  bottom: 0;  width: 100%; position: fixed; color: white;  text-align: center;">		
+		<div style="     margin:0px auto ;   width:100%;   overflow: hidden; padding-top: 10px">
+			<p style="color: white; font-size: 10px"> Corte Superior de Justicia de Arequipa  - Plaza España S/N - Arequipa - Peru<br> &copy; CSJAR - 2020 - Todos los derechos reservados </p>
+		</div>
+	</footer>
+	<script type="text/javascript">
+		$('.btnCalcular').click(function(){
+			var fecha = $('.txtFecha').val();
+			var dia = $('.txtDia').val();
+			var mes = $('.txtMes').val();
+			var anio = $('.txtAnio').val();
+			var operacion = $('.lstOperacion').val();
+			
+			if(fecha == ""){
+	    		toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("CAMPO FECHA VACIO O INCORRECTO!!");
+				return false;
+			}
+				
+			if(dia == "") dia = 0;
+			if(mes == "") mes = 0;
+			if(anio == "") anio = 0;
+			
+			var json = {
+				"fecha" : fecha,
+				"fecha2" : fecha,
+				"dia" : dia,
+				"mes" : mes,
+				"anio" : anio,
+				"operacion" : operacion
+			};
+
+		  	$.ajax({
+		   		type : "POST",
+		   		contentType : "application/json",
+		   		url : "calculoFecha",
+		   		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        timeout : 600000,
+		        success : function(data) {
+		        	$('.txtResultado').val(data.fecha);
+		        },
+		    	error : function(e) {
+		    	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo calcular.!!',
+					});
+		     	}
+		  	});	
+		});
+		
+		$('.btnRestar').click(function(){
+			var anio1 = $('.txtAnioInicial').val();
+			var anio2 = $('.txtAnioFinal').val();
+			var mes1 = $('.txtMesInicial').val();
+			var mes2 = $('.txtMesFinal').val();
+			var dia1 = $('.txtDiaInicial').val();
+			var dia2 = $('.txtDiaFinal').val();
+			
+			if(anio1 == "") anio1 = 0;
+			if(anio2 == "") anio2 = 0;
+			if(mes1 == "") mes1 = 0;
+			if(mes2 == "") mes2 = 0;
+			if(dia1 == "") dia1 = 0;
+			if(dia2 == "") dia2 = 0;
+			
+			var json = {
+				"anio1" : anio1,
+				"anio2" : anio2,
+				"mes1" : mes1,
+				"mes2" : mes2,
+				"dia1" : dia1,
+				"dia2" : dia2
+			};
+
+		  	$.ajax({
+		   		type : "POST",
+		   		contentType : "application/json",
+		   		url : "restaFechas",
+		   		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        timeout : 600000,
+		        success : function(data) {
+		        	var res = '';
+		        	res = 'Quedan ' + data.anio + ' año(s), con ' + data.mes + ' mes(es) y ' + data.dia + ' dias.';
+		        	$('#lblResultadoResta').html(res);
+		        },
+		    	error : function(e) {
+		    	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo calcular la resta de fechas.!!',
+					});
+		     	}
+		  	});	
+		});
+	</script>
+
+</body>
+</html>

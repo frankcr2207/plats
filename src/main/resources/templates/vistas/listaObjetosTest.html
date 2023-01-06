@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+		<link rel="stylesheet" href="css/toastr.min.css" >
+		<style type="text/css">
+		  .selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<table style="font-size:11px" class="table table-hover tablaSolicitudes" id="tablaSolicitudes">
+						<thead>
+							<tr>
+								<th></th>
+								<th><strong><label style="font-size: 15px" th:text="${tipo}"></label></strong><input type="hidden" class="formulario" th:value="${formulario}"></th>
+								<th></th>
+								<th align="center"><button onclick="actualizar()" class="btn btn-outline-success btn-sm"><strong>REFRESCAR</strong></button></th>
+							</tr>
+						</thead>
+						<tbody class="buscar">
+							<tr style="cursor: default" th:each="solicitud:${solicitudes}" id="filasSolicitudes" class="filasSolicitudes">
+								<td th:text="${solicitud.n_id}"></td>
+								<td style="display: none" th:text="${solicitud.s_estado}">
+								<td><strong>DE:  <span th:text="${solicitud.nombresCompletos}"></span> - <span th:text="${solicitud.s_correo_electronico}"></span></strong> 
+								
+								<td>FECHA: <span th:text="${solicitud.fecha}"></span></td>
+								<td th:switch="${solicitud.s_estado}" align="center">
+	                            	<label class="switch">
+	                            	<span th:case="'I'" ><img src="img/mensaje.png" align="middle" th:src="@{img/mensaje.png}" width="28"/></span>
+	                            	<span th:case="'E'" ><img src="img/email.png" align="middle" th:src="@{img/email.png}" width="28"/></span>
+	                            	<span th:case="'A'" ><img src="img/enviado.png" align="middle" th:src="@{img/enviado.png}" width="32"/></span>
+	                            	<span th:case="'X'" ><img src="img/sinvisto.png" align="middle" th:src="@{img/sinvisto.png}" width="30"/></span>
+									</label>
+								</td>
+							</tr>
+						</tbody>
+			</table>
+		</div>
+	</div>
+	 <script type="text/javascript">
+			
+	    	function terminar(){	
+	    		$('#exampleModalExp').modal( 'hide' );
+	    		var url='obtenerExpedientes';
+
+	    		url = url + '/' + $('#dni').val();
+
+	    		document.getElementById('partes').style.display="none";
+	    		$("#resultados").load(url);
+
+	    	}
+			
+	    </script>
+	    <script type="text/javascript">
+			
+	 	$("#tablaSolicitudes #filasSolicitudes").click(function(){
+	 		$(this).addClass('selected').siblings().removeClass('selected');
+	 		
+	   		 
+	   		toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+			var estado = null; 
+			estado = $(this).find('td:eq(1)').html();
+		   	var value=$(this).find('td:first').html();
+		   
+
+		   	var url='detalleObjetos';
+	   		url = url + '/' + value;
+	   		$(".listaObjetos").load(url);
+
+			
+		});	
+	    </script>
+	    <script type="text/javascript">
+	    	function actualizar(){
+		    	var url3 = $('.formulario').val();
+	   			$(".listaObjetos").load(url3);
+	   		}
+	    </script>
+
+
+</body>
+</html>

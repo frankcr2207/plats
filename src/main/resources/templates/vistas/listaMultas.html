@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<style type="text/css">
+	  	.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+	  	input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+    	}
+    	input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+	    
+		.animated {
+		  animation: blinker 1s linear infinite;
+		}
+		
+		@keyframes blinker {
+		  50% {
+		    opacity: 0;
+		  }
+		}
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div>
+			<div class="form-row">
+				<select id="lstTipoBusqueda"><option value="T">NOMBRES. o EXP.</option></select>&nbsp;&nbsp;
+				<input id="x_texto" style="font-size: 12px;" name="x_texto" class="x_texto" type="text" placeholder="Escriba aqui" />&nbsp;&nbsp;
+				<button type="button" id="btnBuscarMultasCoor" class="btn btn-outline-primary btn-sm"><i class='fas fa-search'></i></button>
+			</div>
+		</div>
+		<table style="font-size:10px" class="table table-hover table-sm tablaMultas" id="tablaMultas">
+			<thead>
+				<tr>
+					<th></th>
+					<th><strong><label style="font-size: 12px" th:text="${tipo}"></label></strong> - <strong><label id="lblRows" style="font-size: 12px"></label></strong><input type="hidden" id="formulario" th:value="${formulario}"></th>
+					<th align="center"><button onclick="actualizar()" class="btn btn-outline-success btn-sm"><i class='fas fa-sync-alt fa-lg'></i></button></th>
+				</tr>
+			</thead>
+			<tbody class="buscar">
+				<tr style="cursor: pointer" th:each="multa:${multas}" id="filasMultas" class="filasMultas">
+					<td th:text="${multa.id_multa}"></td>
+					<td><strong>REGISTRADO: <i><span th:text="${multa.registro}"></span><br></i>MULTADO: <i><span th:text="${multa.nombresCompletos}"></span></i></strong><br>
+					<strong> EXPEDIENTE: </strong> <span th:text="${multa.n_expediente}"></span></td>
+					<td th:switch="${multa.s_estado}" align="center">
+                          	<label class="switch">
+                          	<span th:case="'P'" ><img src="img/mensaje.png" align="middle" th:src="@{img/mensaje.png}" width="25"/><br>PENDIENTE</span>
+                          	<span th:case="'T'" ><img src="img/visto.png" align="middle" th:src="@{img/visto.png}" width="30"/><br>TRAMITADO</span>
+                          	<span th:case="'O'" ><img src="img/sinvisto.png" align="middle" th:src="@{img/sinvisto.png}" width="28"/><br>OBSERVADO</span>
+						</label>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var rowCount = $('#tablaMultas tr').length;
+	    	document.getElementById('lblRows').innerHTML = 'Registros: ' + (rowCount-1);
+	    	$('.txtBuscarSolicitud').val('');
+	    	
+	    	$('#lstTipoBusqueda').change(function(){
+				var accion = $(this).find(":selected").val();
+				if(accion == 'T'){
+					$('#x_texto').show();
+					$('#x_inicio').hide();
+					$('#x_fin').hide();
+				}
+				else{
+					$('#x_texto').hide();
+					$('#x_inicio').show();
+					$('#x_fin').show();
+				}
+			});
+	    	
+	    });
+		$(document).ready(function () {  
+		    (function ($) {
+		        $('.txtBuscarSolicitud').keyup(function () {
+		             var rex = new RegExp($(this).val(), 'i');
+		             $('.buscar tr').hide();
+		             $('.buscar tr').filter(function () {
+		               return rex.test($(this).text());
+		             }).show();
+		        })
+		    }(jQuery));
+		});
+		$("#tablaMultas #filasMultas").click(function(){
+			$(this).addClass('selected').siblings().removeClass('selected');	 
+
+		   	var value=$(this).find('td:first').html();
+		   	var form=$('#formulario').val();
+
+		   	$(".detalleObjetos").empty();
+			$.get( "detalleMulta", { id: value})
+				.done(function(data) {
+					$(".detalleObjetos").html(data);
+					toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.success("DATOS RECUPERADOS!!");
+				})
+				.fail( function() {
+					Swal.fire({
+					  	icon: 'error', title: 'ATENCIÓN', text: 'Algo salió mal, no se pudo obtener la información. Actualice toda la página!!',
+					});
+				});
+		});	
+		
+		$('#btnBuscarMultasCoor').click(function(){
+			var parametro = $('#x_texto').val();
+			$.get( "buscarMultasCoor", {parametro:parametro})
+		    .done(function( data ) {
+		    	$(".listaObjetos").html(data);
+		    	$(".detalleObjetos").empty();
+		    });
+		});
+		
+		function actualizar(){
+				getRegistros();
+		};
+		
+		function getRegistros(){
+			var sede = $('#lstSedes').val();
+			$.get( "multasCoor", {sede:sede})
+		    .done(function( data ) {
+		    	$(".listaObjetos").html(data);
+		    	$(".detalleObjetos").empty();
+		    	toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.success("REGISTROS ACTUALIZADOS!!");
+		    });
+		}
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Insert title here</title>
+<style type="text/css">
+	@media print {
+		#menu {display:none;}
+		.divRepGen{display:none;}
+	}
+</style>
+</head>
+<body>
+	<div style="witdh: 90%">
+		<div class="card card-body divRepGenDet" style="width: 100%">
+			<div class="form-row">
+				<div>
+					<select id="listaAdmCDMDet" class="form-control form-control-sm listaAdmCDMDet">
+						
+					</select>
+				</div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div>
+					<input type="date" class="form-control form-control-sm txtFechaDetRep1">
+				</div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div>
+					<input type="date" class="form-control form-control-sm txtFechaDetRep2">
+				</div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div>
+				<button class="btn btn-primary btn-sm btnFiltrarAdmCDMDet"><i class="fas fa-search fa-lg"></i></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button type="button" id="btnImprimir" class="btn btn-outline-dark btn-sm btnImprimirDetallado" style="margin:auto"><i class='fas fa-print fa-lg'></i></button>
+				</div>
+			</div>
+			
+		</div>
+		<div id="filtroReporte" class="filtroReporte" style="width: 100%">
+		</div>
+		<div id="resultadoRepGenDet" class="card card-body resultadoRepGenDet">
+		</div>
+	</div>
+	<script type="text/javascript">
+	$( document ).ready(function() {
+	    $.ajax({
+       		type : "POST",
+       		contentType : "application/json",
+       		url : "obtCDMAdm",
+	        dataType : 'json',
+	        cache : false,
+	        timeout : 600000,
+	        success : function(data) {
+	         	var html = '';
+	         	var len = data.length;
+	         	html += '<option value="T">VER TODOS LOS CDM</option>';
+	         	for (var i = 0; i < len; i++) {
+	         		html += '<option value="' + data[i].id + '">' + data[i].nombres + '</option>';
+		        }
+		        $('.listaAdmCDMDet').html(html);
+	        },
+        	error : function(e) {
+        	 	Swal.fire({
+				  	icon: 'error',
+				  	title: 'ATENCIÓN',
+				  	text: 'Ooops, algo salió mal, no se pudo cargar los CDM.!!',
+				});
+	     	}
+      	});
+	});
+</script>
+<script type="text/javascript">
+	
+	$('.btnFiltrarAdmCDMDet').click(function(){
+		var id = $('.listaAdmCDMDet').val();
+		var fecha1 = $('.txtFechaDetRep1').val();
+		var fecha2 = $('.txtFechaDetRep2').val();
+		if(fecha1 == '' || fecha2 == ''){
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.warning("INGRESE RANGO DE FECHAS!!");
+			return false;
+		}
+		var json = {
+				"id" : id,
+				"fecha1" : fecha1,
+       			"fecha2" : fecha2
+      		};
+        $.ajax({
+        	type : "POST",
+       		contentType : "application/json",
+       		url : "obtReporteDetAdmCDM",
+       		data : JSON.stringify(json),
+	        dataType : 'json',
+	        cache : false,
+	        timeout : 600000,
+	        success : function(data) {
+	        	var html = '<h6><strong>REPORTE POR CDM</strong></h6>';
+	         	var len = data.length;
+	         	html += '<table style="font-size:11px" class="table table-hover table-sm"><tr><th>NOMBRE DEL CDM</th><th>EXPEDIENTE</th><th>INSTANCIA</th><th>TIPO</th><th>REGISTRO</th><th>USUARIO</th><th>ESTADO</th></tr>';
+	         	for (var i = 0; i < len; i++) {
+	         		html += '<tr><td>' + data[i].cdm + '</td><td>' + data[i].expediente + '</td><td>' + data[i].instancia + '</td><td>' + data[i].documento + '</td><td>' + data[i].fecha + '</td><td>' + data[i].nombres + '</td><td>' + data[i].estado + '</td></tr>';
+		        }
+	         	html += '</table>';
+		        $('.resultadoRepGenDet').html(html);
+	        },
+        	error : function(e) {
+        	 	Swal.fire({
+				  	icon: 'error',
+				  	title: 'ATENCIÓN',
+				  	text: 'Ooops, algo salió mal, no se pudo cargar el reporte del CDM.!!',
+				});
+	     	}
+      	});
+	});
+</script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('.btnImprimirDetallado').on('click', function(){
+				var ficha = document.getElementById('resultadoRepGenDet');
+	    		//var fichaOriginal = document.body.innerHTML;
+	    		//document.body.innerHTML = ficha;
+	    		//window.print();
+	    		//document.body.innerHTML = fichaOriginal;
+	    		var ventimp = window.open('','popimpr');
+	    		ventimp.document.write(ficha.innerHTML);
+	    		ventimp.document.close();
+	    		ventimp.print();
+	    		ventimp.close();
+			});
+		});
+	</script>
+</body>
+</html>

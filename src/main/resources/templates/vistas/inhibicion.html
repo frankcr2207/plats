@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/funciones.js"></script>
+
+	<style type="text/css">
+	 	.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+		#modalNuevaAudiencia label{
+			font-weight: bold;
+			font-size: 10px";
+		}
+		input{
+	    	border:0;
+		    border-bottom: 1px solid #009CBF;
+		    font-size: 11px";
+	    }
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud><br><input type="hidden" class="formulario" th:value="${formulario}"><input type="hidden" id="sedeOrigen" th:value="${sedeOrigen}">
+			<button type="button" class="btn btn-outline-primary btn-sm btnNuevaAudiencia"><i class='fas fa-plus'></i>&nbsp;NUEVO</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input id="txtBuscarAudiencia" name="txtBuscarAudiencia" type="text" style="text-transform:uppercase;" class="txtBuscarAudiencia" placeholder="Filtre aquí ..."/><br><br>
+			<table style="font-size:10px" class="table table-hover table-sm">	
+				<thead>
+					<tr><th>REGISTRO</th>
+						<th>EXPEDIENTE</th>
+						<th>ORIGEN</th>
+						<th style="vertical-align:middle;">DESTINO</th>
+						<th style="vertical-align:middle;">OBSERVACION</th>
+						
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer; font-size:10px" th:each="reg:${lista}" id="filaAudiencias" class="filaAudiencias">
+						<td><strong>F. REGISTRO: </strong><span th:text="${reg.fechaRegistro}"></span></td>
+						<td style="font-size: 13px;"><strong>EXP. <span th:text="${reg.expediente}"></span></strong></td>
+						<td ><span th:text="${reg.s_sede}"></span><br><span th:text="${reg.x_nom_instancia}"></span></td>
+						<td ><span th:text="${reg.sedeDestino}"></span><br><span th:text="${reg.insDestino}"></span></td>
+						<td ><span th:text="${reg.s_observacion}"></span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	
+				
+		<div class="modal fade modalNuevaAudiencia" id="modalNuevaAudiencia" data-backdrop="static" data-keyboard="false"  tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-dialog-centered" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel">DATOS DEL EXPEDIENTE</h5>
+		        <button style="display: none" type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <form class="guardarAudiencia" id="guardarAudiencia"  enctype="multipart/form-data">
+		      	<div class="modal-body" style="font-size: 11px">
+		        	<div style="margin-left:auto" class="form-row" id="divBuscarAudiencia">
+                       	<div class="form-group col-sm-2">
+                       		<label>NÚM</label>
+	                        <input name="numero" id="numero" autofocus class="form-control form-control-sm numero" maxlength="5" onkeypress="return numbersonly(event)">
+	                	</div>
+	                	<div class="form-group col-sm-2">
+	                        <label>AÑO</label>
+	                        <input name="anio" id="anio" class="form-control form-control-sm" maxlength="4" onkeypress="return numbersonly(event)">
+	                	</div>
+	                	<div class="form-group col-sm-2">
+	                        <label>CUAD.</label>
+	                        <input name="cuaderno" id="cuaderno" class="form-control form-control-sm" maxlength="2" onkeypress="return numbersonly(event)">
+	                	</div>
+	                	<div class="form-group col-md-4">
+							  <label>INSTANCIA</label>
+							<select id="instancia" name="instancia" class="form-control form-control-sm">
+								<option value="0">SELECCIONE ...</option>
+								<option th:each="instancia: ${instancias}" 
+								       th:value="${instancia.c_instancia}" th:text="${instancia.x_nom_instancia}"></option>
+							</select>
+						</div>
+					</div>
+					<div>
+                      	<label>&nbsp;OBSERVACION</label><br>
+                        <textarea rows="" cols="" class="form-control" id="obs"></textarea>
+                	</div>
+		      	</div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary btn-sm cerrar" data-dismiss="modal">CERRAR</button>
+		        <button type="button" id="btnGuardarInhibicacion" class="btn btn-primary"><i class="fas fa-save fa-lg"></i>&nbsp;GUARDAR</button>
+		      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+				
+	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function() {
+		(function ($) {
+	        $('.txtBuscarAudiencia').keyup(function () {
+	             var rex = new RegExp($(this).val(), 'i');
+	             $('.buscar tr').hide();
+	             $('.buscar tr').filter(function () {
+	               return rex.test($(this).text());
+	             }).show();
+	        })
+	    }(jQuery));
+		
+    	$("#btnGuardarInhibicacion").click(function() {
+    		var sede = $("#sedeOrigen").val();
+    		var numero = $("#numero").val();
+      		var anio= $("#anio").val();
+      		var cuaderno = $("#cuaderno").val();
+      		var instancia = $("#instancia").val();
+      		var obs = $("#obs").val();
+      		if(numero == '' || anio == '' || cuaderno == '' || instancia == '0'){
+      			toastr.clear();
+    			toastr.options = {
+    				"closeButton":true,
+    				"progressBar": true,
+    				"positionClass":"toast-topcenter-right"
+    			};
+    			toastr.warning("DEBE COMPLETAR TODOS LOS CAMPOS!!");
+      			return false;
+      		}
+      		
+      		if(numero.length == 1)
+      			numero = '0000' + numero;	
+      		else if(numero.length == 2)
+      			numero = '000' + numero;
+      		else if(numero.length == 3)
+      			numero = '00' + numero;
+      		else if(numero.length == 4)
+      			numero = '0' + numero;
+      		
+      		var json = {
+      			"numero" : numero,
+           		"anio" : anio,
+           		"cuaderno" : cuaderno,
+           		"sede" : sede,
+           		"instancia" : instancia,
+           		"fecha" : obs
+      		};
+ 
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "guardarInhibicion",
+	       		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        timeout : 600000,
+		        success : function(data) {
+					if(data.estado == 'ok'){
+						$("#modalNuevaAudiencia").modal('hide');//ocultamos el modal
+						$('body').removeClass('modal-open');//eliminamos la clase del body para poder hacer scroll
+						$('.modal-backdrop').remove();//e
+						$("#divInhibiciones").empty();
+						$("#divInhibiciones").load("INHIBICIONES");
+			        	Swal.fire({
+							icon: 'success',
+							title: 'SEDE: ' + data.sede,
+							text: 'INSTANCIA: ' + data.instancia,	  
+						});
+					}
+					else{
+						Swal.fire({
+							icon: 'error',
+							title: 'ATENCIÓN',
+							text: 'No se pudo guardar!!',  
+						});
+					}
+	         	} 
+	      	});
+    	});
+  	});
+		
+	</script>
+
+	<script type="text/javascript">
+		document.getElementById('numero').addEventListener('keydown', inputCharacters1);
+		document.getElementById('anio').addEventListener('keydown', inputCharacters2);
+	
+		function inputCharacters1(event) {
+		  	if (event.keyCode == 13) {
+		   		document.getElementById('anio').focus();
+		  	}
+		};
+		function inputCharacters2(event) {
+			if (event.keyCode == 13) {
+			    document.getElementById('cuaderno').focus();
+			}
+		};
+		$('.btnNuevaAudiencia').click(function(){
+			$('.modalNuevaAudiencia').find('[autofocus]').focus();
+			$('.modalNuevaAudiencia').modal('show');
+		});
+		
+	</script>
+
+</body>
+</html>

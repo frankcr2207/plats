@@ -1,0 +1,17 @@
+{"properties": [
+  {
+    "name": "legacy.datasource.password",
+    "type": "java.lang.String",
+    "description": "A description for 'legacy.datasource.password'"
+  },
+  {
+    "name": "legacy.datasource.url",
+    "type": "java.lang.String",
+    "description": "A description for 'legacy.datasource.url'"
+  },
+  {
+    "name": "legacy.datasource.username",
+    "type": "java.lang.String",
+    "description": "A description for 'legacy.datasource.username'"
+  }
+]}

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8">
+<title>CDM - Sistema de gestión de solicitudes</title>
+	<link rel="icon" type="img/jpg" href="img/pj.jpg" />
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+ 	<link rel="stylesheet" href="css/bootstrap-select.min.css">
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/estilo2.css" >
+	
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/jquery-3.5.1.js"></script>
+	<script src="js/popper.min.js" th:src="@{js/popper.min.js}"></script>
+	<script src="js/bootstrap.min.js"></script>
+  
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/funciones.js" th:src="@{js/funciones.js}"></script>
+	<script src="js/iconos.js"></script>
+	<script src="js/bootstrap-select.min.js"></script>
+	<style type="text/css">
+		#grupoChk label{
+			font-size: 11px;
+		}
+	</style>
+	
+</head>
+<body>
+	<div  style="background-color: #4E0000;">
+			<div id="cabecera" style="padding-top: 10px;padding-bottom: 1px" align="center">
+				<a href="/" style="text-decoration:none;"><img alt="ayuda" src="img/pj.svg" width="20px">&nbsp;&nbsp;&nbsp;</a><a style="color:white;  text-decoration:none;" href="principal"><strong>CORTE SUPERIOR DE JUSTICIA DE AREQUIPA</strong></a>
+				<p style="color: white;font-size:15px;"><strong>Directorio Abogados</strong></p>
+			</div>
+	</div>
+	<div style="background-color: #790000; padding:0px; border-bottom: 4px solid #C4C4C4;">
+		<div class="form-row" id="menu">
+			 <div style="width: 75%; padding-top: 5px">
+			 </div>
+
+		</div>
+	</div><div id="divReporte" class="divReporte"></div>
+	<div style="width: 90%;  height: 80%; margin: auto;" class="form-row contenido" id=contenido>
+		<div  style="width:50%; height: 100%; overflow-y: scroll;" class="card card-body contenidoLista">
+			<div style="width:100%; height: 25%;" id="divBuscar">
+				<div class="form-row">
+				<div>
+					<label style="font-size: 11px">FILTRAR POR: </label></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div>
+					<select class="form-control form-control-sm tipoBusqueda"><option value="N">NOMBRES</option><option value="E">ESPECIALIDAD</option></select>
+				</div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div><input autofocus="autofocus" id="x_nombres" name="x_nombres" type="text" style="text-transform:uppercase;" class="form-control form-control-sm" placeholder="Nombres"/></div>&nbsp;&nbsp;
+				<div><button type="button" onclick="buscarSolicitud()" class="btn btn-outline-primary btn-sm btnBuscarAbo"><i class='fas fa-search'></i></button></div>
+				</div><br>
+				<div id="grupoChk" class="form-row">
+				    
+				    <div class="form-group col-md-2">
+						<input type="checkbox" id="chkCiv" name="especialidades[]" value="CI" >
+								<label for="vehicle1"> CIVIL</label>
+				    </div>
+				    <div class="form-group col-md-4">
+						<input type="checkbox" id="chkCon" name="especialidades[]" value="CO" >
+								<label for="vehicle1"> CONSTITUCIONAL</label>
+				    </div>
+				    <div class="form-group col-md-3">
+						<input type="checkbox" id="chkFam" name="especialidades[]" value="FA" >
+								<label for="vehicle1"> FAMILIA</label>
+				    </div>
+				    <div class="form-group col-md-3">
+						<input type="checkbox" id="chkLab" name="especialidades[]" value="LA" >
+								<label for="vehicle1"> LABORAL</label>
+				    </div>
+				    <div class="form-group col-md-2">
+						<input type="checkbox" id="chkPen" name="especialidades[]" value="PE" >
+								<label for="vehicle1"> PENAL</label>
+				    </div>
+				    <div class="form-group col-md-4">
+						<input type="checkbox" id="chkAdm" name="especialidades[]" value="CA" >
+								<label for="vehicle1"> CONT. ADMINISTRATIVO</label>
+				    </div>
+				    <div class="form-group col-md-4">
+						<input type="checkbox" id="chkExt" name="especialidades[]" value="ED" >
+								<label for="vehicle1"> EXTINCIÓN DE DOMINIO</label>
+				    </div>
+				</div>
+			</div>
+			<div style="width:100%; height: 75%;" id="listaObjetos" class="listaObjetos">
+				
+			</div>
+		</div>
+		<div id="detalleObjetos" style="width:50%; height: 100%; overflow-y: scroll;" class="card card-body detalleObjetos">
+		</div>
+	</div>
+
+		
+		
+	<footer style="background-color: black;  left: 0;  bottom: 0;  width: 100%; position: fixed; color: white;  text-align: center;">		
+		<div style="     margin:0px auto ;   width:100%;   overflow: hidden; padding-top: 10px">
+			<p style="color: white; font-size: 10px"> Corte Superior de Justicia de Arequipa  - Plaza España S/N - Arequipa - Peru<br> &copy; CSJAR - 2020 - Todos los derechos reservados </p>
+		</div>
+	</footer>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$("#chkFam").prop("disabled", true);
+			$("#chkLab").prop("disabled", true);
+			$("#chkCiv").prop("disabled", true);
+			$("#chkPen").prop("disabled", true);
+			$("#chkExt").prop("disabled", true);
+			$("#chkAdm").prop("disabled", true);
+			$("#chkCon").prop("disabled", true);
+		});
+		
+		$(function() {
+		    $(".tipoBusqueda").change( function() {
+		        if ($(this).val() == "N") {
+		        	$("#x_nombres").prop("disabled", false);
+		        	$("#x_nombres").val("");
+		        	$("#x_nombres").focus();
+		        	$("#chkFam").prop("disabled", true);
+					$("#chkLab").prop("disabled", true);
+					$("#chkCiv").prop("disabled", true);
+					$("#chkPen").prop("disabled", true);
+					$("#chkExt").prop("disabled", true);
+					$("#chkAdm").prop("disabled", true);
+					$("#chkCon").prop("disabled", true);
+		        }
+		        else if ($(this).val() == "E") {
+		        	$("#x_nombres").prop("disabled", true);
+		        	$("#x_nombres").val("");
+		        	$("#chkFam").prop("disabled", false);
+					$("#chkLab").prop("disabled", false);
+					$("#chkCiv").prop("disabled", false);
+					$("#chkPen").prop("disabled", false);
+					$("#chkExt").prop("disabled", false);
+					$("#chkAdm").prop("disabled", false);
+					$("#chkCon").prop("disabled", false);
+		        }
+		    });
+		});
+		
+    	$('.btnBuscarAbo').click(function(){
+    		$(".detalleObjetos").empty();
+    		var formulario = $('.formulario').val();
+    		var nombres = $('#x_nombres').val();
+	    	var url;
+	    	if($('.tipoBusqueda').val()=="N"){
+	    		if(nombres == ""){
+		    		toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.warning("INGRESE ALGÚN NOMBRE O APELLIDO!!");
+					$('#x_nombres').focus();
+					return false;
+		    	}
+		    	else{
+		    		$.get( "getDirectory", { nombres: nombres} )
+				    .done(function( data ) {
+				    	$(".listaObjetos").html(data);
+				    })
+	    		}
+	    	}
+	    	else{
+	    		var varFam = $('#chkFam:checked').val();
+			   	var varLab = $('#chkLab:checked').val();
+			   	var varCiv = $('#chkCiv:checked').val();
+			   	var varPen = $('#chkPen:checked').val();
+			   	var varExt = $('#chkExt:checked').val();
+			   	var varAdm = $('#chkAdm:checked').val();
+			   	var varCon = $('#chkCon:checked').val();
+
+			   	if (varFam != 'FA' && varLab != 'LA' && varCiv != 'CI' && varPen != 'PE' && varExt != 'ED' && varAdm != 'CA' && varCon != 'CO'){ 
+					toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.warning("Elija al menos una ESPECIALIDAD!");
+			      	return false; 
+			   	}
+			   	else{
+			   		if(varFam != 'FA') varFam = '0';
+			   		if(varLab != 'LA') varLab = '0';
+			   		if(varCiv != 'CI') varCiv = '0';
+			   		if(varPen != 'PE') varPen = '0';
+			   		if(varExt != 'ED') varExt = '0';
+			   		if(varAdm != 'CA') varAdm = '0';
+			   		if(varCon != 'CO') varCon = '0';
+		    		$.get( "getEspDir", { varFam: varFam, varLab:varLab, varCiv:varCiv, varPen:varPen, varExt:varExt, varAdm:varAdm, varCon:varCon})
+				    .done(function( data ) {
+				    	$(".listaObjetos").html(data);
+				    })
+	    		}
+	    	}
+	    	
+    	});
+	</script>
+
+</body>
+</html>

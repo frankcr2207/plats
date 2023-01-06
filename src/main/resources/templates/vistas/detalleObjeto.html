@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/printThis.js" th:src="@{js/printThis.js}"></script>
+	<script type="text/javascript" src="js/jquery.richtext.js"></script>
+	<link rel="stylesheet" href="css/main.css" >
+	<link rel="stylesheet" href="css/richtext.min.css">
+	<link rel="stylesheet" href="css/estiloPrint.css">
+	<style type="text/css" media="print">
+		@media print {
+		.contenido {height: 100%;}
+		#listaObjetos {display:none;}
+		#btnResponder {display:none;}
+		#btnImprimir {display:none;}
+		#btnVerRespuesta {display:none;}
+		#btnDerivar {display:none;}
+		#btnResolver {display:none;}
+		#menu {display:none;}
+		.taObsResolucion {display:none;}
+		.lblObsResolucion {display:none;}
+		
+	</style>
+	<style type="text/css">
+		.loader{
+        	display: none;
+        	background-color:white;
+	   		opacity:1;
+	   		filter:alpha(opacity=60); /* IE < 9.0 */
+      	}
+		#solicitud input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+    	#datosSolicitud label, .modalDerivar label, .modalDevolver label{
+    		width: 100px;
+    	}
+    	.select2-results__option { 
+	  font-size: 10px;
+	}
+	</style>
+	
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="dato:${detalle}" id="datosSolicitud" class="datosSolicitud">
+				<h6><strong>DATOS DE SOLICITUD - <span th:text="${tipoFormulario}"></span></strong></h6>
+				<div class="form-row">
+					<div style="width:70%; font-size: 11px">
+						<input th:value="${dato.n_id}" id="id" type="hidden" class="id">
+						<input th:value="${tipoFormulario}" class="tipoFormulario" id="tipoFormulario" type="hidden">
+						<label><strong>DNI: </strong></label><input th:value="${dato.s_documento}" id="documento" readonly="readonly" size="20" >&nbsp;&nbsp;&nbsp;<button th:href="@{consultaReniec/(dni=${dato.s_documento})}" class="btn btn-outline-primary btn-sm btnReniec" ><i class='fas fa-fingerprint fa-lg'></i>&nbsp;</button>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="window.print();" id="btnImprimir" class="btn btn-outline-dark btn-sm" style="margin:auto"><i class='fas fa-print fa-lg'></i></button><br>
+						<label><strong>SOLICITANTE: </strong></label><input style="font-weight: bold" th:value="${dato.nombresCompletos}" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>CORREO: </strong></label><input th:value="${dato.s_correo_electronico}" id="correo" readonly="readonly" size="40" ><br>
+						<label><strong>CELULAR: </strong></label><input th:value="${dato.s_celular}" id="celular" readonly="readonly" size="40"><br>
+						<div th:if="${dato.form == 'EXPEDICION' OR dato.form == 'COPIAS' OR dato.form == 'DOCUMENTAL'}">
+							<label><strong>COLEGIO: </strong></label><input th:value="${dato.s_colegio}" id="colegio" readonly="readonly" size="40"><br>
+							<label style="width: 100px"><strong>COLEGIATURA: </strong></label><input th:value="${dato.s_colegiatura}" id="colegiatura" readonly="readonly" size="15">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<label style="width: 80px"><strong>CASILLA: </strong></label><input th:value="${dato.s_casilla_electronica}" id="casilla" readonly="readonly" size="15"><br>
+							<label style="width: 100px"><strong>DOM. PROCESAL: </strong></label><input th:value="${dato.s_domicilio_procesal}" id="domicilio" readonly="readonly" size="55"><br>
+						</div>
+						<div th:if="${dato.form == 'LECTURA'}">
+							<label><strong>COLEGIO: </strong></label><input th:value="${dato.s_colegio}" id="colegio" readonly="readonly" size="40"><br>
+							<label><strong>COLEGIATURA: </strong></label><input th:value="${dato.s_colegiatura}" id="colegiatura" readonly="readonly" size="40"><br>
+						</div>
+						<script type="text/javascript" src="js/datosReniec.js" th:src="@{js/datosReniec.js}"></script>
+					</div>
+					<div style="width:30%;" align="center" >
+						<div sec:authorize="hasRole('ASISTENTE-CDM/CDG')">
+							<div th:if="${dato.c_usuario == sesion}">
+							<div th:if="${(dato.s_estado == 'E' OR dato.s_estado == 'R' OR dato.s_estado == 'X')}">
+								<button class="btn btn-success" id="btnResponder" style="margin:auto" data-toggle="modal" data-target="#modalRespuesta"><strong><i class='fas fa-envelope'></i>&nbsp;RESPONDER</strong></button><br><br>
+							</div>
+							<div th:if="${(dato.s_estado == 'E' OR dato.s_estado == 'X') and (dato.form != 'DEVOLUCION')}">
+								<button class="btn btn-primary btn-sm btnDerivar" id="btnDerivar" style="margin:auto"><strong><i class='fas fa-share-square'></i>&nbsp;DERIVAR</strong></button><br><br>
+							</div>
+							<div th:if="${dato.s_estado == 'X' and (dato.form != 'DEVOLUCION')}">
+								<button class="btn btn-danger btn-sm btnVerMotivoDevolucion" id="btnVerMotivoDevolucion" style="margin:auto"><strong><i class='fas fa-exclamation-triangle'></i>&nbsp;VER DEVOLUCIÓN</strong></button><br><br>
+							</div>
+							</div>
+							<div th:if="${dato.c_usuario != sesion}">
+								<h6><strong>La solicitud está siendo atendida por: <span th:text="${dato.c_usuario}"></span>, por favor actualice la lista y elija otra tarea.</strong></h6>
+							</div>
+						</div>
+						<div sec:authorize="hasRole('SECRETARIO-CDM')">
+							<button th:if="${dato.s_estado == 'D'}" class="btn btn-success btnModalResolver" style="margin: auto" id="btnModalResolver"><strong><i class="fas fa-edit"></i>&nbsp;RESOLVER</strong></button><br><br>
+							<button th:if="${dato.s_estado == 'D'}" class="btn btn-danger btn-sm btnModalDevolver" style="margin: auto" id="btnModalDevolver"><strong><i class="fas fa-undo"></i>&nbsp;DEVOLVER</strong></button>
+						</div><br>
+						<div th:if="${dato.s_estado == 'A'}">
+							<button style="cursor: default; margin:auto" class="btn btn-primary" id="btnVerRespuesta"><strong><i class='fas fa-envelope'></i>&nbsp;ATENDIDO</strong></button><br><br>
+						</div>
+						
+					</div>
+				</div><hr>
+				<div  style="font-size: 11px;">
+					<label><strong>CDM: </strong></label><input th:value="${dato.s_cdm}" id="cdm" readonly="readonly" size="65" value=""><br>
+					<input class="c_instancia" type="hidden" th:value="${dato.c_instancia}">
+					<label><strong>INSTANCIA: </strong></label><input th:value="${dato.x_nom_instancia}" id="instancia" readonly="readonly" size="40" value=""><br>
+					<label><strong>EXPEDIENTE: </strong></label><input th:value="${dato.n_expediente}" id="expediente" readonly="readonly" size="40" value=""><br>
+					<label><strong>ESPECIALISTA: </strong></label><input th:value="${dato.s_secretario}" id="secretario" readonly="readonly" size="60" value=""><br>
+					<label><strong>P. PROCESAL: </strong></label><input th:value="${dato.n_id_tipo_parte}" id="parte" readonly="readonly" size="60" value=""><br>
+					<label><strong>NOMBRE PARTE: </strong></label><input th:value="${dato.s_parte_procesal}" id="nombreParte" readonly="readonly" size="60" value=""><br>
+					
+					<label th:if="${dato.adjunto != '' and dato.adjunto != null}" ><strong>ADJUNTO</strong></label>
+					<button type="button" th:if="${dato.adjunto != '' and dato.adjunto != null}" onclick="ventanaNueva()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button>
+				
+				</div><hr>
+				<div style="font-size: 11px;" th:if="${dato.form == 'DEVOLUCION'}">
+					<label><strong>MOTIVO: </strong></label><input th:value="${dato.s_motivo}" id="motivo" readonly="readonly" size="60" value=""><br>
+					<label style="width: 100px"><strong>ADJ. ARANCEL: </strong></label><input th:value="${dato.s_arancel}" id="arancel" readonly="readonly" size="60" value=""><br>
+					<label><strong>MONTO: </strong></label><input th:value="${dato.n_monto_arancel}" id="monto" readonly="readonly" size="20" value=""><br>
+					<div style="font-size: 12px;">
+					<label th:if="${dato.arancel != ''and dato.arancel != null}" ><strong>ARANCEL</strong></label>
+					<button type="button" th:if="${dato.arancel != '' and dato.arancel != null}" onclick="ventanaNueva2()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button>
+					</div>
+				</div>
+				<div style="font-size: 11px;" th:if="${dato.form == 'EXPEDICION'}">
+					<label style="width: 120px"><strong>COD. CAUTELAR: </strong></label><input th:value="${dato.s_codigo_cautelar}" id="cautelar" readonly="readonly" size="30" value=""><br>
+					<label style="width: 100px"><strong>ADJ. ARANCEL: </strong></label><input th:value="${dato.s_arancel}" id="arancel" readonly="readonly" size="60" value=""><br>
+					<label><strong>MONTO: </strong></label><input th:value="${dato.n_monto_arancel}" id="monto" readonly="readonly" size="20" value=""><br>
+					<div style="font-size: 12px;">
+					<label th:if="${dato.arancel != ''and dato.arancel != null}" ><strong>ARANCEL</strong></label>
+					<button type="button" th:if="${dato.arancel != '' and dato.arancel != null}" onclick="ventanaNueva2()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button>
+					</div>
+				</div>
+				<div style="font-size: 11px;" th:if="${dato.form == 'COPIAS'}">
+					<label style="width: 120px"><strong>COD. CAUTELAR: </strong></label><input th:value="${dato.s_codigo_cautelar}" id="cautelar" readonly="readonly" size="30" value=""><br>
+					<label><strong>TIPO COPIAS: </strong></label><input style="font-weight: bold" th:value="${dato.s_tipo_copias}" id="tipo" readonly="readonly" size="30" value=""><br>
+					<label><strong>N° FOJAS: </strong></label><input th:value="${dato.s_numero_fojas}" id="fojas" readonly="readonly" size="30" value="">&nbsp;&nbsp;&nbsp;
+					<label><strong>TOTAL: </strong></label><input th:value="${dato.s_cantidad_folios}" id="total" readonly="readonly" size="10" value=""><br>
+					<label><strong>ACTUADOS: </strong></label><input th:value="${dato.s_actuados}" id="actuados" readonly="readonly" size="80" value=""><br>
+					<label style="width: 100px"><strong>ADJ. ARANCEL: </strong></label><input th:value="${dato.s_arancel}" id="arancel" readonly="readonly" size="50" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<label><strong>MONTO: </strong></label><input th:value="${dato.n_monto_arancel}" id="monto" readonly="readonly" size="10" value=""><br>
+					<div style="font-size: 12px;">
+					<label th:if="${dato.arancel != '' and dato.arancel != null}" ><strong>ARANCEL</strong></label>
+					<button type="button" th:if="${dato.arancel != '' and dato.arancel != null}" onclick="ventanaNueva2()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button>
+					</div>
+					
+				</div>
+				<div style="font-size: 11px;">
+					<label style="width: 150px;"><strong>OBS. DEL SOLICITANTE:</strong></label><br>
+					<div style="padding-left: 10px" th:remove="tag" th:utext="${dato.s_observaciones}">
+					</div>
+				</div><hr>
+				<div style="font-size: 11px;" th:if="${(dato.form == 'COPIAS' or dato.form == 'ENDOSE') and (dato.s_estado == 'R' or dato.s_estado == 'A')}">
+					<div th:each="der:${derivacion}">
+						<div>
+						<span th:if="${(dato.form == 'COPIAS')}"><strong>CONCEDER COPIAS :</strong> <label><strong> <span th:text="${der.s_fallo}"></span> </strong></label></span>
+						<span th:if="${(dato.form == 'ENDOSE')}"><strong>ENDOSE :</strong> <label><strong> <span th:text="${der.s_fallo}"></span> </strong></label></span><br>
+						<strong>RESOLUCION N°:</strong> <label><strong> <span th:text="${der.n_resolucion}"></span> </strong></label><br>
+						<span th:text="${der.fechaLetras}"> </span>
+						</div><br><label style="width: 120px"><strong>SUMILLA:</strong></label>
+						<div th:remove="tag" th:utext="${der.s_sumilla}">
+						</div><br>
+						<label style="width: 120px" class="lblObsResolucion"><strong>OBSERVACIÓN:</strong></label><br><div  class="taObsResolucion" th:remove="tag" th:utext="${der.s_observacion}">
+						</div>
+					</div>
+				</div>
+				<div style="font-size: 11px;" th:if="${dato.form == 'LECTURA'}">
+					<label style="width: 130px"><strong>MOTIVO LECTURA: </strong></label><input th:value="${dato.s_motivo}" id="motivo" readonly="readonly" size="50" value=""><br>
+					<label style="width: 130px"><strong>TIEMPO DE LECTURA: </strong></label><input th:value="${dato.s_tiempo}" id="motivo" readonly="readonly" size="30" value=""><br>
+
+				</div>
+				<div style="font-size: 11px;" th:if="${dato.form == 'DOCUMENTAL'}">
+					<label style="width: 130px"><strong>TIPO DOCUMENTO.: </strong></label><input th:value="${dato.s_tipo_documento}" id="tipoDocumento" readonly="readonly" size="30" value=""><br>
+					<label style="width: 130px"><strong>ADJ. ARANCEL: </strong></label><input th:value="${dato.s_arancel}" id="arancel" readonly="readonly" size="60" value=""><br>
+					<label style="width: 130px"><strong>MONTO: </strong></label><input th:value="${dato.n_monto_arancel}" id="monto" readonly="readonly" size="20" value=""><br>
+					<div style="font-size: 12px;">
+					<label style="width: 130px" th:if="${dato.arancel != ''and dato.arancel != null}" ><strong>ARANCEL</strong></label>
+					<button type="button" th:if="${dato.arancel != '' and dato.arancel != null}" onclick="ventanaNueva2()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button>
+					</div>
+					<hr>
+				</div>
+				<div style="font-size: 11px;" th:if="${(dato.form == 'DOCUMENTAL' or dato.form == 'EXPEDICION' or dato.form == 'LECTURA') and (dato.s_estado == 'R' or dato.s_estado == 'A')}">
+					<div th:each="der:${derivacion}">
+						<div>
+						<label style="width: 120px"><strong>INDICACIÓN SECRETARIO:</strong></label>
+						<div th:remove="tag" th:utext="${der.s_sumilla}">
+						</div>
+						</div>
+					</div>
+				</div><hr>
+				<div style="font-size: 11px;" th:if="${(dato.form != 'DEVOLUCION') and (dato.s_estado == 'D' OR dato.s_estado == 'R' or dato.s_estado == 'A')}">
+					<div th:each="usuario:${usuarios}">
+						<div>
+						<label><strong>DERIVADO: </strong></label>&nbsp;&nbsp;&nbsp;<span th:text="${usuario.fechaDerivacion}"></span><br>
+						<label><strong>ASIST. CDM :</strong></label> <input size="50" type="text" th:value="${usuario.usuarioAsistente}"><br>
+						<label><strong>SECRETARIO:</strong></label> <input size="50" type="text" th:value="${usuario.usuarioSecretario}"><br>
+						</div>
+					</div>
+				</div><hr>
+				<div style="font-size: 11px;" th:if="${dato.s_estado == 'A'}">
+					<label style="width: 200px"><strong>ATENDIDO EL <span th:text="${dato.fechaAtendido}"></span></strong></label><br>
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">MENSAJE</span>
+					  </div>
+					  <textarea style="height: 150px; font-size: 11px;" class="form-control" aria-label="With textarea" th:text="${dato.x_respuesta}" readonly="readonly"></textarea><br>
+					  
+					</div><br>
+					<div class="form-row">
+						<div style="padding-left: 10px"><label style="width: 70px"><strong>PRIMER DÍA:</strong></label><input type="text" readonly="readonly" th:value="${dato.primeraCita}"></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<div style="padding-left: 10px"><label style="width: 90px"><strong>SEGUNDO DÍA:</strong></label><input type="text" readonly="readonly" th:value="${dato.segundaCita}"></div>
+					</div><br>
+					<label th:if="${dato.respuesta != '' and dato.respuesta != null}" ><strong>ADJUNTO</strong></label>
+					<button type="button" th:if="${dato.respuesta != '' and dato.respuesta != null}" onclick="ventanaNueva3()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i>&nbsp; VER DOCUMENTO</button>
+						
+				</div>
+			</div>
+		</div>
+	</div>
+                
+	<div class="modal fade modalRespuesta" id="modalRespuesta" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog modal-lg">
+		    <div class="modal-content" th:each="dato:${detalle}">
+		    	<div class="loader" id="loader" style="width: 100%; height: 100%;  position: absolute; z-index: 10000;" >
+					<div style="position: relative; width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top:100px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/corteAQP.png" width="200">
+							</div><br>
+							<p><strong>ENVIANDO, ESPERE POR FAVOR!</strong></p>
+								<img alt="" src="img/send-small.gif">
+							<br><br><br><br><br><br>
+						</div>
+					</div>
+				</div>
+		    <form class="sendAnswer" action="" method="post" enctype="multipart/form-data" id="sendAnswer">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">RESPUESTA</h5>
+		        <button style="display:none;" type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      
+		      		<div class="modal-body" style="font-size: 12px">
+		      			<input class="solicitud" type="hidden" id="idSolicitud" name="idSolicitud" th:value="${dato.n_id}">
+		      			<label style="width: 90px"><strong>SOLICITANTE: </strong></label><input th:value="${dato.nombresCompletos}" id="solicitanteRespuesta" name="solicitanteRespuesta" readonly="readonly" size="40" ><br>
+		      			<label style="width: 90px"><strong>CORREO: </strong></label><input th:value="${dato.s_correo_electronico}" id="correoRespuesta" name="correoRespuesta" readonly="readonly" size="40" ><br>
+		      			<label style="width: 90px"><strong>ASUNTO: </strong></label><input th:value="${dato.asunto}" id="asuntoRespuesta" name="asuntoRespuesta" readonly="readonly" size="80" >&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-danger btn-sm" onclick="verAgenda()">VER AGENDA</button><br>
+		      			<input th:value="${dato.descripcionAgenda}" type="hidden" id="descripcionAgenda" name="descripcionAgenda">
+			      		<div class="input-group">
+						  <div class="input-group-prepend">
+						    <span class="input-group-text">CONTENIDO</span>
+						  </div>
+						  <textarea style="height: 130px" class="form-control"  required id="textoRespuesta" name="textoRespuesta" aria-label="With textarea" th:text="${dato.textoReferencia}"></textarea>
+						</div><br>
+						
+						<div  class="form-row">
+							<div><label><strong>CITAR?</strong></label><br><select id="cita" name="cita" class="form-control form-control-sm"><option>SI</option><option>NO</option></select></div>&nbsp;&nbsp;
+							<div><label id="lblDia1"><strong>DIA 1</strong></label><br><input min="2020-08-01" max="2020-12-31" size="8" id="agenda1" name="agenda1" type="datetime-local"/></div>&nbsp;&nbsp;
+							<div><label id="lblDia2"><strong>DIA 2</strong></label><br><input min="2020-08-01" max="2020-12-31" id="agenda2" name="agenda2" type="datetime-local"/></div>&nbsp;&nbsp;
+							<div><label id="lblEspacio"><strong>MINUTOS</strong></label><br><select class="form-control form-control-sm" name="espacio" id="espacio"><option selected>5</option><option>10</option><option>15</option><option>20</option><option>25</option><option>30</option></select></div>
+						</div><br>
+						<label style="font-size: 12px" for="exampleFormControlFile1">Archivo adjunto. (Formato PDF)</label>
+						<input style="width: 300px" accept=".pdf,image/*" type="file" class="form-control-file" id="adjunto" name="adjunto">  
+		      		</div>
+		      	
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+			        <button type="button" class="btn btn-success btnEnviarCorreo"><strong><i class='far fa-paper-plane	'></i>&nbsp;ENVIAR</strong></button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+		
+		<div class="modal fade modalReniec" id="modalReniec" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog ">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">COMPARACIÓN DE DATOS</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      	<div class="modal-body">
+		        	<div class="form-row datosModal" th:each="dato:${detalle}" style="font-size: 12px">
+		        		<div style="width:50%" class="modalSolicitante">
+		        			<div style="margin: 10px" class="form-horizontal">
+		        				<h6><i class='fas fa-user'></i>&nbsp;<strong>DATOS DEL SOLICITANTE</strong></h6><br>
+		        				<div class="form-group">
+		        					<label><strong>NOMBRES: </strong></label>
+		        					<input class="form-control form-control-sm" th:value="${dato.nombresCompletos}">
+		        				</div> 
+		        				<div class="form-group">
+		        					<label><strong>FECHA NACIMIENTO:</strong></label>
+		        					<input class="form-control form-control-sm" th:value="${dato.fNacimiento}">
+		        				</div>
+		        			</div>
+		        		</div>
+		        		<div style="width:50%" class="modalWebService">
+		        			<div style="margin: 10px">
+		        				<h6><i class='fas fa-fingerprint'></i>&nbsp;<strong>RENIEC</strong></h6><br>
+		        				<div class="form-group">
+				        			<label><strong>NOMBRES: </strong></label>
+				        			<input class="form-control form-control-sm nombresReniec" id="nombresReniec">
+				        		</div>
+				        		<div class="form-group">
+				        			<label><strong>FECHA NACIMIENTO: </strong></label>
+				        			<input class="form-control form-control-sm fechaNacReniec" id="fechaNacReniec">
+				        		</div>
+		        			</div>
+		        		</div>
+		        	</div>
+		        </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-success btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;OK</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	
+	<div class="modal fade modalDerivar" id="modalDerivar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>DERIVAR SOLICITUD</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 12px">
+	      	<label><strong>SOLICITANTE:</strong></label><input size="40" id="txtSolicitanteDerivar" class='txtSolicitanteDerivar' readonly><br>
+	      	<label><strong>INSTANCIA:</strong></label><input size="30" id="txtInstanciaDerivar" class='txtInstanciaDerivar' readonly><br>
+	      	<label><strong>EXPEDIENTE:</strong></label><input size="30" id="txtExpedienteDerivar" class='txtExpedienteDerivar' readonly><br>
+	      	<label><strong>SECRETARIO:</strong></label>
+			<select id="listaSecretarios" class='form-control listaSecretarios' style="width: 300px">
+			</select><br><br>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	        <button type="button" class="btn btn-primary btnGuardarDerivacion"><strong><i class="fas fa-share-square"></i>&nbsp;DERIVAR</strong></button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalVerDevolucion" id="modalVerDevolucion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog " role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>SOLICITUD DEVUELTA</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 12px">
+	      	<label><strong>SECRETARIO:</strong></label><br>
+	      	<input class=" form-control form-control-sm txtSecretarioDevolucion" readonly><br>
+	      	<label><strong>FECHA DEVOLUCIÓN:</strong></label><br>
+	      	<input class=" form-control form-control-sm txtFechaDevolucion" readonly><br>
+	      	<label><strong>MOTIVO DE DEVOLUCIÓN:</strong></label><br>
+	      	<textarea class="form-control taMotivoDevolucion" readonly></textarea><br>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalResolver" id="modalResolver" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>RESOLVER SOLICITUD</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 12px">
+	      	<label style="width: 130px"><strong>SOLICITANTE:</strong></label><input size="40" id="txtSolicitanteResolver" class='txtSolicitanteResolver' readonly><br>
+	      	<label style="width: 130px"><strong>INSTANCIA:</strong></label><input size="30" id="txtInstanciaResolver" class='txtInstanciaResolver' readonly><br>
+	      	<label style="width: 130px"><strong>EXPEDIENTE:</strong></label><input size="30" id="txtExpedienteResolver" class='txtExpedienteResolver' readonly><br>
+	      	<label class="lblResolucionResolver" style="width: 130px"><strong>RESOLUCIÓN SIJ N°:</strong></label><input style="border-bottom: 1px solid #C50000;" size="10" id="txtResolucionResolver" class='txtResolucionResolver' onkeypress="return numbersonly(event)" ><br>
+	      	<label class="lblFechaResolver" style="width: 130px"><strong>FECHA:</strong></label><input style="border-bottom: 1px solid #C50000;" id="txtFechaResolver" class='txtFechaResolver' type="date"><br>
+	      	<label class="lblAprobar" style="width: 130px"><strong>HA LUGAR?</strong></label>
+			<select id="aprobar" class='aprobar'>
+				<option value="SI">SI</option>
+				<option value="NO">NO</option>
+			</select><br>
+			<textarea id="sumilla" class="sumilla"></textarea>
+			<label class="lblObsResolver" style="width: 130px"><strong>OBSERVACIONES:</strong></label>
+			<textarea id="observacionResolver" class="form-control observacionResolver"></textarea>
+			<br>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	        <button type="button" class="btn btn-primary btnGuardarResolucion"><strong><i class="fas fa-share-square"></i>&nbsp;RESOLVER</strong></button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalDevolver" id="modalDevolver" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>DEVOLVER SOLICITUD</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 12px">
+	      	<label><strong>SOLICITANTE:</strong></label><input size="40" id="txtSolicitanteDevolver" class='txtSolicitanteDevolver' readonly><br>
+	      	<label><strong>INSTANCIA:</strong></label><input size="30" id="txtInstanciaDevolver" class='txtInstanciaDevolver' readonly><br>
+	      	<label><strong>EXPEDIENTE:</strong></label><input size="30" id="txtExpedienteDevolver" class='txtExpedienteDevolver' readonly><br>
+	      	<label style="width: 380px"><strong>MOTIVO DE LA DEVOLUCIÓN (Solo en caso de error de derivación u otros motivos.)</strong></label>
+	      	<textarea class="form-control txtMotivoDevolucion" style="text-transform:uppercase;">
+	      	</textarea>
+	      	<br>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	        <button type="button" class="btn btn-primary btnGuardarDevolucion"><strong><i class="fas fa-share-square"></i>&nbsp;DEVOLVER</strong></button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalSesion" id="modalSesion" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">ATENCIÓN</h5>
+
+	      </div>
+	      <div class="modal-body">
+	      	<h6>La sesión ha caducado, por favor haga click en el botón OK.</h6>
+	        <a class="btn btn-success" href="/">OK</a>
+	      </div>
+	      <div class="modal-footer">
+
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<script src="js/datosReniec.js" th:src="@{js/datosReniec.js}"></script>
+	<script src="js/jquery-target.js" th:src="@{js/jquery-target.js}"></script>
+	<script src="js/jquery-object.js" th:src="@{js/jquery-object.js}"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			let cajaFecha = document.getElementById("agenda1")
+			cajaFecha.addEventListener("change", () => {
+				let fecha = document.getElementById("agenda1")
+				let transformado = fecha.value.split("-")
+				
+				if(transformado[0] >= "2024"){
+					fecha.value = "";
+				}
+			});
+		});
+	</script>
+		<script type="text/javascript">
+		$(document).ready(function() {
+			let cajaFecha2 = document.getElementById("agenda2")
+			cajaFecha2.addEventListener("change", () => {
+				let fecha2 = document.getElementById("agenda2")
+				let transformado2 = fecha2.value.split("-")
+				
+				if(transformado2[0] >= "2024"){
+					fecha2.value = "";
+				}
+			});
+		});
+		
+		function printDiv() {
+			$('#datosSolicitud').printThis();
+		}
+
+	</script>
+</body>
+</html>

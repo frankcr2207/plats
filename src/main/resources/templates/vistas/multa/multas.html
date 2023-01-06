@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+		<link rel="stylesheet" href="css/Loader.css" >
+</head>
+<body>
+	<div style="width:100%; height: 100%; margin: auto">
+		<br>
+		<button class="btn btn-primary btn-sm" type="button" id="btnNuevo"><i class="fas fa-plus"></i>&nbsp;NUEVO</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" placeholder="Escriba aqui" id="txtBuscar">&nbsp;<button id="btnBuscarMulta" type="button" class="btn btn-info btn-sm"><i class="fas fa-search"></i></button><br><br>
+		<h6><strong>LISTA DE MULTAS</strong></h6>
+		<div id="divListaMultas">
+		</div>
+	</div>
+	
+	<div class="modal fade bd-example-modal-xl" id="modalNuevo" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+  		<div class="modal-dialog modal-xl">
+    		<div class="modal-content">
+    			<div id="divContenedor" style="width: 100%; height:100%; margin: auto; float: left;" class="card card-body">	
+					<div style="font-size: 12px; font-weight: bold;">
+						<h6 style="font-weight: bold;">DATOS DEL MULTADO</h6>
+						<div id="divBuscarDNI">
+						<label>CONSULTE POR: </label>&nbsp;&nbsp;
+						<select id="tipoServicio" name="tipoServicio" style="width: 200px">
+							<option value="0">SELECCIONE ...</option>
+							<option value="DNI">NATURAL (DNI)</option>
+							<option value="RUC">JURIDICA (RUC)</option>
+						</select>&nbsp;&nbsp;&nbsp;
+						&nbsp;&nbsp;<input autofocus size="10" onkeypress="return numbersonly(event)" id="txtBuscarDocumento" type="text" maxlength="11"> <button class="btn btn-info btn-sm" id="btnBuscarDocumento" type="button"><i class="fas fa-search fa-lg"></i></button></div>
+						<hr>	
+						<form id="formMulta" action="">
+						
+						<div id="divDatosPersonales">
+						<input type="hidden" name="tipoMultado" id="tipoMultado">
+						<label>DOCUMENTO: </label>&nbsp;&nbsp;<input readonly type="text" name="documento" id="documento"><br>
+						<label>RAZON SOCIAL: </label>&nbsp;&nbsp;<input readonly type="text" name="razonSocial" id="razonSocial" size="80"><br>
+						<label>NOMBRES: </label>&nbsp;&nbsp;<input class="text-uppercase" type="text" name="nombres" id="nombres" readonly size="40">&nbsp;&nbsp;&nbsp;
+						<label>APELLIDOS: </label>&nbsp;&nbsp;<input class="text-uppercase" type="text" name="apellidos" id="apellidos" readonly size="40"><br>
+						<label>DOM. REAL: </label>&nbsp;&nbsp;<input class="text-uppercase" id="domReal" name="domReal" type="text" size="60">&nbsp;&nbsp;&nbsp;
+						<label>DOM. PROCESAL: </label>&nbsp;&nbsp;<input class="text-uppercase" name="domProcesal" type="text" size="60"><br>
+						<label>CELULAR: </label>&nbsp;&nbsp;<input class="text-uppercase" name="celular" type="text" size="20">
+						<label>CORREO: </label>&nbsp;&nbsp;<input class="text-uppercase" name="correo" type="text" size="20">
+						<label>CASILLA FISICA: </label>&nbsp;&nbsp;<input class="text-uppercase" name="casillaFisica" type="text">&nbsp;&nbsp;&nbsp;
+						<label>CASILLA ELECTRONICA: </label>&nbsp;&nbsp;<input class="text-uppercase" name="casillaElectronica" type="text">&nbsp;&nbsp;&nbsp;
+						</div>
+						<hr>
+						<h6 style="font-weight: bold;">DATOS DEL EXPEDIENTE</h6>
+						<div id="divExpediente">
+						<label>NÚMERO: </label>&nbsp;&nbsp;<input type="text" style="text-align: center;" size="5" maxlength="5" name="numExp">&nbsp;&nbsp;&nbsp;
+						<label>AÑO: </label>&nbsp;&nbsp;<input type="text" style="text-align: center;" size="5" maxlength="4" name="anioExp">&nbsp;&nbsp;&nbsp;
+						<label>INCIDENTE: </label>&nbsp;&nbsp;<input type="text" style="text-align: center;" size="3" maxlength="3" name="incExp">&nbsp;&nbsp;&nbsp;
+						<label>SEDE: </label>&nbsp;&nbsp;
+						<select id="sede" name="sede" style="width: 300px">
+							<option value="0">SELECCIONE ...</option>
+							<option th:each="sede: ${sedes}" 
+		     				th:value="${sede.id}" th:text="${sede.denominacion}" ></option>
+						</select><br>
+						<label>INSTANCIAS: </label>&nbsp;&nbsp;
+						<select id="instancia" name="instancia" style="width: 300px">
+							<option value="0">SELECCIONE ...</option>
+						</select>&nbsp;&nbsp;
+						<label>ESPECIALIDAD: </label>&nbsp;&nbsp;
+						<select id="especialidad" name="especialidad">
+							<option value="0">SELECCIONE ...</option>
+							<option th:each="especialidad: ${especialidades}" 
+		     				th:value="${especialidad.id}" th:text="${especialidad.denominacion}" ></option>
+						</select>&nbsp;&nbsp;&nbsp;
+						<label>TIPO MULTA: </label>&nbsp;&nbsp;
+						<select id="tipoMulta" name="tipoMulta">
+							<option value="0">SELECCIONE ...</option>
+							<option>INDEPENDIENTE</option>
+							<option>PROGRESIVA</option>
+						</select>&nbsp;&nbsp;&nbsp;&nbsp;
+						</div>
+						<label>NUM RESOLUCION: </label>&nbsp;&nbsp;<input type="text" size=5 id="numResolucion" name="numResolucion">&nbsp;&nbsp;&nbsp;
+						<label>FECHA RES.: </label>&nbsp;&nbsp;<input type="date" size=5 id="fecResolucion" name="fecResolucion">&nbsp;&nbsp;&nbsp;
+						<label>MONTO: </label>&nbsp;&nbsp;<input type="text" id="monto" size=5 name="monto">&nbsp;&nbsp;&nbsp;
+						
+						
+						<input type="checkbox" id="consentida" name="consentida" value="1"> <label for="cbox2">Consentida?</label>&nbsp;&nbsp;&nbsp;
+						<input type="checkbox" id="Remitida" name="remitida" value="1"> <label for="cbox2">Remitida?</label>&nbsp;&nbsp;&nbsp;
+						
+						
+						</form>
+						<hr>
+						<div align="center">
+							<button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class="fas fa-times"></i>&nbsp;CANCELAR</button>
+							<button type="button" class="btn btn-primary" id="btnGuardar"><i class="fas fa-save"></i>&nbsp;GUARDAR</button>
+						</div>
+					</div>
+				</div>
+    		</div>
+  		</div>
+	</div>
+	
+	<div class="modal fade modalEspera" id="modalEspera" data-backdrop="static" data-keyboard="false" tabindex="-5" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+		    <div class="modal-content">
+			    <div class="modal-body" align="justify">
+			      	<div style="width:100%; height:100%">
+		      			<div style=" margin: auto;" >
+							<div style="position: relative; width: 100%; height: 100%;">
+								<div style="background-color: white; width: 100%; height: 100%; padding-top:15px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+									<div align="center">
+										<img alt="ayuda" src="img/corte.png" width="250px">
+									</div><br>
+
+									<div class="col-sm-2" style="height: 150px">
+						                <div class="container">
+										      <div class="wrapper">
+										        <div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										<div class="loader">
+										          <div class="dot">
+										</div>
+										</div>
+										</div>
+										<div class="text">
+										<p><strong>CONSULTANDO ...</strong></p></div>
+										</div>
+						            </div>
+								</div>
+							</div>
+						</div>
+	            	</div>
+			    </div>
+			</div>
+		</div>
+	</div>
+	
+	<script src="js/funciones.js"></script>	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			cargarMultas();
+		});
+		
+		$('#btnNuevo').click(function(){
+			$('#divContenedor input').val('');
+			$('#modalNuevo').modal('show');
+		});
+		
+		
+		$("#btnBuscarDocumento").click(function(){
+			var delay = 2000;
+			$.ajax({
+				url: 'consultarServicios?servicio=' + $('#tipoServicio').val() + "&documento=" + $('#txtBuscarDocumento').val(),
+				method: 'GET',
+				beforeSend : function(){
+					$("#modalEspera").modal('show');
+					$("#modalNuevo").modal('hide');
+				},
+				success : function(data) {
+					setTimeout(function() {
+						$("#modalEspera").modal('hide');
+						$("#modalNuevo").modal('show');
+				    	$('#documento').val(data.documento);
+				        $('#nombres').val(data.nombres);
+				        $('#apellidos').val(data.apellidos);
+				        $('#razonSocial').val(data.razonSocial);
+				        $('#domReal').val(data.domReal);
+				        $('#tipoMultado').val(data.tipoMultado);
+						xhr.send();
+				    }, delay);
+					
+				},
+				error : function(response) {
+					$("#modalEspera").modal('hide');
+					var r = jQuery.parseJSON(response.responseText);
+					toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.error(r.message);
+				}
+	  		});
+			$('#txtBuscarDocumento').val('');
+			$('#tipoServicio').val('0');
+		});
+		
+		$("#btnGuardar").click(function() {	
+			if($('#tipoMultado').val() == "NATURAL") 
+				$('#razonSocial').val('-');
+			else{
+				$('#nombres').val('-');
+				$('#apellidso').val('-');
+			}
+			
+			var check = true;
+			$('#divDatosPersonales').children('input').each(function () {
+			    if(this.value == '') 
+			    	check = false;
+			});
+			
+			$('#divExpediente').children('input').each(function () {
+			    if(this.value == '') 
+			    	check = false;
+			});
+			
+			$('#divExpediente').children('select').each(function () {
+			    if(this.value == '0') 
+			    	check = false;
+			});
+			
+			if(!check || $('#monto').val() == '' || $('#resolucion').val() == '' ||  $('#fecResolucion').val() == ''){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE INGRESAR TODOS LOS CAMPOS!!");		
+				return false;
+			}
+	  		
+			var object = {};
+			var form = document.getElementById('formMulta');
+			var formData = new FormData(form);
+			formData.append('tipoMulta', $("#tipoMulta option:selected" ).text());
+			if($('#consentida').is(":checked")) 
+				formData.append('consentida', 'S');
+			else
+				formData.append('consentida', 'N');	
+			
+			if($('#remitida').is(":checked")) 
+				formData.append('remitida', 'S');
+			else
+				formData.append('remitida', 'N');
+			
+			formData.forEach((value, key) => object[key] = value);
+			
+			var json = JSON.stringify(object);
+			
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "guardarMulta",
+	       		data : json,
+		        dataType : 'json',
+		        cache : false,
+		        success : function(response) {
+					limpiar();
+					cargarMultas();
+					Swal.fire(
+						'DATOS GUARDADOS CON ÉXITO!!',
+						'Click en OK para continuar!',
+						'success'
+					);			
+		        },
+		        error : function(response){
+		        	var r = jQuery.parseJSON(response.responseText);
+		        	Swal.fire(
+						'ATENCION!!',
+						r.message,
+						'info'
+					);		
+		        }
+	      	});
+		});
+		$('#btnCancelar').click(function(){
+			limpiar();
+		});
+		
+		function limpiar(){
+			$('#divContenedor input').val('');
+			$('#divContenedor select').val('0');
+			$('#divBuscarDNI').show();
+		};
+		
+		$("#sede").change(function() {
+	  		var sede = $(this).find(":selected").val();
+	      	$.ajax({
+	       		type : "GET",
+	       		url: 'getInstanciasMulta?sede=' + sede,
+		        success : function(data) {
+		         	var html = '';
+		         	var len = data.length;
+		         	html += '';
+		         	if(len > 0){
+		         		html += '<option style="font-size: 11px" value="0">SELECCIONE ...</option>';
+		         		for (var i = 0; i < len; i++) {
+			         		html += '<option style="font-size: 11px" value="' + data[i].id + '">' + data[i].denominacion+ '</option>';
+				        }
+		         	}
+		         	else
+		         		html += '<option style="font-size: 11px" value="0">SIN JUZGADOS ASIGNADOS</option>';
+		         	
+			        $('#instancia').html(html);
+		        },
+	        	error : function(e) {
+	        	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'No se pudo cargar instancias.!!',
+					});
+		     	}
+	      	});
+		});
+
+		
+		function cargarMultas(){
+			$.get('getMultasSec', function (data) {
+				var html = '';
+	         	var len = data.length;
+	         	var multado = '';
+	         	var largo = data[1].documento.length;
+	         	if(len > 0){
+	         		html += '<table class="table table-hover table-sm" style="font-size: 11px">';
+	         		html += '<tr><th>DOCUMENTO</th><th>MULTADO</th><th>EXPEDIENTE</th><th>REGISTRO</th><th>MONTO</th></tr>';
+	         		for (var i = 0; i < len; i++) {
+		         		html += '<tr><td>' + data[i].documento + '</td><td>' + data[i].razonSocial + '</td><td>' + data[i].expediente + '</td><td>' + data[i].fecSistema + '</td><td>' + data[i].monto + '</td></tr>';
+			        }
+	         		html += '</table>';
+	         	}
+			    $('#divListaMultas').html(html);
+			});
+		}
+		
+		$('#btnBuscarMulta').click(function(){
+			$.get('getMultasSec?parametro=' + $('#txtBuscar').val(), function (data) {
+				var html = '';
+	         	var len = data.length;
+	         	var multado = '';
+	         	if(len > 0){
+	         		html += '<table class="table table-hover table-sm" style="font-size: 11px">';
+	         		html += '<tr><th>DOCUMENTO</th><th>MULTADO</th><th>EXPEDIENTE</th><th>REGISTRO</th><th>MONTO</th></tr>';
+	         		for (var i = 0; i < len; i++) {
+		         		html += '<tr><td>' + data[i].documento + '</td><td>' + data[i].razonSocial + '</td><td>' + data[i].expediente + '</td><td>' + data[i].fecSistema + '</td><td>' + data[i].monto + '</td></tr>';
+			        }
+	         		html += '</table>';
+	         	}
+			    $('#divListaMultas').html(html);
+			});
+		});	
+	</script>
+</body>
+</html>

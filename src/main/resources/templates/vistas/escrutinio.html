@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<style type="text/css">
+		input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+	</style>
+</head>
+<body>
+	<div th:fragment="escrutinio">
+		<div class="form-row" style="width: 60%; margin: auto;">
+			<div style="width: 20%" align="left">
+				<img alt="" src="img/corte2.png">
+			</div>
+			<div style="width: 60%" align="center"><br>
+				<h5><strong>CORTE SUPERIOR DE JUSTICIA DE AREQUIPA<br>ELECCIONES SUB CAFAE - PERIODO 2020 - 2022</strong></h5>
+			</div>
+			<div style="width: 20%" align="right">
+				<img alt="" src="img/cafae.jpeg">
+			</div>
+		</div>
+		<div style="width: 40%; margin: auto;" align="center">
+			<h6><strong>ESCRUTINIO GENERADO: <span th:text="${fechaActual}"></span></strong></h6>
+		</div>
+		<div style="width: 40%; margin: auto;">
+			<div class="card crad-body">
+				<table style="font-size:11px" class="table table-hover table-sm" id="" >	
+					<thead>
+						<tr>
+							<th>DESCRIPCIÓN</th>
+							<th style="vertical-align:middle;text-align: center">CANTIDAD</th>			
+						</tr>
+					</thead>
+					<tbody class="buscar">
+						<tr style="cursor: pointer; font-size:12px" th:each="cantidad:${cantidades}">
+							<td th:text="${cantidad.titulo}"></td>
+							<td style="text-align: center" th:text="${cantidad.conteo}"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div><hr>
+			<div class="card crad-body">
+				<table style="font-size:11px" class="table table-hover table-sm" id="" >	
+					<thead>
+						<tr>
+							<th>ELECCIÓN</th>
+							<th style="vertical-align:middle;text-align: center">CANTIDAD</th>			
+						</tr>
+					</thead>
+					<tbody class="buscar">
+						<tr style="cursor: pointer; font-size:12px" th:each="lista:${listas}" id="filaAudiencias" class="filaAudiencias">
+							<td th:text="${lista.s_lista}"></td>
+							<td style="text-align: center" th:text="${lista.conteo}"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

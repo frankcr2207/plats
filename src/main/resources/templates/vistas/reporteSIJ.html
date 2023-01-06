@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+</head>
+<body>
+	<div style="width:100%; height: 100%; margin: auto" id="divProgramacion">
+			<div style="width: 25%; height:100%; margin: auto; float: left;" class="card card-body">	
+				<div style="font-size: 11px; font-weight: bold;">
+					<label>ELIJA SEDE: </label><br>
+					<select id="lstSedes" style="width: 300px">
+						<option style="font-size: 12px" value="0">SELECCIONE ...</option>
+						<option style="font-size: 12px" th:each="sede: ${sedes}" 
+	     				th:value="${sede.c_sede}" th:text="${sede.x_desc_sede}" ></option>
+					</select>
+					<div th:each="sede: ${sedes}" style="display: none;">
+						<input id="txtUsuarioSIJ" type="hidden" th:value="${sede.c_usuario}">
+					</div>
+					<br><br>
+					<label>ESPECIALIDAD: </label><br>
+					<select id="lstEspecialidad" style="width: 300px">
+						<option style="font-size: 11px" value="0">SELECCIONE ...</option>
+					</select><br><br>
+					<label>INSTANCIAS: </label><br>
+					<select id="lstInstancias" style="width: 300px">
+						<option style="font-size: 11px" value="0">SELECCIONE ...</option>
+					</select><br><br>
+					<div align="center">
+					<button type="button" class="btn btn-primary btn-sm" id="btnGenerarReporte"><i class="fas fa-save"></i>&nbsp;GENERAR REPORTE</button>
+					</div>
+				</div>
+			</div>
+			<div style="width: 75%; height:100%; margin: auto; float: left;" class="card card-body">
+				<div id="divReporteSIJ" style="overflow-y: scroll;">
+				</div>
+			</div>
+		</div>
+		
+	<script type="text/javascript">
+		$("#lstSedes").change(function() {
+			
+	  		var sede = $(this).find(":selected").val();
+	  		var json = {
+	   			"codigo" : sede,
+	   			"valor" : $('#txtUsuarioSIJ').val()
+	  		};
+	
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "obtenerUsuarioEsp",
+	       		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        timeout : 600000,
+		        success : function(data) {
+		         	var html = '';
+		         	var len = data.length;
+		         	html += '';
+		         	if(len > 0){
+		         		html += '<option style="font-size: 11px" value="0">SELECCIONE ...</option>';
+		         		for (var i = 0; i < len; i++) {
+			         		html += '<option style="font-size: 11px" value="' + data[i].codigo + '">' + data[i].valor+ '</option>';
+				        }
+		         	}
+		         	else
+		         		html += '<option style="font-size: 11px" value="0">SIN ESPEC. ASIGNADAS</option>';
+		         	
+			        $('#lstEspecialidad').html(html);
+		        },
+	        	error : function(e) {
+	        	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo cargar usuarios.!!',
+					});
+		     	}
+	      	});
+		});
+		
+		$("#lstEspecialidad").change(function() {
+	  		var esp = $(this).find(":selected").val();
+	  		var json = {
+	   			"origen" : $('#lstSedes').val(),
+	   			"valor" : $('#txtUsuarioSIJ').val(),
+	   			"destino" : esp 	
+	  		};
+	
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "obtenerUsuarioIns",
+	       		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        success : function(data) {
+		         	var html = '';
+		         	var len = data.length;
+		         	html += '';
+		         	if(len > 0){
+		         		html += '<option style="font-size: 11px" value="0">SELECCIONE ...</option>';
+		         		for (var i = 0; i < len; i++) {
+			         		html += '<option style="font-size: 11px" value="' + data[i].c_instancia + '">' + data[i].x_nom_instancia+ '</option>';
+				        }
+		         	}
+		         	else
+		         		html += '<option style="font-size: 11px" value="0">SIN INSTANCIAS ASIGNADAS</option>';
+		         	
+			        $('#lstInstancias').html(html);
+		        },
+	        	error : function(e) {
+	        	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo cargar usuarios.!!',
+					});
+		     	}
+	      	});
+		});
+		
+		$("#btnGenerarReporte").click(function() {
+
+	  		var json = {
+	   			"codigo" : $('#lstSedes').val(),
+	   			"valor" : $('#lstInstancias').val() 	
+	  		};
+	
+	      	$.ajax({
+	       		type : "POST",
+	       		contentType : "application/json",
+	       		url : "obtReporteSecSIJ",
+	       		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        success : function(data) {
+		         	var html = '';
+		         	var len = data.length;
+		         	html += '';
+		         	if(len > 0){
+		         		html += '<option style="font-size: 11px" value="0">SELECCIONE ...</option>';
+		         		for (var i = 0; i < len; i++) {
+			         		html += '<option style="font-size: 11px" value="' + data[i].c_instancia + '">' + data[i].x_nom_instancia+ '</option>';
+				        }
+		         	}
+		         	else
+		         		html += '<option style="font-size: 11px" value="0">SIN INSTANCIAS ASIGNADAS</option>';
+		         	
+			        $('#lstInstancias').html(html);
+		        },
+	        	error : function(e) {
+	        	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo cargar usuarios.!!',
+					});
+		     	}
+	      	});
+		});
+	</script>
+</body>
+</html>

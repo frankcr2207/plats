@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	
+	<style type="text/css" media="print">
+		@media print {
+		.contenido {height: 100%;}
+		#listaObjetos {display:none;}
+		#btnResponder {display:none;}
+		#btnImprimir {display:none;}
+		#btnVerRespuesta {display:none;}
+		#btnDerivar {display:none;}
+		#btnResolver {display:none;}
+		#menu {display:none;}
+		.taObsResolucion {display:none;}
+		.lblObsResolucion {display:none;}
+		
+	</style>
+	<style type="text/css">
+		.loader{
+        	display: none;
+        	background-color:white;
+	   		opacity:1;
+	   		filter:alpha(opacity=60); /* IE < 9.0 */
+      	}
+		#solicitud input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+    	#datosSolicitud label, .modalDerivar label, .modalDevolver label{
+    		width: 100px;
+    	}
+    	.select2-results__option { 
+	  		font-size: 10px;
+		}
+	</style>
+	
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="dato:${detalle}" id="datosMulta" class="datosMulta">
+				<h6><strong>DATOS DE MULTA</strong></h6>
+				<div class="form-row">
+					<div style="width:70%; font-size: 11px">
+						<input th:value="${dato.id_multa}" id="id" type="hidden" class="id">
+						
+						<label><strong>REGISTRO: </strong></label><input style="font-weight: bold" th:value="${dato.registro}" id="nombres" readonly="readonly" size="20">
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="window.print();" id="btnImprimir" class="btn btn-outline-dark btn-sm" style="margin:auto"><i class='fas fa-print fa-lg'></i></button><br>
+						<label style="width: 60px"><strong>DNI: </strong></label><input th:value="${dato.s_dni}" id="documento" readonly="readonly" size="20" ><br>
+						<label style="width: 120px"><strong>MULTADO: </strong></label><input style="font-weight: bold" th:value="${dato.s_nombres + ' ' + dato.s_apellidos}" readonly="readonly" size="40"><br>
+						<label style="width: 150px"><strong>CASILLA ELECTRONICA: </strong></label><input th:value="${dato.s_casilla_elec}" readonly="readonly" size="40"><br>
+						<label style="width: 150px"><strong>CASILLA FISICA: </strong></label><input th:value="${dato.s_casilla_fisica}" readonly="readonly" size="40"><br>
+						<label style="width: 150px"><strong>DOMICILIO REAL: </strong></label><input th:value="${dato.s_dom_real}" readonly="readonly" size="40"><br>
+						<label style="width: 150px"><strong>DOMICILIO PROCESAL: </strong></label><input th:value="${dato.s_dom_proc}"  readonly="readonly" size="40"><br>
+					</div>
+					<div style="width:30%;" align="center" >
+						
+						<div th:if="${dato.s_estado == 'P'}">
+							<button class="btn btn-primary" id="btnResponder" style="margin:auto" data-toggle="modal" data-target="#modalMulta"><strong><i class='fas fa-envelope'></i>&nbsp;TRAMITAR</strong></button><br><br>
+						</div>
+
+						<div th:if="${dato.s_estado == 'R'}">
+							<button style="margin:auto" class="btn btn-success"><strong><i class='fas fa-envelope'></i>&nbsp;TRAMITADO</strong></button><br><br>
+						</div>
+						
+						<div th:if="${dato.s_estado == 'O'}">
+							<button style="margin:auto" class="btn btn-danger"><strong><i class='fas fa-exclamation'></i>&nbsp;OBSERVADO</strong></button><br><br>
+						</div>
+
+					</div>
+				</div><hr>
+				<div  style="font-size: 11px;">
+					<label style="width: 120px"><strong>SEDE: </strong></label><input th:value="${dato.s_sede}" id="sede" readonly="readonly" size="40" value=""><br>
+					<label style="width: 120px"><strong>INSTANCIA: </strong></label><input th:value="${dato.x_nom_instancia}" id="instancia" readonly="readonly" size="40" value=""><br>
+					<label style="width: 120px"><strong>EXPEDIENTE: </strong></label><input th:value="${dato.n_expediente}" id="expediente" readonly="readonly" size="20" value=""><br>
+					<label style="width: 120px"><strong>ESPECIALIDAD: </strong></label><input th:value="${dato.s_especialidad}" id="especialidad" readonly="readonly" size="30" value=""><br>
+					<label style="width: 120px"><strong>RESOLUCION: </strong></label><input th:value="${dato.n_resolucion}" id="resolucion" readonly="readonly" size="5" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<label style="width: 120px"><strong>FECHA RESOLUCION: </strong></label><input th:value="${dato.resolucion}" id="fecha" readonly="readonly" size="10" value=""><br>
+					<label style="width: 120px"><strong>CONSENTIDA: </strong></label><input th:if="${dato.s_consentida == 'S'}" size="5" type="text" value="SI" /><input th:if="${dato.s_consentida == 'N'}" size="5" type="text" value="NO" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<label style="width: 80px"><strong>MONTO  S/. </strong></label><input th:value="${dato.n_monto}" id="expediente" readonly="readonly" size="6" value=""><br>
+					<label style="width: 120px"><strong>SECRETARIO: </strong></label><input th:value="${dato.usuarioCsjar}" id="usuario" readonly="readonly" size="60" value=""><br>
+				
+				</div>
+
+				<hr>
+				<div style="font-size: 11px;" th:if="${dato.s_estado == 'O' or dato.s_estado == 'R'}">
+					<label style="width: 300px"><strong>TRAMITADO EL <span th:text="${dato.tramitado}"></span></strong></label><br>
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">MENSAJE</span>
+					  </div>
+					  <textarea style="height: 150px; font-size: 11px;" class="form-control" aria-label="With textarea" th:text="${dato.s_tramite}" readonly="readonly"></textarea><br>
+					  
+					</div>	
+				</div>
+			</div>
+		</div>
+	</div>
+                
+	<div class="modal fade modalMulta" id="modalMulta" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog">
+		    <div class="modal-content" th:each="dato:${detalle}">
+		    	<div class="loader" id="loader" style="width: 100%; height: 100%;  position: fixed; z-index: 10000;" >
+				
+				</div>
+		    <form class="formMulta" action="" method="post" enctype="multipart/form-data" id="formMulta">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">GESTION</h5>
+		        <button style="display:none;" type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      
+		      		<div class="modal-body" style="font-size: 12px">
+		      			<input class="solicitud" type="hidden" id="idMulta" name="idMulta" th:value="${dato.id_multa}">
+		      			<label style="width: 90px"><strong>MULTADO: </strong></label><input th:value="${dato.s_nombres + ' ' + dato.s_apellidos}" id="solicitanteRespuesta" name="solicitanteRespuesta" readonly="readonly" size="40" ><br>
+		      			<label style="width: 90px"><strong>ACCIÓN: </strong></label><select id="lstAccion" name="accion">
+		      				<option value="0">SELECCIONE ...</option><option value="T">TRAMITAR</option><option value="O">OBSERVAR</option>
+		      			</select><br>
+		      			<div class="input-group">
+						  <div class="input-group-prepend">
+						    <span class="input-group-text">RESPUESTA</span>
+						  </div>
+						  <textarea style="height: 130px; font-size: 12px" class="form-control"  required id="textoRespuesta" name="textoRespuesta" aria-label="With textarea"></textarea>
+						</div><br>
+		      		</div>
+		      	
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+			        <button type="button" class="btn btn-primary btnGuardarTramite"><strong><i class='far fa-paper-plane'></i>&nbsp;RESPONDER</strong></button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+		
+
+	
+	<div class="modal fade modalSesion" id="modalSesion" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">ATENCIÓN</h5>
+
+	      </div>
+	      <div class="modal-body">
+	      	<h6>La sesión ha caducado, por favor haga click en el botón OK.</h6>
+	        <a class="btn btn-success" href="/">OK</a>
+	      </div>
+	      <div class="modal-footer">
+
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<script type="text/javascript">
+		
+		$(".btnGuardarTramite").click(function() {
+			if($('#lstAccion').val() == '0'){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE ELEGIR ACCION!!");
+				return false;
+			}
+			
+			if($('#textoRespuesta').val() == ''){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE INGRESAR DETALLE DEL TRAMITE!!");
+				return false;
+			}
+				
+			var form = document.getElementById('formMulta');
+			var formData = new FormData(form);
+			
+			$.ajax({
+				type:"POST",
+				url:"guardarTramite",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				success:function(response) {
+					if(response.Status == 1){ 
+						$(".detalleObjetos").empty();
+						$(".listaObjetos").load('multasCoor');
+						$(".modalMulta").modal('hide');
+						$('body').removeClass('modal-open');
+						$('.modal-backdrop').remove();
+				
+						Swal.fire(
+						  'REGISTRO TRAMITADO!!',
+						  'Click en OK para continuar!',
+						  'success'
+						);
+					
+					}
+					else {
+						$(".modalMulta").modal("hide");
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'Algo salió mal, no se pudo enviar la información.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		});	
+		
+	</script>
+	
+</body>
+</html>

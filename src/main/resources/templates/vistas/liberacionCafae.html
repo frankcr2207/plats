@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<style type="text/css">
+		input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+			font-size: 11px;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+	    label{
+	    	width: 120px;
+	    	font-size: 11px;
+	    	font-weight: bold;
+	    }
+	</style>
+</head>
+<body>
+	<div th:fragment="listaObjetos">
+		<div class="divLiberar" style="display: none;">
+			<div>
+				<h6><strong>LIBERACIÓN DE ELECTORES</strong></h6>
+				<div class="divBuscar">
+					<label>DNI: </label><input maxlength="8" class="txtDNI">&nbsp;&nbsp;&nbsp;<button class="btn btn-info btn-sm btnBuscar"><i class="fas fa-fingerprint"></i>&nbsp;BUSCAR</button>
+				</div>
+				<hr>
+				<div class="divMensaje">
+				</div>
+				<div class="divDatos">
+					<input type="hidden" class="txtDNIFinal">
+					<label>NOMBRES: </label>
+					<input size="45" class="txtNombres" readonly>&nbsp;&nbsp;&nbsp;<button style="display: none;" class="btn btn-success btn-sm btnLiberar"><i class="fas fa-lock-open"></i>&nbsp;LIBERAR</button><br>
+					<label>FECHA DE NAC.: </label>
+					<input class="txtFecha" readonly><br>
+					<label>NOMBRE PADRE: </label>
+					<input class="txtPadre" readonly><br>
+					<label>NOMBRE MADRE: </label>
+					<input class="txtMadre" readonly><br>
+					<label>DPTO. NAC: </label>
+					<input class="txtDepartamento" readonly><br>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="modal fade modalClave" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>CLAVE DE ACCESO</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" align="center">
+	        <input type="password" class="txtClaveCafae" placeholder="Ingrese aqui">
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">CERRAR</button>
+	        <button type="button" class="btn btn-primary btnAcceder"><i class="fas fa-share"></i>&nbsp;ACCEDER</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$('.modalClave').modal('show');
+		$('.txtClaveCafae').focus();
+	});
+	
+	$('.btnAcceder').click(function(){
+		if ($(".txtClaveCafae").val() == ''){
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.warning("Ingrese clave del proceso!");
+			$("#clave").focus() 
+	      	return false; 
+	   	}
+		
+		var id = $(".txtClaveCafae").val();
+  		var json = {
+  			"id" : id
+  		};
+      	$.ajax({
+       		type : "POST",
+       		contentType : "application/json",
+       		url : "accederCafae",
+       		data : JSON.stringify(json),
+	        dataType : 'json',
+	        cache : false,
+	        success : function(response) {
+	        	if(response.Status == 200){ 
+	        		$(".txtClaveCafae").val('');
+	        		$(".modalClave").modal("hide");
+	        		$('body').removeClass('modal-open');
+					$('.modal-backdrop').remove();
+					$('.divLiberar').show();
+		        	Swal.fire(
+						'ACCESO CONCEDIDO!!',
+						'Click en OK para continuar!',
+						'success'
+					);
+				}
+	        	else{
+	        		$(".txtClaveCafae").val('');
+	        		$(".modalClave").modal("hide");
+	        		$('body').removeClass('modal-open');
+					$('.modal-backdrop').remove();
+	        		$('.divLiberar').hide();
+	        		Swal.fire({
+						icon: 'error',
+						title: 'ATENCIÓN',
+						text: 'CLAVE INCORRECTA.!!',
+						  
+					});
+	        	}
+	        }
+      	});
+	});
+	
+	$('.btnBuscar').click(function(){
+		if ($(".txtDNI").val().length != 8){
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.warning("DNI debe contener 8 caracteres!");
+			$("#clave").focus() 
+	      	return false; 
+	   	}
+		
+		var dni = $('.txtDNI').val();
+		var json = {
+				"id" : dni
+			};
+
+		  	$.ajax({
+		   		type : "POST",
+		   		contentType : "application/json",
+		   		url : "WSReniec",
+		   		data : JSON.stringify(json),
+		        dataType : 'json',
+		        cache : false,
+		        timeout : 600000,
+		        success : function(data) {
+		        	$('.txtDNIFinal').val(data.dni);
+	        		$('.txtNombres').val(data.nombres);
+	                $('.txtFecha').val(data.nacimiento);
+	                $('.txtPadre').val(data.paterno);
+	                $('.txtMadre').val(data.materno);
+	                $('.txtDepartamento').val(data.perfil);
+		        	if(data.estado == 'S'){
+		                $('.divMensaje').html('<div class="alert alert-primary" role="alert"><strong>El elector aún tiene intentos para votar.</strong></div>');
+		                $('.btnLiberar').hide();
+		        	}
+		        	else if(data.estado == 'N'){
+		        		$('.divMensaje').html('<div class="alert alert-success" role="alert"><strong>Haga click en LIBERAR para reiniciar los intentos del elector.</strong></div>');
+		        		$('.btnLiberar').show();
+		        	}
+		        	else if(data.estado == 'NN'){
+		        		$('.divMensaje').html('<div class="alert alert-info" role="alert"><strong>El elector ya emitió su voto.</strong></div>');
+		        		$('.btnLiberar').hide();
+		        	}
+		        	else if(data.estado == 'X'){
+		        		$('.divMensaje').html('<div class="alert alert-warning" role="alert"><strong>EL DNI ingresado no se encuentra en la lista de electores.</strong></div>');
+		        		$('.btnLiberar').hide();
+		        	}else if(data.estado == 'XX'){
+		        		$('.divMensaje').html('<div class="alert alert-danger" role="alert"><strong>EL DNI ingresado NO EXISTE en Reniec.</strong></div>');
+		        		$('.btnLiberar').hide();
+		        	}
+		        },
+		    	error : function(e) {
+		    	 	Swal.fire({
+					  	icon: 'error',
+					  	title: 'ATENCIÓN',
+					  	text: 'Ooops, algo salió mal, no se pudo obtener datos.!!',
+					});
+		     	}
+		  	});
+	});
+	
+	$('.btnLiberar').click(function(){
+		Swal.fire({
+			title: 'Está seguro de liberar al elector?',
+			text: "",
+			icon: 'question',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'SI, Liberar!'
+		}).then((result) => {
+			if (result.value) {
+
+				var id = $(".txtDNIFinal").val();
+	      		var json = {
+	      			"id" : id
+	      		};
+		      	$.ajax({
+		       		type : "POST",
+		       		contentType : "application/json",
+		       		url : "liberar",
+		       		data : JSON.stringify(json),
+			        dataType : 'json',
+			        cache : false,
+			        success : function(response) {
+			        	if(response.Status == 200){ 
+			        		$('.txtDNI').val('');
+			        		$('.txtDNI').focus();
+			        		$('.txtDNIFinal').val('');
+			        		$('.txtNombres').val('');
+			                $('.txtFecha').val('');
+			                $('.txtPadre').val('');
+			                $('.txtMadre').val('');
+			                $('.txtDepartamento').val('');
+			                $('.btnLiberar').hide();
+			                $('.divMensaje').empty();
+				        	Swal.fire(
+								'ELECTOR LIBERADO CON ÉXITO!!',
+								'Click en OK para continuar!',
+								'success'
+							);
+						}
+			        	else{
+			        		Swal.fire({
+								icon: 'error',
+								title: 'ATENCIÓN',
+								text: 'Ooops, algo salió mal, no se pudo liberar al elector.!!',
+								  
+							});
+			        	}
+			        }
+		      	});
+			}
+		})
+	});
+
+	</script>
+</body>
+</html>

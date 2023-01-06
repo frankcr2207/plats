@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/bootstrap-select.min.css" th:src="@{css/bootstrap-select.min.css}">
+	<script src="js/bootstrap-select.min.js" th:src="@{js/bootstrap-select.min.js}"></script>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/popper.min.js" th:src="@{js/popper.min.js}"></script>
+
+		<style type="text/css">
+		  .selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+		<button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#modalCDM"><i class='fas fa-plus'></i></button> &nbsp;&nbsp;<button type="button" onclick="fnselect()" class="btn btn-outline-danger btn-sm" ><i class='fas fa-minus'></i></button>&nbsp;&nbsp;&nbsp;<strong>CDM ASIGNADOS A:&nbsp;&nbsp;<span th:text="${nombres}"></span></strong> 
+			<table style="font-size:11px" class="table table-hover tablaUsuariosCDM" id="tablaUsuariosCDM">
+						<thead>
+							<tr>
+								
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody class="buscar">
+							<tr style="cursor: pointer" th:each="solicitud:${cdmAsignados}" id="filasUsuariosCDM" class="filasUsuariosCDM">
+								<td style="display: none" th:text="${solicitud.n_id_cdm}"></td>
+								<td></td>
+								<td th:text="${solicitud.s_cdm}">
+								<td><strong></strong><br> 
+								</td>
+							</tr>
+						</tbody>
+			</table>
+		</div>
+	</div>
+	
+	
+	<div class="modal fade modalCDM" id="modalCDM" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog modal-lg" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">LISTA CDM</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <form class="asignarCDM" action="" method="post">
+			      	<div class="modal-body">
+			      		<input id="usuarioCDM" name="usuarioCDM" class="usuarioCDM" type="hidden" th:value="${usuario}">
+						<div style="margin-left:auto" class="form-row">
+							<div class="form-group col-md-10">
+								<label>SEDES</label>
+								<select id="cdm" name="cdm" class="form-control form-control-sm listaCdm">
+									<option th:each="cdmm:${cdmBD}" th:value="${cdmm.n_id_cdm}" th:text="${cdmm.s_cdm}" ></option> 
+								</select><br><br>
+							</div>	                	
+						</div>
+			        </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">CERRAR</button>
+			        <button onclick="asignar()" type="button" class="btn btn-success asigna"><i class="fas fa-save"></i>&nbsp;ASIGNAR</button>
+			      </div>
+			      </form>
+			    </div>
+			  </div>
+			</div>
+	<script src="js/popper.min.js" th:src="@{js/popper.min.js}"></script>
+	<script src="js/jquery-func.js" th:src="@{js/jquery-func.js}"></script>
+	<script type="text/javascript">
+		var table = document.getElementById('tablaUsuariosCDM'),
+    	selected = table.getElementsByClassName('selected');
+		table.onclick = highlight;
+	</script>
+</body>
+</html>

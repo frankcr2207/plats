@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/funciones.js"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div class="form-row">
+				<div><button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#modalNuevoAbogado"><i class='fas fa-user-plus'></i></button></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div><select  class="form-control form-control-sm estadoAbogado" id="estadoAbogado" name="estadoAbogado"><option value="N">NUEVOS</option><option value="A">ADMITIDOS</option><option value="R">RECHAZADOS</option><option value="X">BLOQUEADOS</option></select></div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div><button type="button" onclick="buscarAbogados()" class="btn btn-outline-success btn-sm"><i class='fas fa-search'></i></button></div>
+			</div><br>
+			<input type="hidden" th:value="${formulario}">
+			<table style="font-size:11px" class="table table-hover table-sm tablaAbogados" id="tablaAbogados" >	
+				<thead>
+					<tr>
+						<th>DNI</th>
+						<th>NOMBRES Y APELLIDOS</th>
+						<th>FECHA REGISTRO</th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: default" th:each="abogado:${abogados}" id="filasAbogados" class="filasAbogados">	
+						<td th:text="${abogado.s_dni}"></td>
+						<td><strong><span th:text="${abogado.nombresCompletos}"></span></strong></td>
+						<td><span th:text="${abogado.fechaRegistro}"></span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		
+				
+			<div class="modal fade modalNuevoAbogado" id="modalNuevoAbogado" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog modal-sm" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">BUSCAR DNI</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <div class="modal-body">
+			        <input id="dniNuevoUsuario" name="dniNuevoUsuario" class="form-control form-control-sm dniNuevoUsuario" type="text" maxlength="8" onkeypress="return numbersonly(event)"/>
+			      </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">CERRAR</button>
+			        <button onclick="buscarReniec()" class="btn btn-primary"><i class="fas fa-fingerprint fa-lg"></i>&nbsp;BUSCAR</button>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+				
+				
+	</div>
+	
+	
+	<script src="js/usuario.js" th:src="@{js/usuario.js}"></script>
+	
+	<script type="text/javascript">
+	    	function buscarReniec(){
+		    	var url = 'buscarPersonaReniec/' + $('.dniNuevoUsuario').val();
+	   			$(".detalleObjetos").load(url);
+	   			$(".modalNuevoUsuario").modal('hide');//ocultamos el modal
+				$('body').removeClass('modal-open');//eliminamos la clase del body para poder hacer scroll
+				$('.modal-backdrop').remove();//e
+	   		}
+	</script>
+	<script type="text/javascript">
+			
+	 	$("#tablaAbogados #filasAbogados").click(function(){
+	 		$(this).addClass('selected').siblings().removeClass('selected');
+	 		
+	   		 
+	   		toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+			
+		   	var value=$(this).find('td:first').html();
+		   	$(".detalleObjetos").empty();
+		   	var url='verAbogado';
+	   		url = url + '/' + $('.formulario').val() + '/' + value;
+	   		$(".detalleObjetos").load(url);
+
+		});	
+	</script>
+    <script type="text/javascript">
+	    function buscarAbogados(){	
+			var url='abogados' + '/'+ $('.estadoAbogado').val();
+			$(".listaObjetos").load(url);
+			$(".detalleObjetos").empty();
+		}
+    </script>
+
+</body>
+</html>

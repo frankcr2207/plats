@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/funciones.js"></script>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<style type="text/css">
+		.modalUsuario label{
+	    		font-weight: bold;
+	    		font-size: 12px;
+	    	}
+	    .modalSecretario select, input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	#ver{
+  position: fixed;
+  top: 0%;
+  width: 50%;
+  height: 20px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  text-align: center;
+  box-shadow: 0px 0px 5px #4E0000;
+  background: #4E0000;
+  z-index: 10;
+  opacity: 0;
+  transition: all 0.5s;
+}
+
+#ver p{
+  color: white;
+  font-weight: bold;
+}
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div id="ver">
+    </div>
+			<table style="font-size:11px" class="table table-hover table-sm tablaLiberacion" id="tablaLiberacion" >		
+				<thead>
+					<tr>
+						<th><button type="button" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#modalNuevaLiberacion"><i class='fas fa-file'></i></button></th>
+						<th style="vertical-align:middle;">
+							<input style="text-transform:uppercase; width:200px;" id="txtBuscarUsuario" type="text" placeholder="Escriba algo para filtrar" />
+						</th>
+						<th style="vertical-align:middle;">EXPEDIENTE</th>
+						<th style="vertical-align:middle;">FECHA</th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: default" th:each="registro:${registros}" id="filasLiberacion" class="filasLiberacion">
+						<td style="vertical-align:middle;" class="cod" th:text="${registro.n_id_solicitud}"></td>
+						<td style="vertical-align:middle;"><strong><span th:text="${registro.nombresCompletos}"></span></strong></td>
+						<td style="vertical-align:middle;" class="cod" ><span th:text="${registro.n_expediente}"></span><br><span th:text="${registro.s_instancia}"></span></td>
+						<td style="vertical-align:middle;" class="cod" th:text="${registro.fechaLiberacion}"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		
+				
+	<div class="modal fade modalNuevaLiberacion" id="modalNuevaLiberacion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-sm" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="exampleModalLabel">INGRESAR NUEVA LIBERACIÓN</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body">
+	        <input id="idSolicitud" name="dniNuevoUsuario" class="form-control form-control-sm idSolicitud" type="text" maxlength="8" onkeypress="return numbersonly(event)"/>
+	        <input id="idSolLiberacion" class="idSolLiberacion" type="text">
+	        <input class="form-control form-control-sm txtUsuarioOrigen">
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">CERRAR</button>
+	        <button class="btn btn-primary btnLiberar"><i class="fas fa-save fa-lg"></i>&nbsp;GUARDAR</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+			
+	</div>
+	
+	
+	
+	<script src="js/jquery-source.js"></script>
+	<script src="js/usuario.js" th:src="@{js/usuario.js}"></script>
+
+</body>
+</html>

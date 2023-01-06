@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<style type="text/css">
+			#solicitud input{
+		    	border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	#solicitud #enl, #solicitud #fechaNueva{
+		    	border:0;
+		    	border-bottom: 1px solid #BE0000; 
+		    	text-align:center";
+	    	}
+	    	
+	    	.modalSolicitante input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	.modalWebService input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	#modalRespuestaAbogado input{
+		    	border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	#datosAud label{
+	    	width: 100px;
+	    }
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="detalle:${audiencia}" id="datosAud" class="datosAud">
+				<h6><strong>DATOS DE AUDIENCIA VIRTUAL</strong></h6><br>
+				<form class="updateAud" method="post">
+				<div class="form-row">
+					<div style="width:80%; font-size: 12px">
+						<input th:value="${formulario}" class="formulario" id="formulario" type="hidden">
+						<input type="hidden" th:value="${detalle.id_audiencia}" name="codAud">
+						<label><strong>EXPEDIENTE: </strong></label><input th:value="${detalle.n_expediente}" class="exp" id="dni" readonly="readonly" size="30" >&nbsp;&nbsp;&nbsp;<br>
+						<label><strong>INSTANCIA: </strong></label><input th:value="${detalle.s_instancia}" class="det" id="nombres" readonly="readonly" size="50"><br>
+						<label><strong>TIPO AUD.: </strong></label><input th:value="${detalle.s_tipo_audiencia}" id="tip" readonly="readonly" size="40"><br>
+						<label><strong>DELITO: </strong></label><input th:value="${detalle.s_delito}" id="del" readonly="readonly" size="40"><br>
+						<label><strong>F. REGISTRO: </strong></label><input th:value="${detalle.fechaRegistro}" readonly="readonly" size="30"><br>
+						<label><strong>F. VIDEOLLAM: </strong></label><input th:value="${detalle.fechaAudiencia}" type="text" id="fechaAntigua" name="fechaAntigua" size="20" readonly="readonly">&nbsp;&nbsp;&nbsp;<input type="datetime-local" id="fechaNueva" name="fechaNueva"><br>
+						<label><strong>MEET: </strong></label><input th:value="${detalle.s_link_audiencia}" id="enl" name="enl" size="40"><br>
+						
+					</div>
+					<div style="width:20%;" align="center">
+						<button type="submit" class="btn btn-success actualizar" style="margin:auto"><strong><i class='fas fa-save'></i>&nbsp;GUARDAR</strong></button><br><br>
+					</div>
+				</div>
+				<div class="form-row" style="font-size: 12px;">
+					<label><strong>RESERVADO</strong></label>
+					<div style="width:20%;" align="center" th:switch="${detalle.s_reservado}">
+						<select class="form-control form-control-sm" th:case="'S'" id="estadoRes" name="estadoRes">
+							<option selected value="S">SI</option>
+							<option value="N">NO</option>
+						</select>
+						<select class="form-control form-control-sm" th:case="'N'" id="estadoRes" name="estadoRes">
+							<option  value="S">SI</option>
+							<option  selected value="N">NO</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-row" style="font-size: 12px;">
+					<label><strong>ESTADO</strong></label>
+					<div style="width:30%;" align="center" th:switch="${detalle.s_estado}">
+						<select class="form-control form-control-sm" th:case="'P'" id="estadoAud" name="estadoAud">
+							<option selected value="P">PUBLICADO</option>
+							<option value="A">ANULADO</option>
+						</select>
+						<select class="form-control form-control-sm" th:case="'A'" id="estadoAud" name="estadoAud">
+							<option  value="P">PUBLICADO</option>
+							<option  selected value="A">ANULADO</option>
+						</select>
+					</div>
+				</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	
+	<script src="js/jquery-target.js"></script>
+    <script type="text/javascript">
+		function cancelar(){	
+    		$(".detalleObjetos").empty();
+		}
+    </script>    
+</body>
+</html>

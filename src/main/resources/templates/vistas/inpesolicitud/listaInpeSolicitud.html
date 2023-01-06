@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<style type="text/css">
+	  	.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+	  	input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+    	}
+    	input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div class="form-row">
+				<div class="form-row" style="font-size: 10px; vertical-align: middle;">
+				<div><input id="x_inicio" name="x_inicio" class="x_inicio" type="date"/></div>&nbsp;&nbsp;
+				<div><input id="x_fin" name="x_fin" class="x_fin" type="date"/></div>&nbsp;&nbsp;
+				<div><button type="button" id="btnBuscarInpeSolicitud" class="btn btn-outline-primary btn-sm"><i class='fas fa-search'></i></button></div>
+				</div>
+			</div>
+			<table style="font-size:11px" class="table table-hover table-sm tablaRegistros" id="tablaRegistros">
+				<thead>
+					<tr>
+						<th></th>
+						<th><strong><label style="font-size: 12px" th:text="${tipo}"></label></strong> - <strong><label id="lblRows" style="font-size: 12px"></label></strong><input type="hidden" class="formulario" th:value="${formulario}"></th>
+						<th align="center"><button onclick="actualizar()" class="btn btn-outline-success btn-sm"><i class='fas fa-sync-alt fa-lg'></i></button></th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer" th:each="registro:${registros}" id="filasRegistros" class="filasRegistros">
+						<td th:text="${registro.idSolicitud}"></td>
+						<td style="display: none" th:text="${registro.estado}">
+						<td><strong>INGRESADO: </strong><i><span th:text="${#temporals.format(registro.fechaSistema, 'dd-MM-yyyy hh:mm:ss a')}"></span></i><br>
+							<strong>EXPEDIENTE: </strong><i><span th:text="${registro.expediente}"></span></i><br>
+						</td>
+						<td th:switch="${registro.estado}" align="center">
+                           	<label class="switch">
+                           	<span th:case="'P'" ><img src="img/mensaje.png" align="middle" th:src="@{img/mensaje.png}" width="25"/><br>PENDIENTE</span>
+                           	<span th:case="'T'" ><img src="img/email.png" align="middle" th:src="@{img/email.png}" width="20"/><br><span style="font-size: 9px">EN TRAMITE POR</span><br><span th:text="${registro.usuario}"></span></span>
+                           	<span th:case="'A'" ><img src="img/enviado.png" align="middle" th:src="@{img/enviado.png}" width="28"/><br>ATENDIDO</span>
+							</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var rowCount = $('#tablaRegistros tr').length;
+	    	document.getElementById('lblRows').innerHTML = 'Registros: ' + (rowCount-1);
+	    	$('.txtBuscarSolicitud').val('');
+	    });
+		
+		$(document).ready(function () {  
+		    (function ($) {
+		        $('.txtBuscarSolicitud').keyup(function () {
+		             var rex = new RegExp($(this).val(), 'i');
+		             $('.buscar tr').hide();
+		             $('.buscar tr').filter(function () {
+		               return rex.test($(this).text());
+		             }).show();
+		        })
+		    }(jQuery));
+		});
+		
+		$("#tablaRegistros #filasRegistros").click(function(){
+			$(this).addClass('selected').siblings().removeClass('selected');	 
+
+		   	var value = $(this).find('td:first').html();
+
+		   	$(".detalleObjetos").empty();
+			$.get( "getInpeSolicitud", { id: value})
+				.done(function(data) {
+					$(".detalleObjetos").html(data);
+					toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.success("DATOS RECUPERADOS!!");
+				})
+				.fail( function() {
+					Swal.fire({
+					  	icon: 'error', title: 'ATENCIÓN', text: 'Algo salió mal, no se pudo obtener la información. Actualice toda la página!!',
+					});
+				});
+		});	
+		
+		$('#btnBuscarInpeSolicitud').click(function(){
+			var inicio = $('.x_inicio').val() + ' 00:00';
+			var fin = $('.x_fin').val() + ' 23:59';
+			$.get( "getInpeSolicitudes", {inicio:inicio, fin:fin})
+		    .done(function( data ) {
+		    	$(".listaObjetos").html(data);
+		    	$(".detalleObjetos").empty();
+		    });
+		});
+		
+		function actualizar(){
+			$(".detalleObjetos").empty();
+			$(".listaObjetos").load('getInpeSolicitudes');
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("REGISTROS ACTUALIZADOS!!");
+		};
+	</script>
+</body>
+</html>

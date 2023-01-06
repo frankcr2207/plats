@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/funciones.js"></script>
+	<link rel="stylesheet" href="css/newLoader.css" >
+	<style type="text/css">
+	.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+	input{
+    	border:0;
+	    border-bottom: 1px solid #009CBF; 
+    }
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="divReglas">
+		<div style="width:100%; height: 100%">
+			<table style="font-size:11px" class="table table-hover table-sm tablaSentenciados" id="tablaSentenciados" >
+				<thead>
+					<tr>
+						<th><input th:value="${sede}" type="hidden" id="txtIdSede"><input th:value="${form}" type="hidden" id="txtIdForm"></th>
+						<th style="vertical-align:middle;"><label id="lblRows"></label>
+							<input style="text-transform:uppercase; width:200px;" id="txtBuscarSentenciado" type="hidden" placeholder="Dni o nombres o apellidos" />
+						</th>
+						<th style="vertical-align:middle;"></th>
+						<th style="vertical-align:middle;"></th>
+						<th style="vertical-align:middle;"></th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer" th:each="sentenciado:${sentenciados}" id="filasSentenciados" class="filasSentenciados">
+						<td style="vertical-align:middle;" class="cod" th:text="${sentenciado.id_sentenciado}"></td>
+						<td style="display: none" th:text="${sentenciado.s_estado}"></td>
+						<td style="vertical-align:middle;"><i><span th:text="${sentenciado.documento}"></span></i> - <strong><span th:text="${sentenciado.nombresCompletos}"></span></strong></td>
+						<td style="vertical-align:middle;"><strong>PROCESOS: </strong><span th:text="${sentenciado.procesos}"></span></td>
+						<td style="vertical-align:middle;"><strong>REGISTRO: </strong><span th:text="${sentenciado.fechaRegistro}"></span></td>
+						<td th:switch="${sentenciado.s_estado}" align="center">
+                           	<label class="switch">
+                           	<span th:case="'L'" ><span style="font-size: 11px" class="badge badge-pill badge-success">LIBRE</span></span>
+                           	<span th:case="'O'" ><span style="font-size: 11px" class="badge badge-pill badge-danger">OCUPADO POR <span th:text="${sentenciado.c_usuario_temp}"></span></span></span>
+							</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<div class="modal fade modalEspera" id="modalEspera" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog">
+	  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+	    <div class="modal-content">
+	      <div class="modal-body" style="font-size: 12px">
+			<div style="height: 270px; margin: auto"><div class="bb"></div></div>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<script src="js/usuario.js" th:src="@{js/usuario.js}"></script>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		conteo();
+    });
+	
+	function conteo(){
+		var rowCount = $('#tablaSentenciados tr').length;
+    	document.getElementById('lblRows').innerHTML = 'Coincidencias: ' + (rowCount-1);
+	};
+	
+	$(document).ready(function () {  
+	    (function ($) {
+	        $('#txtBuscarSentenciado').keyup(function () {
+	             var rex = new RegExp($(this).val(), 'i');
+	             $('.buscar tr').hide();
+	             $('.buscar tr').filter(function () {
+	             	return rex.test($(this).text());
+	             }).show();
+	        })
+	    }(jQuery));
+	});
+	
+	$(".tablaSentenciados .filasSentenciados").click(function(){
+		$(this).addClass('selected').siblings().removeClass('selected');	 
+	
+		var sede = $('#txtIdSede').val();
+		var form = $('#txtIdForm').val();
+	   	var id = $(this).find('td:first').html();
+	   	//$('#modalEspera').modal('show');
+		$.get( "detalleSentenciado", { id: id})
+			.done(function(data) {
+				//$('#modalEspera').modal('hide');
+				$("#divReglas").hide();
+				$("#divDetalleReglas").show();
+				$("#divDetalleReglas").html(data);
+			})
+			.fail( function() {
+				Swal.fire({
+				  	icon: 'error', title: 'ATENCIÓN', text: 'Algo salió mal, no se pudo obtener la información.!!',
+				});
+			});
+		});	
+	
+	function actualizarSentenciados(){
+
+		var id = $('#txtIdSede').val();
+		var form = $('#txtIdForm').val();
+		$.get( "sentenciados", { id: id, form: form, idSen : 0})
+		.done(function(data) {
+			$("#divListaSentenciados").html(data);
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+		})
+		.fail( function() {
+			Swal.fire({
+			  	icon: 'error', title: 'ATENCIÓN', text: 'Algo salió mal, no se pudo obtener la información. Actualice toda la página!!',
+			});
+		});
+	};
+	</script>
+
+</body>
+</html>

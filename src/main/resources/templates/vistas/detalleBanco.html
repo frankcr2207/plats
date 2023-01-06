@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/printThis.js" th:src="@{js/printThis.js}"></script>
+	<script type="text/javascript" src="js/jquery.richtext.js"></script>
+	<link rel="stylesheet" href="css/main.css" >
+	<link rel="stylesheet" href="css/richtext.min.css">
+	<link rel="stylesheet" href="css/estiloPrint.css">
+	
+	<style type="text/css" media="print">
+		@media print {
+		.contenido {height: 100%;}
+		#listaObjetos {display:none;}
+		#btnResponder {display:none;}
+		#btnImprimir {display:none;}
+		#btnVerRespuesta {display:none;}
+		#btnDerivar {display:none;}
+		#btnResolver {display:none;}
+		#menu {display:none;}
+		.taObsResolucion {display:none;}
+		.lblObsResolucion {display:none;}
+		
+	</style>
+	<style type="text/css">
+		.loader{
+        	display: none;
+        	background-color:white;
+	   		opacity:1;
+	   		filter:alpha(opacity=60); /* IE < 9.0 */
+      	}
+		#solicitud input{
+	    	border:0;
+			border-bottom: 1px solid #009CBF;
+	    }
+	    input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+    	#datosSolicitud label, .modalDerivar label, .modalDevolver label{
+    		width: 100px;
+    	}
+    	.select2-results__option { 
+	  		font-size: 10px;
+		}
+	</style>
+	
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="dato:${detalle}" id="datosSolicitud" class="datosSolicitud">
+				<h6><strong>DATOS DE LA SOLICITUD BANCO DE LA NACION</strong></h6>
+				<div class="form-row">
+					<div style="width:70%; font-size: 11px">
+						<input th:value="${dato.n_id_solicitud}" id="id" type="hidden" class="id">
+						
+						<label><strong>FECHA: </strong></label><input style="font-weight: bold" th:value="${dato.fechaRegistro}" id="nombres" readonly="readonly" size="20">&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-outline-primary btn-sm btnReniec" ><i class='fas fa-fingerprint fa-lg'></i>&nbsp;</button>
+						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="window.print();" id="btnImprimir" class="btn btn-outline-dark btn-sm" style="margin:auto"><i class='fas fa-print fa-lg'></i></button><br>
+						<label><strong>NOMBRES: </strong></label><input style="font-weight: bold" th:value="${dato.s_nombre}" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>EXPEDIENTE: </strong></label><input th:value="${dato.x_expediente}" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>SEDE: </strong></label><input th:value="${dato.s_sede}" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>INSTANCIA: </strong></label><input th:value="${dato.x_nom_instancia}" id="nombres" readonly="readonly" size="50"><br>
+					</div>
+					<div style="width:30%;" align="center" >
+						
+						<div th:if="${dato.s_cdg == 'T' && dato.c_usuario_csjar == sesion}">
+							<button class="btn btn-primary" id="btnResponder" style="margin:auto" data-toggle="modal" data-target="#modalRespuestaBanco"><strong><i class='fas fa-envelope'></i>&nbsp;RESPONDER</strong></button><br><br>
+						</div>
+
+						<div th:if="${dato.s_cdg == 'S'}">
+							<button style="margin:auto" class="btn btn-success"><strong><i class='fas fa-check-circle'></i>&nbsp;ATENDIDO POR<br><span th:text="${dato.c_usuario_csjar}"></span></strong></button><br><br>
+						</div>
+						
+						<div th:if="${dato.s_cdg == 'T' && dato.c_usuario_csjar != sesion}">
+							<button type="button" class="btn btn-warning btn-sm"><strong><i class='fas fa-exclamation-circle'></i>&nbsp;LA SOLICITUD<br>ESTA SIENDO TRAMITADA<br>POR <span th:text="${dato.c_usuario_csjar}"></span></strong></button><br><br>
+						</div>
+										
+					</div>
+				</div><hr>
+				<label style="font-size: 11px"><strong>OBSERVACION: </strong></label><input style="font-size: 11px" th:value="${dato.s_respuesta}" readonly="readonly" size="80"><br>
+				<label style="font-size: 11px"><strong>ADJUNTO: </strong></label><button onclick="descargar_bn()" type="button" class="btn btn-outline-danger btn-sm"><i class="fas fa-download"></i>&nbsp;DESCARGAR</button>
+				<hr>
+
+				<div style="font-size: 11px;" th:if="${dato.s_cdg == 'S'}">
+					<label style="width: 200px"><strong>ATENDIDO EL <span th:text="${dato.fechaAtencion}"></span></strong></label><br>
+					<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">OBS.</span>
+					  </div>
+					  <textarea style="height: 100px; font-size: 11px;" class="form-control" aria-label="With textarea" th:text="${dato.s_ingreso_cdg}" readonly="readonly"></textarea><br>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+                
+	<div class="modal fade modalRespuestaBanco" id="modalRespuestaBanco" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog">
+		    <div class="modal-content" th:each="dato:${detalle}">
+		    	<div class="loader" id="loader" style="width: 100%; height: 100%;  position: absolute; z-index: 10000;" >
+					<div style="position: relative; width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top:90px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/corteAQP.png" width="200">
+							</div><br>
+							<p><strong>ENVIANDO, ESPERE POR FAVOR!</strong></p>
+								<img alt="" src="img/send-small.gif">
+							<br><br><br><br><br><br>
+						</div>
+					</div>
+				</div>
+		    <form class="formRespuestaBanco" action="" method="post" enctype="multipart/form-data" id="formRespuestaBanco">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">RESPUESTA</h5>
+		        <button style="display:none;" type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      
+		      		<div class="modal-body" style="font-size: 12px">
+		      			<input class="solicitud" type="hidden" id="idSolicitud" name="idSolicitud" th:value="${dato.n_id_solicitud}">
+		      			<input type="hidden" name="idSede" th:value="${dato.c_sede}">
+		      			<label style="width: 90px"><strong>IMPUTADO: </strong></label><input th:value="${dato.s_nombre}" id="solicitanteRespuesta" name="solicitanteRespuesta" readonly="readonly" size="40" ><hr><br>
+		      			<label style="width: 90px"><strong>ACCIÓN: </strong></label><select id="lstAccion" name="accion">
+		      				<option value="0">SELECCIONE ...</option>
+		      				<option value="S">ACEPTAR</option>
+		      				<option value="X">RECHAZAR</option>
+		      			</select><br>
+		      			<div>
+		      				<div id="divCodigo">
+		      				<label style="width: 140px"><strong>COD DIGITALIZACION: </strong></label><input style="text-align: right;" onkeypress="return numbersonly(event)" maxlength="10" id="codRespuesta" name="codRespuesta" size="7" ><strong>-<span th:text="${dato.anio}"></span>-ESC-JP-FC</strong>
+		      				</div><br>
+		      				<div class="input-group">
+						  	<div class="input-group-prepend">
+						    <span class="input-group-text">OBS.</span>
+						  	</div>
+						  	<textarea style="height: 130px; font-size: 12px" class="form-control"  required id="txtRespuesta" name="respuesta" aria-label="With textarea"></textarea>
+							</div>
+		      				<input type="hidden" th:value="${dato.anio}" id="txtAnio">
+		      			</div> 
+		      		</div>
+		      	
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+			        <button type="button" class="btn btn-primary btnEnviarRespuestaBanco"><strong><i class='far fa-paper-plane'></i>&nbsp;FINALIZAR</strong></button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+	
+		<script src="js/funciones.js"></script>	
+	<script type="text/javascript">
+		$(document).ready(function(){ 	
+			$("#tablaAdjuntos").tableDnD();
+		});
+	</script>
+	<script type="text/javascript">
+	
+		$('#lstAccion').change(function(){
+			var accion = $(this).find(":selected").val();
+			if(accion == 'X' || accion == '0')
+				$('#divCodigo').hide();
+			else
+				$('#divCodigo').show();
+		});
+		
+		$(".btnEnviarRespuestaBanco").click(function() {
+			
+			if($('#lstAccion').val() == '0'){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE ELEGIR ACCION!!");
+				return false;
+			}
+			
+			if(($('#lstAccion').val() == 'S' && $('#codRespuesta').val() == '') || $('#txtRespuesta').val() == ''){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE COMPLETAR TODOS LOS CAMPOS!!");
+				return false;
+			}
+			
+			var numeroCod = $('#codRespuesta').val();
+			
+			if(numeroCod.length == 1)
+				numeroCod = '000000000' + numeroCod;
+			else if(numeroCod.length == 2)
+				numeroCod = '00000000' + numeroCod;
+			else if(numeroCod.length == 3)
+				numeroCod = '0000000' + numeroCod;
+			else if(numeroCod.length == 4)
+				numeroCod = '000000' + numeroCod;
+			else if(numeroCod.length == 5)
+				numeroCod = '00000' + numeroCod;
+			else if(numeroCod.length == 6)
+				numeroCod = '0000' + numeroCod;
+			else if(numeroCod.length == 7)
+				numeroCod = '000' + numeroCod;
+			else if(numeroCod.length == 8)
+				numeroCod = '00' + numeroCod;
+			else if(numeroCod.length == 9)
+				numeroCod = '0' + numeroCod;
+			
+			var form = document.getElementById('formRespuestaBanco');
+			var formData = new FormData(form);
+			formData.append('codigo', numeroCod + '-' + $('#txtAnio').val() + '-ESC-JP-FC');
+			
+			$.ajax({
+				type:"POST",
+				url:"enviarRespuestaBanco",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				beforeSend:function(){
+		            $('.loader').show();
+		        },
+				success:function(response) {
+					if(response.Status == 200){ 
+						$(".detalleObjetos").empty();
+						$(".listaObjetos").load('BANCO');
+						$('.loader').hide();
+						$(".modalRespuestaBanco").modal('hide');
+						$('body').removeClass('modal-open');
+						$('.modal-backdrop').remove();
+						
+						Swal.fire(
+						  'SOLICITUD BANCO DE LA NACION GUARDADA CON EXITO!!',
+						  'Click en OK para continuar!',
+						  'success'
+						);
+						
+					}
+					else if(response.Status == 400){
+						$('.loader').hide();
+						$(".modalRespuestaBanco").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'El registro ya fue atendido, actualice la lista!!',
+							  
+						});
+					}
+					else if(response.Status == 300){
+						$('.loader').hide();
+						$(".modalRespuestaBanco").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'Sin conexion al servidor FTP local!!',
+							  
+							});
+					}
+					else if(response.Status == 270){
+						$('.loader').hide();
+						$(".modalRespuestaBanco").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'No se pudo unir los documentos, comuniquese con informatica!!',
+							  
+							});
+					}
+					else if(response.Status == 290){
+						$('.loader').hide();
+						$(".modalRespuestaBanco").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'Sin conexion al repositorio FTP de la sede, comuniquese con informatica!!',
+							  
+							});
+					}
+					else if(response.Status == 250){
+						$('.loader').hide();
+						$(".modalRespuestaBanco").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'No se pudo enviar los documentos al repositorio SIJ, comuniquese con informatica!!',
+							  
+							});
+					}
+					else {
+						$('.loader').hide();
+						$(".modalRespuestaBanco").modal("hide");
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'Algo salió mal, no se pudo enviar la información.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		});	
+		
+		
+		
+		function actualizar(){
+			$(".detalleObjetos").empty();
+			$(".listaObjetos").load('BANCO');
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("REGISTROS ACTUALIZADOS!!");
+		};
+		
+		
+		function descargar_bn(){	
+			var url='verPDFBanco';
+				url = url + '/' + $('.id').val();
+			window.open(url,'nuevaVentana','width=600, height=630');
+		};
+		
+		
+	</script>
+	
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>Insert title here</title>
+</head>
+<body>
+	<div  id="reporte" class="card card-body">
+			
+		<table style="font-size:11px; width:100%" class="table table-hover table-sm reporteReglas" id="reporteReglas">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>DOCUMENTO</th>
+					<th>NOMBRES</th>
+					<th>NACIONALIDAD</th>
+					<th>CELULAR</th>
+					<th>EXPEDIENTE</th>
+					<th>SEDE</th>
+					<th>INSTANCIA</th>
+					<th>ESTADO</th>
+					<th>CITA</th>
+					<th>REGLA</th>
+					<th>OBSERVACION</th>
+					<th>ESTADO</th>
+				</tr>
+			</thead>
+			<tbody class="buscar">
+				<tr style="cursor: default" th:each="regla:${reglas}" id="filasReglas" class="filasReglas">
+					<td th:text="${regla.id_sentenciado}"></td>
+					<td th:text="${regla.s_abreviacion}"></td>
+					<td th:text="${regla.nombresCompletos}"></td>
+					<td th:text="${regla.s_pais}"></td>
+					<td th:text="${regla.n_celular}"></td>
+					<td th:text="${regla.n_expediente}"></td>
+					<td th:text="${regla.s_sede}"></td>
+					<td th:text="${regla.x_nom_instancia}"></td>
+					<td th:text="${regla.estado}"></td>
+					<td th:text="${regla.cita}"></td>
+					<td th:text="${regla.regla}"></td>
+					<td th:text="${regla.obs}"></td>
+					<td th:text="${regla.estado2}"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>

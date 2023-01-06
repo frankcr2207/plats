@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+		<link rel="stylesheet" href="css/toastr.min.css" >
+		<style type="text/css">
+		  .selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+		  td{vertical-align:middle;"}
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<table style="font-size:11px" class="table table-hover table-sm tablaSolicitudesExpedientes" id="tablaSolicitudesExpedientes">
+					<thead>
+						<tr>
+							<th></th>
+							<th><strong><label style="font-size: 13px" th:text="${tipo}"></label></strong><input type="hidden" class="formulario" th:value="${formulario}"></th>
+							<th align="center"><button onclick="actualizar()" class="btn btn-outline-success btn-sm"><i class='fas fa-sync-alt fa-lg'></i></button></th>
+						</tr>
+					</thead>
+					<tbody class="buscar">
+						<tr style="cursor: default" th:each="solicitud:${solicitudes}" id="filasSolicitudesExpedientes" class="filasSolicitudesExpedientes">
+								
+							<td th:text="${solicitud.id_solicitud}"></td>
+							<td style="vertical-align:middle;"><strong><span th:text="${solicitud.nombresCompletos}"></span></strong>&nbsp;&nbsp;-&nbsp;&nbsp;FECHA SOLICITUD: <span th:text="${solicitud.fechaRegistro}"></span></td>
+							<td th:switch="${solicitud.s_estado_solicitud}" align="center">
+                            	<label class="switch">
+                            	<span th:case="'A'" ><img src="img/visto.png" align="middle" th:src="@{img/visto.png}" width="22"/></span>
+                            	<span th:case="'I'" ><img src="img/reloj.svg" align="middle" th:src="@{img/reloj.svg}" width="22"/></span>
+								</label>
+							</td>
+						</tr>
+					</tbody>
+			</table>
+		</div>
+	</div>
+	 <script type="text/javascript">
+			
+	    	function terminar(){	
+	    		$('#exampleModalExp').modal( 'hide' );
+	    		var url='obtenerExpedientes';
+
+	    		url = url + '/' + $('#dni').val();
+
+	    		document.getElementById('partes').style.display="none";
+	    		$("#resultados").load(url);
+
+	    	}
+			
+	    </script>
+	    <script type="text/javascript">
+			
+	 	$("#tablaSolicitudesExpedientes #filasSolicitudesExpedientes").click(function(){
+	 		$(this).addClass('selected').siblings().removeClass('selected');
+	 		
+	   		toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+		   	var value=$(this).find('td:first').html();
+
+		   	$(".detalleObjetos").empty();
+		   	var url='detalleSolicitudExpedientes';
+	   		url = url + '/' + value;
+	   		$(".listaObjetos").load(url);
+			
+		});	
+	    </script>
+	    <script type="text/javascript">
+	    	function actualizar(){
+		    	$(".detalleObjetos").empty();
+		    	var url3 = 'solicitudExpedientes';
+	   			$(".listaObjetos").load(url3);
+	   			toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.success("REGISTROS ACTUALIZADOS!!");
+	   		}
+	    </script>
+	    
+	    <script type="text/javascript">
+	    	function buscarSolicitud(){
+	    		$(".detalleObjetos").empty();
+	    		var formulario = $('.formulario').val();
+	    		var nombres = $('#x_nombres').val();
+		    	var inicio = $('#x_inicio').val();
+		    	var fin = $('#x_fin').val();
+		    	var url;
+		    	
+		    	if(nombres == "" && inicio == "" && fin == ""){
+		    		toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.error("INGRESE NOMBRE O FILTRE POR FECHAS!!");
+					return false;
+		    	}
+		    	if(nombres == "" && ((inicio != "" && fin == "") || (inicio == "" && fin != ""))){
+		    		toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.error("INGRESE FECHA DE INICIO Y FIN!!");
+					return false;
+		    	}
+		    	if(nombres != "" && inicio == "" && fin == ""){
+	    			url='buscarSolicitudNombre';
+	    			url = url + '/' + formulario + '/' + nombres;
+			   		$(".listaObjetos").load(url);
+	    		}
+		    	else if(nombres == "" && inicio != "" && fin != ""){
+	    			url='buscarSolicitudFecha';
+	    			url = url + '/' + formulario + '/' + inicio + '/' + fin;
+			   		$(".listaObjetos").load(url);
+	    		}
+		    	else if(nombres != "" && inicio != "" && fin != ""){
+		    		url='buscarSolicitud';
+		    		url = url + '/' + formulario + '/' + nombres + '/' + inicio + '/' + fin;
+		    		$(".listaObjetos").load(url);
+		    	}
+
+	   		}
+	    </script>
+</body>
+</html>

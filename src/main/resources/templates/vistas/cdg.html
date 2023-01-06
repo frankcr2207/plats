@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/bootstrap-select.min.css" th:src="@{css/bootstrap-select.min.css}">
+	<script src="js/bootstrap-select.min.js" th:src="@{js/bootstrap-select.min.js}"></script>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/popper.min.js" th:src="@{js/popper.min.js}"></script>
+
+		<style type="text/css">
+		  .selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+		<button type="button" class="btn btn-outline-primary btn-sm" id="btnAgregarOrganos"><i class='fas fa-plus'></i></button> &nbsp;&nbsp;<button type="button" onclick="fnselectOJ()" class="btn btn-outline-danger btn-sm" ><i class='fas fa-minus'></i></button>&nbsp;&nbsp;&nbsp;<strong>OO. JJ. ASIGNADO A:&nbsp;&nbsp;<span th:text="${nombres}"></span></strong> 
+			<table style="font-size:11px" class="table table-hover tablaUsuariosCDG" id="tablaUsuariosCDG">
+						<thead>
+							<tr>
+								<th></th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody class="buscar">
+							<tr style="cursor: pointer" th:each="solicitud:${cdgAsignados}" id="filasUsuariosCDM" class="filasUsuariosCDM">
+								<td style="display: none" th:text="${solicitud.n_id_sou}"></td>
+								<td></td>
+								<td><span th:text="${solicitud.s_sede}"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span th:text="${solicitud.s_organo}"></span>
+								<td><strong></strong><br> 
+								</td>
+							</tr>
+						</tbody>
+			</table>
+		</div>
+	</div>
+	
+	
+	<div class="modal fade modalCDG" id="modalCDG" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			  <div class="modal-dialog" role="document">
+			    <div class="modal-content">
+			      <div class="modal-header">
+			        <h5 class="modal-title" id="exampleModalLabel">LISTA OO JJ</h5>
+			        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+			      </div>
+			      <form class="asignarCDM" action="" method="post">
+			      	<div class="modal-body">
+			      		<input id="usuarioCDG" name="usuarioCDG" class="usuarioCDG" type="hidden" th:value="${usuario}">
+						<div style="margin-left:auto" class="form-row">
+							<div class="form-group col-md-10">
+								<label>SEDES</label>
+								<select id="listaSedes" name="cdg" class="form-control form-control-sm listaSedes">
+									<option th:each="sedes:${sedesBD}" th:value="${sedes.c_sede}" th:text="${sedes.s_sede}" ></option> 
+								</select><br>
+								<label>OO JJ</label>
+								<select id="listaOrganos" class="form-control form-control-sm">
+								</select>
+							</div>	                	
+						</div>
+			        </div>
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">CERRAR</button>
+			        <button onclick="asignarOJ()" type="button" class="btn btn-success asigna"><i class="fas fa-save"></i>&nbsp;ASIGNAR</button>
+			      </div>
+			      </form>
+			    </div>
+			  </div>
+			</div>
+	<script src="js/jquery-func.js" th:src="@{js/jquery-func.js}"></script>
+	<script type="text/javascript">
+		function highlight(e) {
+		    if (selected[0]) selected[0].className = '';
+		    e.target.parentNode.className = 'selected';
+		};
+		
+		var table = document.getElementById('tablaUsuariosCDG'),
+    	selected = table.getElementsByClassName('selected');
+		table.onclick = highlight;
+		
+		function fnselectOJ(){
+			var cdg = null;
+		    cdg = $("tr.selected td:first" ).html();
+		    var nombreCDM = $("tr.selected td:eq(1)").html();
+		    var usuario = $(".usuarioCDG").val();
+		    if (cdg == null){
+		   		toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE ELEGIR UN ÓRGANO!!");
+		    }
+		    else{
+		    	Swal.fire({
+					  title: 'Está seguro de quitar el OO JJ?',
+					  text: "",
+					  icon: 'question',
+					  showCancelButton: true,
+					  confirmButtonColor: '#3085d6',
+					  cancelButtonColor: '#d33',
+					  confirmButtonText: 'SI, ELIMINAR!'
+					}).then((result) => {
+						if (result.value) {
+							
+							$(function () {
+							    var token = $("input[name='_csrf']").val();
+							    var header = "X-CSRF-TOKEN";
+							    $(document).ajaxSend(function(e, xhr, options) {
+							        xhr.setRequestHeader(header, token);
+							    });
+							});
+							
+			                // Creamos un objeto con los datos a enviar
+							
+							  $.ajax({
+								  type:"POST",
+									url:"desasignarCDG",
+									data:"cdg=" + cdg + "&usuario=" + usuario,
+									cache:false,
+									success: function(response){
+										if(response.Status == 200){ 
+											$(".detalleObjetos").empty();
+										   	var url='obtenerCDGAsignados';
+										   	var user = usuario;
+									   		url = url + '/' + user;
+									   		$(".detalleObjetos").load(url);
+											Swal.fire(
+												  'ÓRGANO DESASIGNADO!!',
+												  'Click en OK para continuar!',
+												  'success'
+												);
+										}
+										else if(response.Status == 400){
+											Swal.fire({
+												  icon: 'info',
+												  title: 'ATENCIÓN',
+												  text: 'El usuario ya tiene asignado el Órgano',
+												  
+												});
+										}
+										else {
+											Swal.fire({
+												  icon: 'error',
+												  title: 'ATENCIÓN',
+												  text: 'Algo salió mal, no se pudo guardar la información.!!',
+												  
+												});
+										}
+									}
+								});
+
+						  }
+					})
+		    }
+		    	
+		};
+		
+		
+	</script>
+</body>
+</html>

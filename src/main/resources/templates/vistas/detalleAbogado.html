@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<link rel="stylesheet" href="css/main.css">
+	<style type="text/css">
+		.loader{
+	        display: none;
+	        background-color:white;
+		   	opacity:1;
+		   	filter:alpha(opacity=60); /* IE < 9.0 */
+	    }
+		#solicitud input{
+	    	border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	.modalSolicitante input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	.modalWebService input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	#modalRespuestaAbogado input{
+	    	border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	#datosAbogado label{
+    	width: 100px;
+    }
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+
+			<div th:each="abogado:${abogados}" id="datosAbogado" class="datosAbogado">
+				<h6><strong>DATOS DE ABOGADO</strong></h6>
+				<div class="form-row">
+					<div style="width:70%; font-size: 12px">
+						<input th:value="${formulario}" class="formulario" id="formulario" type="hidden">
+						<label><strong>DNI: </strong></label><input th:value="${abogado.s_dni}" class="dni" id="dni" readonly="readonly" size="20" >&nbsp;&nbsp;&nbsp;<br>
+						<label><strong>NOMBRES: </strong></label><input th:value="${abogado.nombresCompletos}" class="nombres" id="nombres" readonly="readonly" size="40"><br>
+						<label><strong>T. ABOGADO: </strong></label><input style="font-weight: bold" th:value="${abogado.s_tipo_perfil}" id="tipoAbo" readonly="readonly" size="20"><br>
+						<label><strong>COLEGIO: </strong></label><input th:value="${abogado.s_colegio}" id="colegio" readonly="readonly" size="40"><br>
+						<label><strong>COLEGIATURA: </strong></label><input th:value="${abogado.s_colegiatura}" id="colegiatura" readonly="readonly" size="40"><br>
+						<label><strong>CORREO: </strong></label><input th:value="${abogado.s_email}" class="email" id="email" readonly="readonly" size="40" ><br>
+						<label><strong>CELULAR: </strong></label><input th:value="${abogado.s_telefono}" id="telefono" readonly="readonly" size="40"><br>
+						<label><strong>F. REGISTRO: </strong></label><input th:value="${abogado.fechaRegistro}" id="fechaReg" readonly="readonly" size="40"><br>
+						<script type="text/javascript" src="js/datosReniec.js" th:src="@{js/datosReniec.js}"></script>
+					</div>
+					<div style="width:30%;" align="center">
+						<div class="switch">
+							<div th:if="${abogado.s_activo == 'N'}">
+	
+								<button class="btn btn-success btn-lg" style="margin:auto" data-toggle="modal" data-target="#modalRespuestaAbogado"><strong><i class='fas fa-envelope'></i>&nbsp;RESPONDER</strong></button><br><br>
+							</div>
+							<div th:if="${abogado.s_activo != 'N'}">
+								<button class="btn btn-primary updateLaw" style="margin:auto"><strong><i class='fas fa-save'></i>&nbsp;GUARDAR</strong></button><br><br>
+								<button th:if="${abogado.s_activo == 'A'}" class="btn btn-success btn-sm nuevaClaveAbo" style="margin:auto"><strong><i class='fas fa-key'></i>&nbsp;GEN. NUEVA CLAVE</strong></button><br><br>
+							</div>
+						</div>
+					</div>
+				</div>
+					
+				<div th:if="${abogado.s_file_adjunto_pdf != null or abogado.s_file_adjunto_pdf != ''}" style="font-size: 12px;">
+					<label><strong>ADJUNTO</strong></label>
+					<button  type="button" onclick="archivoAbogado()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i></button>
+				</div>
+				<div th:if="${abogado.s_activo != 'N'}" class="form-row" style="font-size: 12px;">
+						<label><strong>ESTADO</strong></label>
+						<div style="width:30%;" align="center" th:switch="${abogado.s_activo}">
+							<select class="form-control form-control-sm estateAbogado" th:case="'A'" id="estateAbogado" name="estateAbogado">
+								<option selected value="A">ADMITIDO</option>
+								<option value="X">BLOQUEADO</option>
+							</select>
+							<select class="form-control form-control-sm estateAbogado" th:case="'R'" id="estateAbogado" name="estateAbogado">
+								<option  value="A">ADMITIDO</option>
+								<option  selected value="R">RECHAZADO</option>
+							</select>
+							<select th:case="'X'" id="estateAbogado" class="form-control form-control-sm estateAbogado" name="estateAbogado">
+								<option  value="A">ADMITIDO</option>
+								<option  selected value="X">BLOQUEADO</option>
+							</select>
+						</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade modalRespuestaAbogado" id="modalRespuestaAbogado" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog modal-lg">
+		  
+		    <div class="modal-content" th:each="abogado:${abogados}">
+		    	<div class="loader" id="loader" style="width: 100%; height: 100%;  position: fixed; z-index: 10000;" >
+					<div style="width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top:100px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/pj.jpg" width="80px">
+							</div><br>
+							<p><strong>ENVIANDO MENSAJE, ESPERE POR FAVOR!</strong></p>
+							<div class="lds-ellipsis">
+								<div></div>
+								<div></div>
+								<div></div>
+								<div></div>
+							</div>
+						</div>
+					</div>
+				</div>
+		    <form class="sendLaw" action="" method="post" enctype="multipart/form-data">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">RESPUESTA</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      
+	      		<div class="modal-body" style="font-size: 12px">
+	      			<input class="solicitud" type="hidden" id="dniAbogado" name="dniAbogado" th:value="${abogado.s_dni}">
+	      			<label style="width: 90px"><strong>SOLICITANTE: </strong></label><input th:value="${abogado.nombresCompletos}" id="solicitanteRespuesta" name="solicitanteRespuesta" readonly="readonly" size="40" ><br>
+	      			<label style="width: 90px"><strong>CORREO: </strong></label><input th:value="${abogado.s_email}" id="correoRespuesta" name="correoRespuesta" readonly="readonly" size="40" ><br>
+	      			<label style="width: 90px"><strong>ASUNTO: </strong></label><input value="CSJAR - NCPP - SOLICITUD INSCRIPCIÓN PARA CONSULTA DE EXPEDIENTES" id="asuntoRespuesta" name="asuntoRespuesta" readonly="readonly" size="80" ><br><br>
+		      		<div class="form-row"><label><strong>ADMITIR INSCRIPCIÓN?</strong></label>&nbsp;&nbsp;&nbsp;<select style="width: 80px" id="confirma" name="confirma" class="form-control form-control-sm"><option>SI</option><option>NO</option></select>&nbsp;&nbsp;</div><br>
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">CONTENIDO</span>
+					  </div>
+					  <textarea style="height: 80px" class="form-control textoRespuestaAbogado" required id="textoRespuestaAbogado" name="textoRespuestaAbogado" aria-label="With textarea"></textarea>
+					</div><br>
+	      		</div>
+		      	
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+			        <button type="submit" class="btn btn-success"><strong><i class='far fa-paper-plane	'></i>&nbsp;ENVIAR</strong></button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+	</div>
+	
+	<div class="modal fade modalLoader" id="modalLoader" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" >
+		  <div class="modal-dialog modal-dialog-centered">
+		    <div class="modal-content">
+		    	<div class="loaderSol" id="loaderSol" style="width: 100%; height: 100%;" >
+					<div style="width: 100%; height: 100%;">
+						<div style="background-color: white; width: 100%; height: 100%; padding-top:50px; padding-bottom: auto; padding-left: auto; padding-right: auto; " align="center">
+							<div align="center">
+								<img alt="ayuda" src="img/pj.jpg" width="80px">
+							</div><br>
+							<p><strong>ENVIANDO NUEVO MENSAJE, ESPERE POR FAVOR!</strong></p>
+							<div class="lds-ellipsis">
+								<div></div>
+								<div></div>
+								<div></div>
+								<div></div>
+							</div>
+						</div>
+					</div>
+				</div>
+		    </div>
+		  </div>
+		</div>
+
+	<script src="js/jquery-target.js"></script>
+</body>
+</html>

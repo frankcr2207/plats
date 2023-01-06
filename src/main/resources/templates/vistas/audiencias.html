@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/funciones.js"></script>
+	<script src="js/moment.min.js"></script>
+		
+
+	<style type="text/css">
+	 	.selected{ background-color: #E1E1E1; } tr:hover{ background-color: #E1E1E1; } 
+		#modalNuevaAudiencia label{
+			font-weight: bold;
+			font-size: 10px";
+		}
+		input{
+	    	border:0;
+		    border-bottom: 1px solid #009CBF;
+		    font-size: 11px";
+	    }
+	</style>
+</head>
+<body>
+	
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud> <input type="hidden" class="formulario" th:value="${formulario}">
+			<button type="button" class="btn btn-outline-primary btn-sm btnNuevaAudiencia"><i class='fas fa-plus'></i>&nbsp;NUEVO</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<input id="txtBuscarAudiencia" name="txtBuscarAudiencia" type="text" style="text-transform:uppercase;" class="txtBuscarAudiencia" placeholder="Filtre aquí ..."/><br>
+			<table style="font-size:10px" class="table table-hover table-sm tablaAudiencias" id="tablaAudiencias" >	
+				<thead>
+					<tr>
+						<th></th>
+						<th><span th:text="${tipo}"></span></th>
+						<th style="vertical-align:middle;">ESTADO</th>
+						
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer; font-size:10px" th:each="audiencia:${audiencias}" id="filaAudiencias" class="filaAudiencias">
+						<td  th:text="${audiencia.id_audiencia}"></td>
+						<td style="vertical-align:middle;" class="cod" ><strong>F. REGISTRO: </strong><span th:text="${audiencia.fechaRegistro}"></span> - <strong>EXP. <span th:text="${audiencia.n_expediente}"></span></strong><br>
+						<span th:text="${audiencia.s_sede}"></span> - <span th:text="${audiencia.s_instancia}"></span><br><i><strong>FECHA AUDIENCIA: </strong><span th:text="${audiencia.fechaAudiencia}"></span></i></td>
+						<td th:switch="${audiencia.s_estado}" align="center">
+                           	<label class="switch">
+                           	<span th:case="'P'" ><img src="img/meet.png" align="middle" th:src="@{img/meet.png}" width="25"/></span>
+                           	<span th:case="'A'" ><img src="img/sinvisto.png" align="middle" th:src="@{img/sinvisto.png}" width="25"/></span>
+							</label>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	
+				
+		<div class="modal fade modalNuevaAudiencia" id="modalNuevaAudiencia" data-backdrop="static" data-keyboard="false"  tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-lg" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel">DATOS DE PUBLICACIÓN</h5>
+		        <button style="display: none" type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <form class="guardarAudiencia" id="guardarAudiencia" action="" method="post" enctype="multipart/form-data">
+		      	<div class="modal-body" style="font-size: 11px">
+		        	<div style="margin-left:auto" class="form-row" id="divBuscarAudiencia">
+                       	<div class="form-group col-sm-1">
+                       		<label>NÚM</label>
+	                        <input name="numero" id="numero" autofocus class="form-control form-control-sm numero" maxlength="5" onkeypress="return numbersonly(event)">
+	                	</div>
+	                	<div class="form-group col-sm-1">
+	                        <label>AÑO</label>
+	                        <input name="anio" id="anio" class="form-control form-control-sm" maxlength="4" onkeypress="return numbersonly(event)">
+	                	</div>
+	                	<div class="form-group col-sm-1">
+	                        <label>CUAD.</label>
+	                        <input name="cuaderno" id="cuaderno" class="form-control form-control-sm" maxlength="3" onkeypress="return numbersonly(event)">
+	                	</div>
+	                	<div class="form-group col-md-2">
+							  <label>SEDE</label>
+							<select id="sede" name="sede" class="form-control form-control-sm sede">
+								<option value="0">SELECCIONE ...</option>
+								<option th:each="sede: ${sedes}" 
+								       th:value="${sede.c_sede}" th:text="${sede.s_sede}"></option>
+							</select>
+						</div>
+						<div class="form-group col-md-2 divInstancia">
+							  <label>INSTANCIA</label>
+							<select id="instancia" name="instancia" class="form-control form-control-sm instancia">
+							</select>
+						</div>
+						<div class="form-group col-sm-3">
+                       		<label>FECHA (SIJ)</label>
+	                        <input type="date" name="fecha" id="fecha" class="form-control form-control-sm">
+	                	</div>
+	                	<div class="form-group col-sm-1">
+                       		<label>&nbsp;</label><br>
+	                        <button type="button" class="btn btn-success btn-sm buscarExp"><i class='fas fa-search'></i></button>
+	                	</div>
+					</div>
+					<hr style="height:1px" color="#911A00">
+					<div style="margin-left:auto" class="form-row" id="divResultadoAudiencia">
+						
+						<div class="form-group col-sm-3">
+	                        <label>EXPEDIENTE</label>
+	                        <input style="font-size: 10px" name="exp" id="exp" class="form-control form-control-sm exp" required>
+	                	</div>
+	                	<div class="form-group col-sm-4">
+	                        <label>INSTANCIA</label>
+	                        <input style="font-size: 10px" name="ins" id="ins" class="form-control form-control-sm ins" required>
+	                	</div>
+	                	<div class="form-group col-sm-4">
+	                        <label>TIPO</label>
+	                        <input style="font-size: 10px" name="tip" id="tip" class="form-control form-control-sm tip" required>
+	                	</div>
+	                	<div class="form-group col-sm-4">
+	                        <label>AGRAVIADO</label>
+	                        <input style="font-size: 10px" name="par" id="par" class="form-control form-control-sm par" required>
+	                	</div>
+	                	<div class="form-group col-sm-4">
+	                        <label>IMPUTADO</label>
+	                        <input style="font-size: 10px" name="par2" id="par2" class="form-control form-control-sm par2" required>
+	                	</div>
+	                	<div class="form-group col-sm-4">
+	                        <label>JUECES</label>
+	                        <input style="font-size: 10px" name="jueces" id="jueces" class="form-control form-control-sm jueces" required>
+	                	</div>
+	                	<div class="form-group col-sm-3">
+	                        <label>DELITO</label>
+	                        <input style="font-size: 10px" name="del" id="del" class="form-control form-control-sm del" required>
+	                	</div>
+	                	<div class="form-group col-sm-3">
+	                        <label>FECHA Y HORA</label>
+	                        <input style="font-size: 10px" type="datetime-local" name="ini" id="ini" class="form-control form-control-sm ini" required>
+	                	</div>
+	                	<div class="form-group col-sm-2">
+	                        <label>RESERVADO?</label>
+	                        <select  id="reserva" name="reserva" class="form-control form-control-sm reserva">
+								<option style="font-size: 10px" value="N" selected>NO</option>
+								<option style="font-size: 10px" value='S'>SI</option>
+							</select>
+	                	</div>
+	                	<div class="form-group col-sm-4">
+	                        <label>ENLACE</label>
+	                        <input style="font-size: 11px" name="enl" id="enl" class="form-control form-control-sm enl" >
+	                	</div>
+					</div>
+					
+		      	</div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary btn-sm cerrar" data-dismiss="modal">CERRAR</button>
+		        <button type="button" class="btn btn-info btn-sm" onclick="reiniciarBusqueda()"><i class="fas fa-broom"></i>LIMPIAR</button>
+		        <button type="submit" class="btn btn-primary"><i class="fas fa-save fa-lg"></i>&nbsp;PUBLICAR</button>
+		      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+				
+	</div>
+	
+	<script type="text/javascript">
+	$(document).ready(function() {
+		(function ($) {
+	        $('.txtBuscarAudiencia').keyup(function () {
+	             var rex = new RegExp($(this).val(), 'i');
+	             $('.buscar tr').hide();
+	             $('.buscar tr').filter(function () {
+	               return rex.test($(this).text());
+	             }).show();
+	        })
+	    }(jQuery));
+		
+    	$(".buscarExp").click(function() {
+      		var numero = $("#numero").val();
+      		var anio= $("#anio").val();
+      		var cuaderno = $("#cuaderno").val();
+      		var sede = $("#sede").val();
+      		var instancia = $("#instancia").val();
+      		var fecha = $("#fecha").val();
+      		var json = {
+       			"numero" : numero,
+       			"anio" : anio,
+       			"cuaderno" : cuaderno,
+       			"sede" : sede,
+       			"instancia" : instancia,
+       			"fecha" : fecha,
+      		};
+ 
+      	$.ajax({
+       		type : "POST",
+       		contentType : "application/json",
+       		url : "datosAudSIJ",
+       		data : JSON.stringify(json),
+	        dataType : 'json',
+	        cache : false,
+	        timeout : 600000,
+	        success : function(data) {
+				if(data.expediente == 'NN'){
+		        	Swal.fire({
+						icon: 'info',
+						title: 'ATENCIÓN',
+						text: 'Expediente no existe, Verifique !!',	  
+					});
+				}
+				else if(data.expediente == 'XX'){
+		        	Swal.fire({
+						icon: 'info',
+						title: 'ATENCIÓN',
+						text: 'Audiencia no encontrada en el SIJ !!',	  
+					});
+				}
+				else{
+					$('#divBuscarAudiencia :input').attr('readonly', true);
+					$('#sede').attr("style", "pointer-events: none;");
+					$('#instancia').attr("style", "pointer-events: none;");
+					$('.exp').val(data.expediente);
+					$('.ins').val(data.instancia);
+					$('.tip').val(data.tipo);
+					$('.jueces').val(data.jueces);
+					$('.par').val(data.parte1);
+					$('.par2').val(data.parte2);
+					$('.ini').val(data.inicio);
+					$('.del').val(data.delito);	
+					$('.enl').val(data.enlace);	
+				}
+         	},
+	         error : function(e) {
+	        	 Swal.fire({
+					  icon: 'info',
+					  title: 'ATENCIÓN',
+					  text: 'Sin resultados!!',
+					  
+					});
+		     }
+	      	});
+    	});
+  	});
+		
+	</script>
+	<script type="text/javascript">
+	   	$(document).ready(function() {
+	    	$(".sede").change(function() {
+	      		var idSede = $(this).find(":selected").val();
+	      		var json = {
+	       			"id" : idSede
+	      		};
+	 
+		      	$.ajax({
+		       		type : "POST",
+		       		contentType : "application/json",
+		       		url : "obtInstanciasNCPP",
+		       		data : JSON.stringify(json),
+			        dataType : 'json',
+			        cache : false,
+			        timeout : 600000,
+			        success : function(data) {
+			         	var html = '';
+			         	var len = data.length;
+			         	html += '';
+			         	for (var i = 0; i < len; i++) {
+			         		html += '<option value="' + data[i].c_instancia + '">' + data[i].x_nom_instancia + '</option>';
+				        }
+				        html += '</option>';
+				        $('.instancia').html(html);
+			        },
+		        	error : function(e) {
+		        	 	Swal.fire({
+						  	icon: 'error',
+						  	title: 'ATENCIÓN',
+						  	text: 'Ooops, algo salió mal, no se pudo cargar instancias.!!',
+						});
+			     	}
+		      	});
+	    	});
+	    	
+	    	$(".reserva").change(function() {
+	      		var reserva = $(this).find(":selected").val();
+	      		if(reserva == 'S'){
+	      			$('.enl').val('');
+	      			$(".enl").attr("readonly", true);
+	      		}
+	      		else{
+	      			$(".enl").attr("readonly", false); 
+	      		}
+	    	});
+	    	
+	  	});
+  	</script>
+	<script type="text/javascript">
+		$(".actualizarAudiencia").on("submit", function(e) {
+			e.preventDefault();
+			var formData = new FormData(this);
+			$.ajax({
+				type:"POST",
+				url:"actualizarAudiencia",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				success:function(response) {
+					if(response.Status == 200){ 
+						$(".modalActualizarAudiencia").modal('hide');//ocultamos el modal
+						$('body').removeClass('modal-open');//eliminamos la clase del body para poder hacer scroll
+						$('.modal-backdrop').remove();//e
+						$(".detalleObjetos").empty();
+						var url=$('.formulario').val();
+						$(".listaObjetos").load(url);
+						
+						Swal.fire(
+								  'ACTUALIZACIÓN EXITOSA!!',
+								  'Click en OK para continuar!',
+								  'success'
+								);
+					}
+					else {
+						$(".modalUsuario").modal("hide");
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'Ooops, algo salió mal, no se pudo guardar la información.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		});
+	</script>
+	<script type="text/javascript">
+	$("#tablaAudiencias #filaAudiencias").click(function(){
+ 		$(this).addClass('selected').siblings().removeClass('selected');
+	   	var value=$(this).find('td:first').html();
+	   	$(".detalleObjetos").empty();
+   		$.get( "detalleAud", { id: value})
+		.done(function(data) {
+			$(".detalleObjetos").html(data);
+			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+		})
+		.fail( function() {
+			Swal.fire({
+			  	icon: 'error', title: 'ATENCIÓN', text: 'Algo salió mal, no se pudo obtener la información. Actualice toda la página!!',
+			});
+		});
+	});	
+	</script>
+	<script type="text/javascript">
+		document.getElementById('numero').addEventListener('keydown', inputCharacters1);
+		document.getElementById('anio').addEventListener('keydown', inputCharacters2);
+	
+		function inputCharacters1(event) {
+		  	if (event.keyCode == 13) {
+		   		document.getElementById('anio').focus();
+		  	}
+		};
+		function inputCharacters2(event) {
+			if (event.keyCode == 13) {
+			    document.getElementById('cuaderno').focus();
+			}
+		};
+		$('.btnNuevaAudiencia').click(function(){
+			$('.modalNuevaAudiencia').find('[autofocus]').focus();
+			$('.modalNuevaAudiencia').modal('show');
+			$('#divBuscarAudiencia :input').attr('readonly', false);
+		});
+		
+		$(".cerrar").click(function() {
+			reiniciarBusqueda();
+   			$(".modalNuevaAudiencia").modal('hide');
+			$('body').removeClass('modal-open');
+			$('.modal-backdrop').remove();
+			$('.reserva option[value="N"]').prop('selected', true);
+		});
+	</script>
+	
+    <script type="text/javascript">
+		$(".guardarAudiencia").on("submit", function(e) {
+			e.preventDefault();
+			var formData = new FormData(this);
+			$.ajax({
+				type:"POST",
+				url:"guardarAudiencia",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				success:function(response) {
+					if(response.Status == 200){ 
+						$("#modalNuevaAudiencia").modal('hide');
+						$('body').removeClass('modal-open');
+						$('.modal-backdrop').remove();
+						$(".detalleObjetos").empty();
+						var url=$('.formulario').val();
+						$(".listaObjetos").load(url);
+						Swal.fire(
+								  'AUDIENCIA PUBLICADA!!',
+								  'Click en OK para continuar!',
+								  'success'
+								);
+						
+					}
+					else if(response.Status == 400){
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'Algún campo se encuentra vacío, verifique!!',
+							  
+							});
+					}
+					else {
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'Ooops, algo salió mal, no se pudo enviar la información.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		})
+		
+		function reiniciarBusqueda(){
+			$('#divBuscarAudiencia :input').attr('readonly', false);
+			$('#sede').attr("style", "pointer-events: all;");
+			$('#instancia').attr("style", "pointer-events: all;");
+			$('#divBuscarAudiencia input').val('');
+			$('#divResultadoAudiencia :input').val('');
+			$('.reserva option[value="N"]').prop('selected', true);
+			$('#numero').focus();
+		};
+	</script>
+
+</body>
+</html>

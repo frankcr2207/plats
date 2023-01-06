@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script type="text/javascript" src="js/jquery.richtext.js"></script>
+	<link rel="stylesheet" href="css/main.css" >
+	<link rel="stylesheet" href="css/richtext.min.css">
+	<style type="text/css" media="print">
+		@media print {
+		#listaObjetos {display:none;}
+		.btnEditarExpSen {display:none;}
+		#btnImprimir {display:none;}
+		.divOpciones {display:none;}
+		.divGuardarSegSen {display:none;}
+		#btnResolver {display:none;}
+		#menu {display:none;}
+		.taObsResolucion {display:none;}
+		.lblObsResolucion {display:none;}
+	</style>
+	<style type="text/css">
+		.loader{
+        	display: none;
+        	background-color:white;
+	   		opacity:1;
+	   		filter:alpha(opacity=60); /* IE < 9.0 */
+      	}
+		#solicitud input{
+	    	border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	.modalVerificarSentenciado input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	
+    	.modalWebService input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF; 
+	    	text-align:center";
+    	}
+    	input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+
+    	#datosSolicitud label, .modalVerificarSentenciado label{
+    	width: 100px;
+    }
+	</style>
+	
+</head>
+<body>
+	
+	<div  th:fragment="divReglas">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<div th:each="dato:${sentenciado}" id="datosSolicitud" class="datosSolicitud">
+				<div class="form-row">
+					<div style="width: 45%; margin: auto;">
+					<button class="btn btn-info btn-sm" type="button" id="btnRegresar"><i class="fas fa-reply"></i>&nbsp;REGRESAR</button>&nbsp;&nbsp;&nbsp;<span><strong>DATOS DEL SENTENCIADO y/o PROCESADO</strong></span><hr>
+					</div>
+					<div style="width: 55%; margin: auto;">
+					<div><span sec:authorize="hasRole('CONTROL-REGLAS-NCPP')"> 
+					<button th:if="${dato.c_usuario_temp == sesion}" class="btn btn-outline-primary btn-sm btnNuevoExp"><i class="fas fa-plus"></i></button></span>&nbsp;&nbsp;<span><strong>PROCESOS</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<select style="font-size: 12px; width:280px;" class="listaExpedientesSentenciados">
+					</select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-weight: bold" class="txtEstado"></span><hr>
+					</div>
+					</div>
+				</div>
+				<div >
+				<div style="width: 45%; height:100%; margin: auto; border-right: 1px solid #C2C2C2; float: left;">
+					<div style="font-size: 11px;">
+						<div style="width:100%; font-size: 11px" class="form-row">
+							<div style="width:65%;">
+							<input th:value="${dato.id_sentenciado}" id="id" type="hidden" class="id"><input th:value="${sede}" id="idSede" type="hidden">
+							<input th:value="${form}" id="form" type="hidden">
+							<label><strong>DNI: </strong></label><input th:value="${dato.s_documento}" id="documento" readonly="readonly" size="20" >&nbsp;&nbsp;&nbsp;<button th:href="@{consultaReniec/(dni=${dato.s_documento})}" class="btn btn-outline-primary btn-sm btnReniec" ><i class='fas fa-fingerprint fa-lg'></i>&nbsp;</button>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="window.print();" id="btnImprimir" class="btn btn-outline-dark btn-sm" style="margin:auto"><i class='fas fa-print fa-lg'></i></button><br>
+							<label><strong>NOMBRES: </strong></label><input style="font-weight: bold" th:value="${dato.nombresCompletos}" id="nombres" readonly="readonly" size="35"><br>
+							<label><strong>F. NAC.: </strong></label><input th:value="${dato.fechaNacimiento}" id="nacimiento" readonly="readonly" size="35"><br>
+							<label><strong>NACIONALIDAD: </strong></label><input th:value="${dato.s_pais}" id="pais" readonly="readonly" size="35"><br>
+							<label><strong>CORREO: </strong></label><input th:value="${dato.s_correo}" id="correo" readonly="readonly" size="35" ><br>
+							<label><strong>CELULAR: </strong></label><input style="font-weight: bold" th:value="${dato.n_celular}" id="celular" readonly="readonly" size="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<label style="width:50px"><strong>FIJO: </strong></label><input th:value="${dato.n_fijo}" readonly="readonly" size="10"><br>
+							<hr>
+							<label><strong>CAMBIÓ DOM.: </strong></label><input th:value="${dato.s_vario}" id="fijo" readonly="readonly" size="5"><br>
+							<label><strong>DOM. ACTUAL: </strong></label><input th:value="${dato.s_domicilio}" readonly="readonly" size="35"><br>
+							<label><strong>REFERENCIA: </strong></label><input th:value="${dato.s_referencia}" readonly="readonly" size="35"><br>
+							<hr>
+							</div>
+							<div style="width:35%;" align="center" >
+								<div sec:authorize="hasRole('CONTROL-REGLAS-NCPP')">
+									<div th:if="${dato.c_usuario_temp != sesion}">
+										<h6><strong>El registro ya está siendo verificado por: <span th:text="${dato.c_usuario_temp}"></span>, por favor elija otro registro.</strong></h6>
+									</div>
+								</div>
+								<div align ="center" >
+									<img class="info" th:attr="src=@{${image}}" width="150" />
+								</div>
+							</div>
+						</div>
+							<label><strong>TRABAJA: </strong></label><input th:value="${dato.s_trabaja}" readonly="readonly" size="5"><br>
+							<label style="width:140px"><strong>CENTRO TRABAJO: </strong></label><input th:value="${dato.s_centro_trabajo}" readonly="readonly" size="40"><br>
+							<label style="width:140px"><strong>LABOR U OCUPACIÓN: </strong></label><input th:value="${dato.s_labores}" readonly="readonly" size="40"><br>
+							<label style="width:140px"><strong>DIRECCIÓN TRABAJO: </strong></label><input th:value="${dato.s_direccion_trabajo}" readonly="readonly" size="40"><br>
+							<label><strong>REFERENCIA: </strong></label><input th:value="${dato.s_referencia_trabajo}" readonly="readonly" size="40"><br>
+							<label><strong>NOMBRE JEFE: </strong></label><input th:value="${dato.s_jefe_trabajo}" readonly="readonly" size="40"><br>
+							<label><strong>TEL. LABORAL: </strong></label><input th:value="${dato.s_telefono_trabajo}" readonly="readonly" size="10"><br>
+					</div>
+				</div>
+				<div style="width: 55%; height: 100%; margin: auto; float: left; padding-left: 5px;">
+					<div id="divReglaExpediente" class="divReglaExpediente" style="display: none; font-size: 12px; ">
+					<div class="form-row">
+						<div style="width: 85%; font-size: 11px">
+						<input type="hidden" class="txtIdExpSen"><input type="hidden" id="txtIdExpIns"><input type="hidden" id="txtIdExpSede"><input type="hidden" id="txtIdSec">
+						<label style="width: 50px"><strong>&nbsp;&nbsp;EXP:</strong></label><input class="txtExpSen" size="10" type="text" readonly>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						<label style="width: 60px;"><strong>SEDE:</strong></label><input class="txtSedeSen" size="50" type="text" readonly><br>
+						<label><strong>&nbsp;&nbsp;INSTANCIA:</strong></label><input class="txtInsSen" size="65" type="text" readonly><br>
+						<label style="width: 60px;"><strong>&nbsp;&nbsp;REGLAS:</strong></label><input class="txtDetReglas" size="50" type="text" readonly><label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>REP. CIVIL SIJ:</strong></label><input class="txtRepCivil" size="10" type="text" readonly><br>
+						<label><strong>&nbsp;&nbsp;ACUMULADO:</strong></label><input class="txtAcumulado" size="10" type="text" readonly>
+						</div>
+						<div th:if="${dato.c_usuario_temp == sesion}" style="width: 15%">
+						<button sec:authorize="hasRole('CONTROL-REGLAS-NCPP')" type="button" class="btn btn-warning btn-sm btnEditarExpSen"><i class="fas fa-edit"></i>&nbsp; EDITAR</button><br><br>
+						<button sec:authorize="hasRole('CONTROL-REGLAS-NCPP')" type="button" class="btn btn-primary btn-sm btnNuevaCita" id="btnNuevaCita"><i class="fas fa-plus"></i>&nbsp; CITA</button>
+						</div>
+					</div>
+					<hr>
+					<div class="form-row" id="divTablaReglas" style="padding-left: 5px;">
+						<table style="font-size: 11px;" id="tablaReglas" class="table table-hover table-sm">
+						</table>
+					</div>
+					</div>
+				</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade modalReniec" id="modalReniec" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title" id="staticBackdropLabel"><i class='fas fa-fingerprint'></i>&nbsp;<strong>CONSULTA RENIEC</strong></h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      	<div class="modal-body">
+	        	<div class="datosModal" style="font-size: 12px">
+	        		<div style="width:100%" class="modalWebService">
+	        			<div style="margin: 10px">
+	        				<div class="form-row">
+			        			<label style="width: 120px"><strong>NOMBRES: </strong></label>
+			        			<input class="nombresReniec" id="nombresReniec" size="40">
+			        		</div>
+			        		<div class="form-row">
+			        			<label style="width: 120px" ><strong>FECHA NACIM.: </strong></label>
+			        			<input class="fechaNacReniec" id="fechaNacReniec" size="30">
+			        		</div>
+			        		<div class="form-row">
+			        			<label style="width: 120px"><strong>DEP. NACIMIENTO: </strong></label>
+			        			<input class="departamentoReniec" id="departamentoReniec" size="30">
+			        		</div>
+			        		<div class="form-row">
+			        			<label style="width: 120px"><strong>NOMBRE PADRE: </strong></label>
+			        			<input class="padreReniec" id="padreReniec" size="30">
+			        		</div>
+			        		<div class="form-row">
+			        			<label style="width: 120px"><strong>NOMBRE MADRE: </strong></label>
+			        			<input class="madreReniec" id="madreReniec" size="30">
+			        		</div>
+	        			</div>
+	        		</div>
+	        	</div>
+	        </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-success btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;OK</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalModificarExpSen" id="modalModificarExpSen" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>MODIFICACIÓN DE EXPEDIENTE</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 11px"  th:each="dato:${sentenciado}">
+	      	<form id="formModificarExp">
+	      	<input type="hidden" class="txtIdExpSen" name="txtIdExpSen">
+	      		<label style="width: 60px"><strong>SEDE:</strong></label><select style="width:200px;" id="posSede" class=' posSede' name="posSede"></select>&nbsp;&nbsp;&nbsp;
+	      		<label style="width: 80px"><strong>INSTANCIA:</strong></label><select style="width:300px;" id="posInstancia" class='posInstancia' name="posInstancia"></select><br>
+	      		<label style="width: 80px"><strong>EXPEDIENTE:</strong></label><input size="10" id="posExpediente" class='posExpediente' name="posExpediente">&nbsp;&nbsp;&nbsp;
+	      		<label style="width: 80px"><strong>REP. CIVIL SIJ:</strong></label><input type="number" size="8" id="posReparacion" class='posReparacion' name="posReparacion">&nbsp;&nbsp;&nbsp;
+	      		<label style="width: 80px"><strong>MEDIDAS:</strong></label><input size="40" id="posMedidas" class='posMedidas' name="posMedidas"><br>
+	      		<label style="width: 80px"><strong>SECRETARIO:</strong></label><select style="width:250px;" id="posSecretario" class='posSecretario' name="posSecretario"></select>&nbsp;&nbsp;&nbsp;
+	      		<label style="width: 70px"><strong>ESTADO:</strong></label><select style="width:150px;" id="posEstado" class='posEstado' name="posEstado"><option value="T">TRAMITE</option><option value="V">PENA VENCIDA</option><option value="B">BIOMETRICO</option><option value="X">NO CORRESPONDE</option></select>
+	      	</form>
+		  </div>
+	      <div class="modal-footer" th:each="dato:${sentenciado}">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	        <span sec:authorize="hasRole('CONTROL-REGLAS-NCPP')"> 
+	        <button th:if="${dato.c_usuario_temp == sesion}" type="button" class="btn btn-primary btnGuardarEdicionExp"><strong><i class="fas fa-save"></i>&nbsp;GUARDAR</strong></button>
+	        </span>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalAgregarExp" id="modalAgregarExp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-dialog-centered" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>NUEVO EXPEDIENTE</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 12px">
+	      	<form id="formAgregarExpSen">
+		      	<div style="margin-left:auto" class="form-row" th:each="dato:${sentenciado}">
+		      		<input th:value="${dato.id_sentenciado}" id="id" type="hidden" name="id">
+		      		<div class="form-group col-sm-3">
+		               <label>EXPEDIENTE</label>
+		               <input type="text" name="expediente" id="expediente" autofocus class="form-control form-control-sm expediente" maxlength="13">
+		             </div>
+			      	 <div class="form-group col-md-4">
+						  <label>SEDE</label>
+						<select id="sede" name="sede" class="form-control form-control-sm sede">
+						</select>
+					</div>
+					<div class="form-group col-md-4 divInstancia">
+					  <label>INSTANCIA</label>
+						<select id="instancia" name="instancia" class="form-control form-control-sm instancia">
+						</select>
+					</div>
+				</div>
+			</form>
+	      </div>
+	      <div class="modal-footer" th:each="dato:${sentenciado}">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	        <button  type="button" class="btn btn-primary btnGuardarNuevoExpSen"><strong><i class="fas fa-save"></i>&nbsp;GUARDAR</strong></button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalNuevaCita" id="modalNuevaCita" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>SIGUIENTE CITA</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 12px">
+	      	<form>
+		      	<div style="margin-left:auto">
+		      		<label><strong>Fecha y Hora:</strong> </label>&nbsp;<input id="txtNuevaCita" type="datetime-local">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button type="button" class="btn btn-danger btn" onclick="getAgeReg()"><i class='fas fa-calendar-alt'></i>&nbsp;AGENDA</button><br><br>
+		      		<i><strong>* No olvide indicar al sentenciado que es de entera responsabilidad la comunicación en la fecha indicada.</strong></i>
+				</div>
+			</form>
+	      </div>
+	      <div class="modal-footer" th:each="dato:${sentenciado}">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	        <span sec:authorize="hasRole('CONTROL-REGLAS-NCPP')"> 
+	        <button th:if="${dato.c_usuario_temp == sesion}" type="button" class="btn btn-primary btnGuardarCita"><strong><i class="fas fa-save"></i>&nbsp;GUARDAR</strong></button>
+	      	</span>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<div class="modal fade modalGuardarRegla" id="modalGuardarRegla" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h6 class="modal-title" id="exampleModalLabel"><strong>REGISTRAR REGLA</strong></h6>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      <div class="modal-body" style="font-size: 12px" >
+	      	<form enctype="multipart/form-data" id="formRegla">
+		      	<div style="width: 85%">
+		      	<input type="hidden" class="txtIdExpSen" name="txtIdExpSen">
+		      	<input name="idRegla" id="idRegla" type="hidden">
+		      		<label style="font-weight: bold;">INGRESE REPARACION: </label>&nbsp;&nbsp;&nbsp;<input type="number" name="txtReparacion" id="txtReparacion" placeholder="Opcional"><br>
+		      		<label style="font-weight: bold;">CAPTURA: </label>&nbsp;&nbsp;&nbsp;<input style="width: 300px" accept="image/*" type="file" name="ubicacion"><br><br>
+					<div class="form-row">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><strong>OBS.</strong></span>
+						</div>
+						<textarea  style="font-size: 11px; text-transform:uppercase;" rows="20" maxlength="2000" name="observacion" class="form-control txtObsRegla" aria-label="With textarea" placeholder="Ingrese aqui las observaciones correspondientes al expediente ..."></textarea><br>  
+					</div></div>
+				</div>
+				
+			</form>
+	      </div>
+	      <div class="modal-footer" th:each="dato:${sentenciado}">
+	        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cerrar</button>
+	        <span  sec:authorize="hasRole('CONTROL-REGLAS-NCPP')" class="divGuardarSegSen">
+				&nbsp;&nbsp;&nbsp;<button th:if="${dato.c_usuario_temp == sesion}" type="button" class="btn btn-primary btn-sm btnGuardarRegla"><i class="fas fa-save"></i>&nbsp;GRABAR</button>
+			</span>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	
+	<script src="js/datosReniec.js" th:src="@{js/datosReniec.js}"></script>
+	<script src="js/jquery.rule.js"></script>
+	<script type="text/javascript">
+		$('#btnRegresar').click(function(){
+			var id = $('#idSede').val();
+			var idSen = $('#id').val();
+			var form = $('#form').val();
+			
+			/*if(form == 'B'){
+				id = 0;
+			}*/
+			
+			$.get( "sentenciados", {id : 9999999999, idSen : idSen})
+			.done(function(data) {
+				$("#divDetalleReglas").hide();
+				$("#divReglas").show();
+				$("#divListaSentenciados").empty();
+				$("#divListaSentenciados").html(data);
+				$("#divListaSentenciados").show();
+				$("#txtBuscarSen").val(''); $("#txtBuscarSen").focus();
+			})
+			.fail( function() {
+				Swal.fire({
+				  	icon: 'error', title: 'ATENCIÓN', text: 'Algo salió mal, no se pudo obtener la información.!!',
+				});
+			});	
+			
+			
+		});
+		function getAgeReg(){	
+			var url='verAgendaReglas';
+			window.open(url,'nuevaVentana','width=1200, height=700');
+		};
+		
+		$('.btnNuevoExp').click(function(){
+			loadSedesNuevo();
+			$('#modalAgregarExp').modal('show');
+		});
+		
+		$('#btnNuevaCita').click(function(){
+			$("#modalNuevaCita input").val("");
+			$('#modalNuevaCita').modal('show');
+		});
+		
+	</script>
+</body>
+</html>

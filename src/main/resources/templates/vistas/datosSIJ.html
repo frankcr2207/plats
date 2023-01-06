@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="ISO-8859-1">
+	<title>Insert title here</title>
+	<style type="text/css">
+		#datosExpediente input{
+			border: none;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div th:fragment="detalleObjetos">
+		<div th:object="${expediente}" id="datosExpediente">
+		<h6><strong>EXPEDIENTE: <input style="text-align: right;" size="2" th:field="*{numero}">-<input size="1" th:field="*{anio}">-&nbsp;<input style="text-align: left;" size="1" th:field="*{cuaderno}"> <input size="40" th:field="*{instancia}"></strong></h6>
+		<hr>
+		<div class="form-row" style="width: 100%" th:if="${expEncontrado == 1}">
+			<div style="margin:auto"><button onclick="rechazar()" class="btn btn-danger btn-sm"><strong>RECHAZAR</strong></button>&nbsp;&nbsp;&nbsp;<button onclick="admitir()" class="btn btn-success btn-sm"><strong>PERMITIR</strong></button></div>
+		</div>
+		<div class="form-row" style="width: 100%" th:if="${expEncontrado != 1}">
+			<div style="margin:auto"><button onclick="noExiste()" class="btn btn-danger btn-sm"><strong>ACEPTAR</strong></button></div>
+		</div><br>
+		<div class="form-row" style="width: 100%; overflow-y: scroll;" >
+			
+			<div style="width: 50%" class="card card-body" >
+				<input type="hidden" th:value="*{id_correlativo}" class="correlativo">
+				<input type="hidden" th:value="*{id_solicitud}" class="solicitud">
+				<input type="hidden"  th:value="${dni}" class="dniSol">
+				<div th:if="${expEncontrado == 1}"><div th:object="${expedienteSIJ}"><input type="hidden"  th:value="*{n_unico}" class="exp">
+				<input type="hidden"  th:value="*{x_formato}" class="formato"></div></div>
+				<label><strong>DATOS DEL SOLICITANTE</strong></label>
+				<label><strong>P. PROCESAL: <input style="border: none; font-size: 12px" th:field="*{nombre_parte}"></strong></label>
+				<label><strong>SECRETARIO: <input style="border: none; font-size: 12px" th:field="*{nombre_secretario}"></strong></label>
+			</div>
+			<div style="width: 50%;overflow-y: scroll;" class="card card-body">
+				<label style="color:red" th:if="${expEncontrado == 0}"><strong> EXPEDIENTE NO ENCONTRADO EN SIJ</strong></label>
+				<label style="color:red" th:if="${expEncontrado == 2}"><strong> EXPEDIENTE YA SE ENCUENTRA ASIGNADO A ESTE DNI</strong></label>
+				<div th:if="${expEncontrado == 1}">	
+					<table style="font-size:11px; width:100%" class="table table-hover table-sm tablaExpedientes" id="tablaExpedientes">
+						<thead>
+							<tr>
+								<th><strong>PARTES PROCESALES SIJ</strong></th>
+							</tr>
+						</thead>
+						<tbody class="buscar">
+							<tr style="cursor: default" th:each="partes:${partesExp}" id="filasExpedientes" class="filasExpedientes">	
+								<td style="vertical-align:middle;"><span th:text="${partes.nombreCompletoParte}"></span></td>
+							</tr>
+						</tbody>
+					</table><br>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>	
+	<script type="text/javascript">
+		function admitir(){
+			var url = 'admitirExpediente/' + $(".solicitud").val() + '/' + $(".correlativo").val() + '/' + $(".exp").val() + '/' + $(".formato").val() + '/' + $(".dniSol").val();
+			$(".listaObjetos").load(url);
+			$(".detalleObjetos").empty();
+		}
+		
+		function noExiste(){
+			var url = 'detalleSolicitudExpedientes/' + $(".solicitud").val();
+			$(".listaObjetos").load(url);
+			$(".detalleObjetos").empty();
+		}
+		
+		function rechazar(){
+			var url = 'rechazarExpediente/' + $(".solicitud").val() + '/' + $(".correlativo").val() + '/' + $(".dniSol").val();
+			$(".listaObjetos").load(url);
+			$(".detalleObjetos").empty();
+		}
+	</script>
+</body>
+</html>

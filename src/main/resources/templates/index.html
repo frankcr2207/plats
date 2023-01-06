@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta charset="UTF-8">
+	<link rel="icon" type="img/jpg" href="img/pj.jpg" />
+	<link rel="stylesheet" href="css/bootstrap.min.css" >
+	<link rel="stylesheet" href="css/toastr.min.css" >
+	<script src="js/iconos.js"></script>
+	<script src="js/jquery-3.5.1.js"></script>
+	<script src="js/popper.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/toastr.min.js"></script>
+	<title>CSJAR - PLATAFORMA DE ATENCIÓN Y SERVICIOS</title>
+ 	<style>
+
+    	html, body {
+      		margin: 10;
+      		padding: 10;
+      		font-size: 14px;
+    		}
+    	body{
+			background:url("img/fondo.jpg") no-repeat center center fixed;
+			background-size: 100%;
+
+    	}
+
+	    #contenido, #cabecera{
+	      width: 75%;
+	      margin: auto;
+	    }
+	    .opacity{
+		   background-color:white;
+		   opacity:0.9;
+		   filter:alpha(opacity=60); /* IE < 9.0 */
+		}
+		input{
+    		border:0;
+	    	border-bottom: 1px solid #009CBF;
+	    	width: 100%;
+	    	text-align:center;
+    	}
+		input:focus{
+			outline:none !important;
+	    	outline-width: 0 !important;
+	   		box-shadow: none;
+	    	-moz-box-shadow: none;
+	    	-webkit-box-shadow: none;
+	    }
+
+  	</style>
+</head>
+<body>
+	<div  style="background-color: #830000; border-bottom: 8px solid #C4C4C4;">
+		<div id="cabecera" style="padding: 20px; color:white;font-size:20px;" align="center">
+			<a><img alt="ayuda" src="img/pj.svg" width="30px">&nbsp;&nbsp;&nbsp;<strong>CORTE SUPERIOR DE JUSTICIA DE AREQUIPA</strong></a>
+			<br><p><strong>PLATS - PLATAFORMA DE ATENCIÓN Y SERVICIOS</strong></p>
+		</div>
+	</div>
+	<div id="contenido" style="padding-top:20px">
+		<div class="form-row" style="width: 70%; margin: auto">
+			<div style="border-radius: 15px; margin: 60px auto;" class="form-group col-md-4 opacity">
+				<form th:action="@{/}"  method="post" >
+					<div style="padding: 10px">
+						<label for="exampleInputEmail1" class="text-uppercase"><strong>Usuario</strong></label><br>
+						<input type="text" id="username" autocomplete="new-password" style="text-transform:uppercase;" name="username" autofocus="autofocus"><br><br>
+						<label for="exampleInputPassword1" class="text-uppercase"><strong>Contraseña</strong></label><br>
+						<input type="password" id="password" autocomplete="off" name="password" value=""><br><br>
+						<div th:if="${param.error}" role="alert" align="center">
+							<span style="font-size: 15px" class="badge badge-pill badge-danger">CREDENCIALES INCORRECTAS</span><br>&nbsp;
+						</div>
+						<div align="center">
+							<button class="btn btn-primary" ><strong>INGRESAR</strong></button>
+						</div>	  
+					</div> 
+				</form>
+			</div>
+
+		</div>
+	</div>
+		<footer style="background-color: black;  left: 0;  bottom: 0;  width: 100%; position: fixed; color: white;  text-align: center;">		
+		<div style="margin:0px auto ;   width:100%;   overflow: hidden; padding-top: 22px" class="form-row">
+			<div style="width: 10%;font-size: 11px">Powered by Jorge F.C.R. <i class='fab fa-java' style='font-size:20px'></i><br>Cel. 999039040</div>
+			<div style="width: 80%">
+			<p style="color: white; font-size: 11px"> Corte Superior de Justicia de Arequipa  - Plaza España S/N - Arequipa - Perú<br> &copy; PLATS v2.6 - Todos los derechos reservados </p>
+			</div>
+			<div style="width: 10%"><i class="fas fa-tools"></i>&nbsp;<a id="btnUtilitarios" style="cursor: pointer" type="button">Utilitarios</a></div>
+		</div>
+	</footer>
+	
+	<div class="modal fade modalUtilitario" id="modalUtilitario" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-dialog-centered">
+		  <form class="formFoliador" action="" method="post" enctype="multipart/form-data" id="formFoliador">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h6 class="modal-title" id="staticBackdropLabel"><strong>FOLIADOR DE DOCUMENTOS PDF</strong></h6>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+	      	  <div class="modal-body">
+	      		 <div align="center">
+	      			<img align="middle" alt="" width="50" src="img/pdf.png"><br><br><br>
+			  		<input id="archivo" accept=".pdf" type="file" name="archivo"><br><br>
+			  		<label style="font-size: 10px; font-weight: bold">* Esta version se encuentra en modo prueba, mas opciones indicar al informatico.</label>
+			  	 </div>
+			  </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CERRAR</button>
+		        <button type="button" class="btn btn-primary btnIniciarFoliado" data-dismiss="modal"><i class='fas fa-pen-alt fa-lg'></i>&nbsp;INICIAR FOLIADO</button>
+		      </div>
+		    </div>
+		    </form>
+		  </div>
+		</div>
+	
+	<script type="text/javascript">
+		$("#btnUtilitarios").click(function(){
+			$("#modalUtilitario").modal('show');
+		});
+		
+		$(".btnIniciarFoliado").click(function() {
+			if($('#archivo').val() == ''){
+				toastr.clear();
+				toastr.options = {
+					"closeButton":true,
+					"progressBar": true,
+					"positionClass":"toast-topcenter-right"
+				};
+				toastr.warning("DEBE ELEGIR ARCHIVO!!");
+				return false;
+			}
+			
+			var form = document.getElementById('formFoliador');
+			var formData = new FormData(form);
+			
+			$.ajax({
+				type:"POST",
+				url:"foliarArchivo",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				beforeSend:function(){
+		            $('.loader').show();
+		        },
+				success:function(response) {
+					if(response.Status == 200){ 
+					
+					}
+					else {
+						$('.loader').hide();
+						$(".modalRespuestaCDG").modal("hide");
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'No se pudo iniciar.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		});	
+	</script>
+</body>
+</html>

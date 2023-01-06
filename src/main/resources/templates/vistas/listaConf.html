@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+	<script src="js/funciones.js"></script>
+	<link rel="stylesheet" href="css/toastr.min.css" >
+</head>
+<body>
+	<div  th:fragment="listaObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+			<label style="font-weight: bold" th:text="${formulario}"></label>&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="actualizarConf()" class="btn btn-outline-success btn-sm"><i class='fas fa-sync-alt fa-lg'></i></button>
+			<table style="font-size:11px" class="table table-hover table-sm tablaParametros" id="tablaParametros" >	
+				<thead>
+					<tr>
+						<th>CÓDIGO</th>
+						<th>DESCRIPCIÓN</th>
+						<th>PARÁMETRO</th>
+					</tr>
+				</thead>
+				<tbody class="buscar">
+					<tr style="cursor: pointer" th:each="parametro:${parametros}" id="filasParametros" class="filasParametros">	
+						<td th:text="${parametro.id}"></td>
+						<td><strong><span th:text="${parametro.descripcion}"></span></strong></td>
+						<td><span th:text="${parametro.valor}"></span></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>		
+	</div>
+	
+	<script type="text/javascript">
+			
+	 	$("#tablaParametros #filasParametros").click(function(){
+	 		$(this).addClass('selected').siblings().removeClass('selected'); 
+	   		toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("DATOS RECUPERADOS!!");
+		   	var value=$(this).find('td:first').html();
+
+		   	$.get( "verParametro", { value: value} )
+		    .done(function( data ) {
+		    	$(".detalleObjetos").html(data);
+		    })
+		    .fail(function() {
+		    	Swal.fire({
+					icon: 'info',
+					title: 'ATENCIÓN',
+					text: 'No se pudieron obtener los datos!!',		  
+				});
+		    });
+		});	
+	</script>
+	<script type="text/javascript">
+    	function actualizarConf(){
+	    	$(".detalleObjetos").empty();
+   			$(".listaObjetos").load('parametros');
+   			toastr.clear();
+			toastr.options = {
+				"closeButton":true,
+				"progressBar": true,
+				"positionClass":"toast-topcenter-right"
+			};
+			toastr.success("REGISTROS ACTUALIZADOS!!");
+   		}
+    </script>
+</body>
+</html>

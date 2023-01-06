@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script src="js/sweetalert2.all.min.js" th:src="@{js/sweetalert2.all.min.js}"></script>	
+	<script src="js/toastr.min.js" th:src="@{js/toastr.min.js}"></script>
+		<link rel="stylesheet" href="css/toastr.min.css" >
+		
+		<style type="text/css">
+			#solicitud input{
+		    	border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	.modalSolicitante input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	.modalWebService input{
+	    		border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	
+	    	#modalRespuesta input{
+		    	border:0;
+		    	border-bottom: 1px solid #009CBF; 
+		    	text-align:center";
+	    	}
+	    	#datosSolicitud label{
+	    	width: 90px;
+	    }
+		</style>
+</head>
+<body>
+	
+	<div  th:fragment="detalleObjetos">
+		<div style="width:100%; height: 100%" id=solicitud>
+
+				<div th:each="dato:${detalle}" id="datosSolicitud" class="datosSolicitud">
+							<h6><strong>DATOS DE SOLICITUD</strong></h6>
+								<div class="form-row">
+									<div style="width:70%; font-size: 12px">
+										<input th:value="${dato.n_id}" id="id" type="hidden">
+										<input th:value="${dato.form}" class="formulario" id="formulario" type="hidden">
+										<label><strong>DNI: </strong></label><input th:value="${dato.s_documento}" id="documento" readonly="readonly" size="20" >&nbsp;&nbsp;&nbsp;<button th:href="@{consultaReniec/(dni=${dato.s_documento})}" class="btn btn-outline-primary btn-sm btnReniec" ><i class='fas fa-fingerprint fa-lg'></i>&nbsp;</button><br>
+										<label><strong>NOMBRES: </strong></label><input th:value="${dato.nombresCompletos}" id="nombres" readonly="readonly" size="40"><br>
+										<label><strong>F. NAC.: </strong></label><input th:value="${dato.fNacimiento}" id="nacimiento" readonly="readonly" size="40"><br>
+										<label><strong>CORREO: </strong></label><input th:value="${dato.s_correo_electronico}" id="correo" readonly="readonly" size="40" ><br>
+										<label><strong>CELULAR: </strong></label><input th:value="${dato.s_celular}" id="celular" readonly="readonly" size="40"><br>
+										<script type="text/javascript" src="js/datosReniec.js" th:src="@{js/datosReniec.js}"></script>
+									</div>
+									<div style="width:30%;" align="center" th:switch="${dato.s_estado}">
+										<div class="switch">
+										<div th:case="'E'">
+											<p><strong>EN ESPERA</strong></p>
+											<button class="btn btn-success btn-lg" style="margin:auto" data-toggle="modal" data-target="#modalRespuesta"><strong><i class='fas fa-envelope'></i>&nbsp;RESPONDER</strong></button><br><br>
+											<button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modalAnulacion" style="margin:auto"><i class='fas fa-times fa-lg'></i>&nbsp;ANULAR</button>
+										</div>
+										<div th:case="'A'">
+											<p><strong>ATENDIDO</strong></p>
+											<button class="btn btn-primary" style="margin:auto" data-toggle="modal" data-target="#modalVerRespuesta"><strong><i class='fas fa-envelope'></i>&nbsp;VER RESPUESTA</strong></button><br><br>
+										</div>
+										<div th:case="'X'">
+											<p><strong>ANULADO</strong></p>
+											<button class="btn btn-danger" style="margin:auto" data-toggle="modal" data-target="#modalVerAnulacion"><strong><i class='fas fa-envelope'></i>&nbsp;VER MOTIVO</strong></button><br><br>
+										</div>
+										</div>
+									</div>
+								</div><hr>
+								<div style="font-size: 12px;">
+									<label><strong>CDM: </strong></label><input th:value="${dato.s_cdm}" id="cdm" readonly="readonly" size="60" value=""><br>
+									<label><strong>INSTANCIA: </strong></label><input th:value="${dato.x_nom_instancia}" id="instancia" readonly="readonly" size="40" value=""><br>
+									<label><strong>EXPEDIENTE: </strong></label><input th:value="${dato.n_expediente}" id="expediente" readonly="readonly" size="40" value=""><br>
+								</div><hr>
+								<div style="font-size: 12px;">
+								<label th:if="${dato.adjunto != '' and dato.adjunto != null}" ><strong>ADJUNTO</strong></label>
+								<button type="button" th:if="${dato.adjunto != '' and dato.adjunto != null}" onclick="ventanaNueva()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i></button>
+								<label th:if="${dato.arancel != ''and dato.arancel != null}" ><strong>ARANCEL</strong></label>
+								<button type="button" th:if="${dato.arancel != '' and dato.arancel != null}" onclick="ventanaNueva2()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i></button>
+								</div>
+								
+							
+				</div>
+				
+				
+			
+		</div>
+	</div>
+	
+	<div class="modal fade modalRespuesta" id="modalRespuesta" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-lg">
+		  
+		    <div class="modal-content" th:each="dato:${detalle}">
+		    <form class="uploadImage" action="" method="post" enctype="multipart/form-data">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">RESPUESTA</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      
+		      		<div class="modal-body" style="font-size: 12px">
+		      			<input class="solicitud" type="hidden" id="idSolicitud" name="idSolicitud" th:value="${dato.n_id}">
+		      			<label style="width: 90px"><strong>SOLICITANTE: </strong></label><input th:value="${dato.nombresCompletos}" id="solicitanteRespuesta" name="solicitanteRespuesta" readonly="readonly" size="40" ><br>
+		      			<label style="width: 90px"><strong>CORREO: </strong></label><input th:value="${dato.s_correo_electronico}" id="correoRespuesta" name="correoRespuesta" readonly="readonly" size="40" ><br>
+		      			<label style="width: 90px"><strong>ASUNTO: </strong></label><input th:value="${dato.asunto}" id="asuntoRespuesta" name="asuntoRespuesta" readonly="readonly" size="80" ><br>
+		      			<label style="width: 90px"><strong>REFERENCIA: </strong></label><input th:value="${dato.n_expediente}" id="referenciaRespuesta" readonly="readonly" size="80" ><br><br>
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">CONTENIDO</span>
+					  </div>
+					  <textarea class="form-control"  required id="textoRespuesta" name="textoRespuesta" aria-label="With textarea"></textarea>
+					</div><br>
+					<label style="font-size: 12px" for="exampleFormControlFile1">Archivo adjunto. (Formato PDF o imagen)</label>
+					<input accept=".pdf,image/*" type="file" class="form-control-file" id="adjunto" name="adjunto">  
+		      		</div>
+		      	
+			      <div class="modal-footer">
+			        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+			        <button type="submit" class="btn btn-success"><strong><i class='far fa-paper-plane	'></i>&nbsp;ENVIAR</strong></button>
+			      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+		
+		<div class="modal fade modalReniec" id="modalReniec" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog ">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">COMPARACIÓN DE DATOS</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      	<div class="modal-body">
+		        	<div class="form-row datosModal" th:each="dato:${detalle}" style="font-size: 12px">
+		        		<div style="width:50%" class="modalSolicitante">
+		        			<div style="margin: 10px" class="form-horizontal">
+		        				<h6><i class='fas fa-user'></i>&nbsp;<strong>DATOS DEL SOLICITANTE</strong></h6><br>
+		        				<div class="form-group">
+		        					<label><strong>NOMBRES: </strong></label>
+		        					<input class="form-control form-control-sm" th:value="${dato.nombresCompletos}">
+		        				</div> 
+		        				<div class="form-group">
+		        					<label><strong>FECHA NACIMIENTO:</strong></label>
+		        					<input class="form-control form-control-sm" th:value="${dato.fNacimiento}">
+		        				</div>
+		        			</div>
+		        		</div>
+		        		<div style="width:50%" class="modalWebService">
+		        			<div style="margin: 10px">
+		        				<h6><i class='fas fa-fingerprint'></i>&nbsp;<strong>RENIEC</strong></h6><br>
+		        				<div class="form-group">
+				        			<label><strong>NOMBRES: </strong></label>
+				        			<input class="form-control form-control-sm nombresReniec" id="nombresReniec">
+				        		</div>
+				        		<div class="form-group">
+				        			<label><strong>FECHA NACIMIENTO: </strong></label>
+				        			<input class="form-control form-control-sm fechaNacReniec" id="fechaNacReniec">
+				        		</div>
+		        			</div>
+		        		</div>
+		        	</div>
+		        </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-success btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;OK</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		
+		<div class="modal fade modalAnulacion" id="modalAnulacion" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">ANULACION DE SOLICITUD</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <form class="anularSolicitud" action="" method="post" enctype="multipart/form-data">
+		      <div class="modal-body" style="font-size: 12px" th:each="dato:${detalle}">
+		      		<input class="solicitud" type="hidden" id="idSolicitud" name="idAnulacion" th:value="${dato.n_id}">
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">MOTIVO</span>
+					  </div>
+					  <textarea class="form-control motivoAnulacion" name="motivoAnulacion" aria-label="With textarea"></textarea>
+					</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CANCELAR</button>
+		        <button type="submit" class="btn btn-danger"><strong><i class='fa fa-save'></i>&nbsp;ANULAR</strong></button>
+		      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>	
+		
+		<div class="modal fade modalVerRespuesta" id="modalVerRespuesta" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content" th:each="dato:${detalle}">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel"><strong>RESPUESTA A LA SOLICITUD</strong></h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body" style="font-size: 12px">
+		      	<h6><strong>ATENDIDO EL <span th:text="${dato.fechaAtendido}"></span></strong></h6><br>
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">MENSAJE</span>
+					  </div>
+					  <textarea class="form-control" aria-label="With textarea" th:text="${dato.x_respuesta}" readonly="readonly"></textarea><br>
+					  
+					</div><br>
+					<label th:if="${dato.respuesta != '' and dato.respuesta != null}" ><strong>ADJUNTO</strong></label>
+					<button type="button" th:if="${dato.respuesta != '' and dato.respuesta != null}" onclick="ventanaNueva3()" class="btn btn-outline-danger btn-sm"><i class='far fa-file-pdf fa-lg'></i></button>
+								
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-success btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CERRAR</button>
+		       
+		      </div>
+		    </div>
+		  </div>
+		</div>
+		
+		
+		<div class="modal fade modalVerAnulacion" id="modalVerAnulacion" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content" th:each="dato:${detalle}">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="staticBackdropLabel">ANULACION DE SOLICITUD</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div>
+		      <div class="modal-body" style="font-size: 12px">
+		      	<h6><strong>ANULADO EL <span th:text="${dato.fechaAtendido}"></span></strong></h6><br>
+		      		<div class="input-group">
+					  <div class="input-group-prepend">
+					    <span class="input-group-text">MOTIVO</span>
+					  </div>
+					  <textarea th:text="${dato.x_respuesta}" class="form-control" aria-label="With textarea" readonly="readonly"></textarea>
+					</div>
+		      </div>
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-success btn-sm" data-dismiss="modal"><i class='fas fa-times fa-lg'></i>&nbsp;CERRAR</button>
+		       
+		      </div>
+		    </div>
+		  </div>
+		</div>	
+		
+		
+	<script src="js/datosReniec.js" th:src="@{js/datosReniec.js}"></script>
+	<script type="text/javascript">
+		$(document).on('change','input[type="file"]',function(){
+		// this.files[0].size recupera el tamaño del archivo
+		// alert(this.files[0].size);
+		
+			var fileName = this.files[0].name;
+			var fileSize = this.files[0].size;
+
+			if(fileSize > 5000000){
+				toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.error("El archivo no debe superar los 5 MB!");
+				this.value = '';
+				this.files[0].name = '';
+			}else{
+				// recuperamos la extensión del archivo
+				var ext = fileName.split('.').pop();
+				
+				// Convertimos en minúscula porque 
+				// la extensión del archivo puede estar en mayúscula
+				ext = ext.toLowerCase();
+		    
+				// console.log(ext);
+				switch (ext) {
+					case 'pdf': break;
+					default:
+						toastr.clear();
+						toastr.options = {
+							"closeButton":true,
+							"progressBar": true,
+							"positionClass":"toast-topcenter-right"
+						};
+						toastr.error("Archivo con formato no aceptado!");
+						this.value = ''; // reset del valor
+						this.files[0].name = '';
+				}
+			}
+		});
+	</script>
+	<script type="text/javascript">
+	function ventanaNueva(){	
+		var url='verAdjunto';
+   		url = url + '/' + $('.solicitud').val();
+		window.open(url,'nuevaVentana','width=600, height=800, toolbar=0, location=0');
+	}
+	function ventanaNueva2(){	
+		var url='verArancel';
+   		url = url + '/' + $('.solicitud').val();
+		window.open(url,'nuevaVentana','width=600, height=800');
+	}
+	function ventanaNueva3(){	
+		var url='verRespuesta';
+   		url = url + '/' + $('.solicitud').val();
+		window.open(url,'nuevaVentana','width=600, height=800');
+	}
+	</script>
+	<script type="text/javascript">
+		$(".uploadImage").on("submit", function(e) {
+			e.preventDefault();
+			var formData = new FormData(this);
+			$.ajax({
+				type:"POST",
+				url:"enviarMensaje",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				success:function(response) {
+					if(response.Status == 200){ 
+						$(".detalleObjetos").empty();
+						var url=$('.formulario').val();
+						$(".listaObjetos").load(url);
+						$(".modalRespuesta").modal('hide');//ocultamos el modal
+						$('body').removeClass('modal-open');//eliminamos la clase del body para poder hacer scroll
+						$('.modal-backdrop').remove();//e
+						Swal.fire(
+								  'MENSAJE ENVIADO!!',
+								  'Click en OK para continuar!',
+								  'success'
+								);
+						fetchList("user");
+						
+						
+					}
+					else if(response.Status == 400){
+						$("#modalRespuesta").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'La solicitud ya fue atendida actualice la lista!!',
+							  
+							});
+					}
+					else {
+						$("#modalRespuesta").modal("hide");
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'Ooops, algo salió mal, no se pudo enviar la información.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		});
+	</script>
+	<script type="text/javascript">
+		$(".anularSolicitud").on("submit", function(e) {
+			e.preventDefault();
+			var formData = new FormData(this);
+			$.ajax({
+				type:"POST",
+				url:"anularSolicitud",
+				data:formData,
+				cache:false,
+				dataType:"json",
+				contentType:false,
+				processData:false,
+				success:function(response) {
+					if(response.Status == 200){ 
+						
+						$(".detalleObjetos").empty();
+						var url=$('.formulario').val();
+						$(".listaObjetos").load(url);
+						$(".modalSolicitud").modal('hide');//ocultamos el modal
+						$('body').removeClass('modal-open');//eliminamos la clase del body para poder hacer scroll
+						$('.modal-backdrop').remove();//e
+						Swal.fire(
+								  'SOLICITUD ANULADA!!',
+								  'Click en OK para continuar!',
+								  'success'
+								);
+						fetchList("user");
+						
+						
+					}
+					else if(response.Status == 400){
+						$("#modalAnulacion").modal("hide");
+						Swal.fire({
+							  icon: 'info',
+							  title: 'ATENCIÓN',
+							  text: 'La solicitud ya fue atendida actualice la lista!!',
+							  
+							});
+					}
+					else {
+						$("#modalAnulacion").modal("hide");
+						Swal.fire({
+							  icon: 'error',
+							  title: 'ATENCIÓN',
+							  text: 'Ooops, algo salió mal, no se pudo completar la operación.!!',
+							  
+							});
+					}
+				}
+			
+			});
+		});
+	</script>
+</body>
+</html>

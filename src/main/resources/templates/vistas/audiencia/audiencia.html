@@ -38,14 +38,14 @@
 						th:value="${sede.id}" th:text="${sede.denominacion}"></option>
 				</select>&nbsp;&nbsp;&nbsp;
 				<label><strong>FECHA: </strong></label>&nbsp;<input type="date" id="txtFecha">&nbsp;&nbsp;&nbsp;
-				<button type="button" class="btn btn-outline-info btn-sm" onclick="buscarAudiencias()"><i class='fas fa-search'></i></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button type="button" class="btn btn-outline-info btn-sm" onclick="getAudiencias()"><i class='fas fa-search'></i></button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<button type="button" class="btn btn-primary" id="btnPublicarAudiencias" style="display:none"><i class='fas fa-save'></i>&nbsp;PUBLICAR</button>
 			
 			</div><br>
-			<div id="divInstancias" class="container">
-			</div><hr>
+			<div style="width:100%; height: 100%; font-size: 11px" id="divInstancias" >
+			</div><hr color="#790000">
 			<div>
-				<table style="font-size:10px" class="table table-hover table-sm" id="tablaAudiencias" >	
+				<table style="font-size:11px" class="table table-hover table-sm" id="tablaAudiencias" >	
 				</table>
 			</div>
 		</div>
@@ -72,6 +72,7 @@
 					<label class="modalLabel">ESTADO</label>
 					<select id="lstEditarEstado">
 						<option value="P">PUBLICADO</option>
+						<option value="R">RESERVADO</option>
 						<option value="A">ANULADO</option>
 					</select>
 		      	</div>
@@ -107,7 +108,7 @@
 			        success : function(data) {
 			         	var html = '';
 			         	var len = data.length;
-			         	html += '<div class="row row-cols-1 row-cols-sm-2 row-cols-md-4">';
+			         	html += '<div class="row row-cols-2 row-cols-sm-2 row-cols-md-2">';
 			         	for (var i = 0; i < len; i++) {
 							html+='<div class="col"><label><input name="instancia" type="checkbox" id="cbox1" value="'+ data[i].id+'"> '+data[i].denominacion+'</label></div>';
 			         	}
@@ -130,17 +131,19 @@
 	    		var audiencias = [];
 	    		$('#tablaAudiencias .filaAudiencia').each(function() {
 	    			var audiencia = {};
-	    			var estado = $(this).find("td:eq(10) input");
-	    			if(estado.is(':checked')==true){
+	    			var estado = $(this).find("td:eq(10) select").val();
+	    			if(estado != 'O'){
 	    				audiencia["expediente"] = $(this).find("td:eq(0)").text();
 	    				audiencia["idInstancia"] = $(this).find("td:eq(1)").text();
 	    				audiencia["idSede"] = $(this).find("td:eq(2)").text();
 	    				audiencia["especialidad"] = $("#txtEspecialidad").val();
 	    				audiencia["parte1"] = $(this).find("td:eq(4)").text();
 	    				audiencia["parte2"] = $(this).find("td:eq(5)").text();
-	    				audiencia["tipo"] = $(this).find("td:eq(6)").text();
-	    				audiencia["fechaHora"] = $(this).find("td:eq(7)").text();
-	    				audiencia["enlace"] = $(this).find("td:eq(9) input").val();
+	    				audiencia["delito"] = $(this).find("td:eq(6)").text();
+	    				audiencia["tipo"] = $(this).find("td:eq(7)").text();
+	    				audiencia["fechaHora"] = $(this).find("td:eq(8)").text();
+	    				audiencia["enlace"] = $(this).find("td:eq(11) input").val();
+	    				audiencia["estado"] = estado;
 	    				audiencias.push(audiencia);
 	    			}
 	    		});
@@ -170,13 +173,16 @@
 	    						'success'
 	    					);	
 	    				},
-			        	error : function(e) {
-			        	 	Swal.fire({
-							  	icon: 'error',
-							  	title: 'ATENCIÓN',
-							  	text: 'No se pudo completar la publicación!!',
-							});
-				     	}
+	    		        error : function(response){
+	    		        	var r = jQuery.parseJSON(response.responseText);
+	    					toastr.clear();
+	    					toastr.options = {
+	    						"closeButton":true,
+	    						"progressBar": true,
+	    						"positionClass":"toast-topcenter-right"
+	    					};
+	    					toastr.warning(r.message);	
+	    		        }
 	    			});
 	    		}
 	        });
@@ -186,55 +192,48 @@
 	    		var enlace = $("#txtEnlace").val();
 	    		var estado = $("#lstEditarEstado").val();
 	    		
-	    		if(enlace == ""){
-					toastr.clear();
-					toastr.options = {
-						"closeButton":true,
-						"progressBar": true,
-						"positionClass":"toast-topcenter-right"
-					};
-					toastr.error("Debe completar el campo enlace!!");
-	    		}
-	    		else{
-	    			var audiencia = {};
-		    		audiencia["id"] = $("#txtIdAudiencia").val();
-		    		audiencia["enlace"] = $("#txtEnlace").val();
-		    		audiencia["estado"] = $("#lstEditarEstado").val();
-		    		
-	    			$.ajax({
-	    				type: "PUT",
-	    				url: "modificarAudiencia",
-	    				data: JSON.stringify(audiencia),
-	    				cache: false,
-	    				dataType: "json",
-	    				contentType: "application/json; charset=utf-8",
-	    				processData: false,
-	    				success:function(response) {
-	    					$("#modalEditarAudiencia").modal('hide');
-	    					$("#tablaAudiencias").empty();
-	    					buscarAudiencias();
-	    					Swal.fire(
-	    						'AUDIENCIA MODIFICADA!!',
-	    						'Click en OK para continuar!',
-	    						'success'
-	    					);	
-	    				},
-			        	error : function(e) {
-			        	 	Swal.fire({
-							  	icon: 'error',
-							  	title: 'ATENCIÓN',
-							  	text: 'No se pudo completar la modificación!!',
-							});
-				     	}
-	    			});
-	    		}
+
+    			var audiencia = {};
+	    		audiencia["id"] = $("#txtIdAudiencia").val();
+	    		audiencia["enlace"] = $("#txtEnlace").val();
+	    		audiencia["estado"] = $("#lstEditarEstado").val();
+	    		
+    			$.ajax({
+    				type: "PUT",
+    				url: "modificarAudiencia",
+    				data: JSON.stringify(audiencia),
+    				cache: false,
+    				dataType: "json",
+    				contentType: "application/json; charset=utf-8",
+    				processData: false,
+    				success:function(response) {
+    					$("#modalEditarAudiencia").modal('hide');
+    					$("#tablaAudiencias").empty();
+    					getAudiencias();
+    					Swal.fire(
+    						'AUDIENCIA MODIFICADA!!',
+    						'Click en OK para continuar!',
+    						'success'
+    					);	
+    				},
+    		        error : function(response){
+    		        	var r = jQuery.parseJSON(response.responseText);
+    					toastr.clear();
+    					toastr.options = {
+    						"closeButton":true,
+    						"progressBar": true,
+    						"positionClass":"toast-topcenter-right"
+    					};
+    					toastr.warning(r.message);	
+    		        }
+    			});
 	        });
 	  	});
   	</script>
 	
     <script type="text/javascript">
     
-	    function buscarAudiencias(){
+	    function getAudiencias(){
 			var accion = $("#lstAccion").val();
 			var idSede = $("#lstSede").val();
 			var fecha = $("#txtFecha").val();
@@ -267,13 +266,17 @@
 		        dataType : 'json',
 		        success : function(data) {
 		         	var html = '';
+
 		         	if(accion=="N"){
-			         	html += '<tbody><tr><th>EXPEDIENTE</th><th style="display:none;"></th><th style="display:none;"></th><th>INSTANCIA</th><th style="display:none;"></th><th style="display:none;"></th><th>TIPO</th><th style="display:none;"></th><th>HORA</th><th>ENLACE</th><th>PUBLICAR</th></tr>';
+			         	html += '<tbody><tr><th>EXPEDIENTE</th><th style="display:none;"></th><th style="display:none;"></th><th>INSTANCIA</th><th style="display:none;"></th><th style="display:none;"></th><th>DELITO</th><th>TIPO</th><th style="display:none;"></th><th>HORA</th><th>ESTADO</th><th>ENLACE</th></tr>';
 			         	for (var i = 0; i < data.length; i++) {
+			         		var delito = '';
+			         		if(data[i].delito != null)
+			         			delito = data[i].delito;
 							html+='<tr class="filaAudiencia"><td>'+data[i].expediente+'</td><td style="display:none;">'+data[i].idInstancia+'</td><td style="display:none;">'+
-							data[i].idSede+'</td><td>'+data[i].instancia+'</td><td style="display:none;">'+data[i].parte1+'</td><td style="display:none;">'+data[i].parte2+'</td><td>'+
-							data[i].tipo+'</td><td style="display:none;">'+data[i].fechaHora +'</td><td>'+data[i].hora +'</td><td><input type="text" value="'+data[i].enlace+'"></td><td>'+
-							'<input type="checkbox"></td></tr>';
+							data[i].idSede+'</td><td>'+data[i].instancia+'</td><td style="display:none;">'+data[i].parte1+'</td><td style="display:none;">'+data[i].parte2+'</td><td>'+delito+'</td><td>'+
+							data[i].tipo+'</td><td style="display:none;">'+data[i].fechaHora +'</td><td>'+data[i].hora +'</td><td><select><option value="P">PUBLICAR</option><option value="R">RESERVAR</option><option value="O">OMITIR</option></select></td>'+
+							'<td><input type="text" size="40px" value="'+data[i].enlace+'"></td></tr>';
 			         	}
 			         	html += '</tbody>';
 		         	}
@@ -294,7 +297,7 @@
 	        	 	Swal.fire({
 					  	icon: 'error',
 					  	title: 'ATENCIÓN',
-					  	text: 'No se pudo cargar instancias.!!',
+					  	text: 'No se pudo cargar audiencias publicadas!!',
 					});
 		     	}
 	      	});
@@ -311,7 +314,7 @@
 					$("#txtExpediente").val(data.expediente);
 					$("#txtHora").val(data.hora);
 					$("#txtEnlace").val(data.enlace);
-					$("#lstEditarAudiencia").val(data.idEstado);
+					$("#lstEditarEstado").val(data.estado);
 		        },
 	        	error : function(e) {
 	        	 	Swal.fire({

@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 import lombok.Data;
 
-@Table(name="audiencias")
+@Table(name="audiencia")
 @Entity
 @Data
 public class Audiencia {
@@ -63,9 +63,19 @@ public class Audiencia {
 	@Column(name="ip_audiencia")
 	private String ip;
 	
+	@Column(name="c_usuario")
+	private String usuario;
+	
 	@Column(name="fecha_audiencia")
 	private LocalDateTime fecAudiencia;
 	
 	@Column(name="fecha_registro")
 	private LocalDateTime fecSistema;
+	
+	@Column(name="c_usuario_modifica")
+	private String usuarioModifica;
+	
+	@Column(name="fecha_modificacion")
+	private LocalDateTime fecModificacion;
+	
 }

@@ -1,6 +1,8 @@
 package com.cdm.service1.impl;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,13 @@ public class InstanciaServiceImpl implements InstanciaService {
 	public List<ResponseInstanciaVO> getInstancias(String sede) {
 		List<Instancia> instancias = instanciaRepository.findBySedeId(sede);
 		return instanciaMapperService.convertir_a_VO(instancias);
+	}
+
+	@Override
+	public List<ResponseInstanciaVO> getInstanciasAudiencia(String sede, String especialidad) {
+		List<Instancia> instancias = this.instanciaRepository.findBySedeIdAndEspecialidad(sede, especialidad);
+		instancias = instancias.stream().sorted(Comparator.comparing(Instancia::getOrden)).collect(Collectors.toList());
+		return this.instanciaMapperService.convertir_a_VO(instancias);
 	}
 
 }

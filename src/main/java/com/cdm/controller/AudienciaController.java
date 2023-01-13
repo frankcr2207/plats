@@ -25,6 +25,7 @@ import com.cdm.domain.Instancia;
 import com.cdm.domain.UsuarioInterno;
 import com.cdm.domain.vo.RequestAudienciaVO;
 import com.cdm.domain.vo.ResponseAudienciaVO;
+import com.cdm.domain.vo.ResponseEnlaceAudienciaVO;
 import com.cdm.domain.vo.ResponseInstanciaVO;
 import com.cdm.domain.vo.ResponseSedeVO;
 import com.cdm.mapper.InstanciaMapperService;
@@ -34,12 +35,15 @@ import com.cdm.repository.UsuarioInternoRepository;
 import com.cdm.service.external.ServicioExternalService;
 import com.cdm.service.external.vo.ResponseAudienciaAgendaExternalVO;
 import com.cdm.service1.AudienciaService;
+import com.cdm.service1.InstanciaService;
 import com.cdm.service1.SedeService;
 
 @Controller
 public class AudienciaController {
 	
 	private SedeService sedeService;
+	
+	private InstanciaService instanciaService;
 	
 	private InstanciaRepository instanciaRepository;
 	
@@ -53,13 +57,14 @@ public class AudienciaController {
 	
 	public AudienciaController(SedeService sedeService, UsuarioInternoRepository usuarioInternoRepository,
 		InstanciaRepository instanciaRepository, InstanciaMapperService instanciaMapperService,
-		ServicioExternalService servicioExternalService, AudienciaService audienciaService) {
+		ServicioExternalService servicioExternalService, AudienciaService audienciaService, InstanciaService instanciaService) {
 		this.sedeService = sedeService;
 		this.usuarioInternoRepository= usuarioInternoRepository;
 		this.instanciaRepository = instanciaRepository;
 		this.instanciaMapperService = instanciaMapperService;
 		this.servicioExternalService = servicioExternalService;
 		this.audienciaService = audienciaService;
+		this.instanciaService = instanciaService;
 	}
 	
 	@GetMapping("/getPublicacionAudiencia") 
@@ -73,10 +78,14 @@ public class AudienciaController {
 		return "vistas/audiencia/audiencia";
 	}
 	
+	@GetMapping("/getSedeAudiencia") 
+	public @ResponseBody List<ResponseSedeVO> getSedeAudiencia(String sede, String especialidad) {
+		return this.sedeService.getSedeAudiencia();
+	}
+	
 	@GetMapping("/getInstanciaAudiencia") 
 	public @ResponseBody List<ResponseInstanciaVO> getInstanciaAudiencia(String sede, String especialidad) {
-		List<Instancia> instancias = this.instanciaRepository.findBySedeIdAndEspecialidad(sede, especialidad);
-		return this.instanciaMapperService.convertir_a_VO(instancias);
+		return this.instanciaService.getInstanciasAudiencia(sede, especialidad);
 	}
 	
 	@GetMapping("/getAgendaSij") 
@@ -86,14 +95,19 @@ public class AudienciaController {
 	}
 	
 	@GetMapping("/getAudienciasPublicadas") 
-	public @ResponseBody List<ResponseAudienciaVO> getAudienciasPublicadas(String sede, @RequestParam(value="instancias") List<String> instancias, String fecha) {
-		LocalDateTime fechaFormateada = LocalDate.parse(fecha, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
-		return this.audienciaService.getAudienciasPublicadas(instancias, fechaFormateada);  
+	public @ResponseBody List<ResponseAudienciaVO> getAudienciasPublicadas(@RequestParam(value="instancias") List<String> instancias, String fecha, 
+			String especialidad) {
+		return this.audienciaService.getAudienciasPublicadas(instancias, fecha, especialidad);  
 	}
 	
 	@GetMapping("/getAudiencia") 
 	public @ResponseBody ResponseAudienciaVO getAudiencia(String sede, @RequestParam(value="id") Integer id) {
 		return this.audienciaService.getAudiencia(id);  
+	}
+	
+	@GetMapping("/getEnlaceAudiencia") 
+	public @ResponseBody ResponseEnlaceAudienciaVO getEnlaceAudiencia(@RequestParam(value="id") Integer id) {
+		return this.audienciaService.getEnlaceAudiencia(id);  
 	}
 
 	@PostMapping(value = "/publicarAudiencias", consumes = {"application/json"}, produces = {"application/json"})

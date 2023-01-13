@@ -10,6 +10,8 @@ public interface InstanciaService {
 	
 	List<ResponseInstanciaVO> getInstanciasSalvaguardia(String sede);
 	
+	List<ResponseInstanciaVO> getInstanciasAudiencia(String sede, String especialidad);
+	
 	ResponseInstanciaVO getInstancia(String id);
 	
 	List<ResponseInstanciaVO> getInstancias(String sede);

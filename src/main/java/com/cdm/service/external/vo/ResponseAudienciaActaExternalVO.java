@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResponseAudienciaActaExternalVO {
 	
+	private String id;
 	private LocalDateTime fecAudiencia;
 	private LocalDateTime fecCreacion;
 	private LocalDateTime fecDescargo;

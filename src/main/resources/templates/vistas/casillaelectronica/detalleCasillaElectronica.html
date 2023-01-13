@@ -58,6 +58,7 @@
 						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button onclick="window.print();" id="btnImprimir" class="btn btn-outline-dark btn-sm" style="margin:auto"><i class='fas fa-print fa-lg'></i></button><br>
 						<label><strong>SOLICITANTE: </strong></label><input style="font-weight: bold" th:value="${dato.usuarioExterno.nombres} + ' ' + ${dato.usuarioExterno.apellidos}" id="nombres" readonly="readonly" size="40"><br>
 						<label><strong>DNI: </strong></label><input th:value="${dato.usuarioExterno.documento}" id="documento" readonly="readonly" size="20" ><br>
+						<label><strong>N° SOLICITUD CASILLA: </strong></label><input th:value="${dato.solicitudCasilla}" id="documento" readonly="readonly" size="20" ><br>
 						<label><strong>TIPO: </strong></label><input style="font-weight: bold" th:value="${dato.tipo}" readonly="readonly" size="50" value=""><br>
 						<label><strong>DEPARTAMENTO: </strong></label><input th:value="${dato.departamento.departamento}" readonly="readonly" size="65" value=""><br>
 						<label><strong>PROVINCIA: </strong></label><input th:value="${dato.provincia.provincia}" readonly="readonly" size="65" value=""><br>

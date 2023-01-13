@@ -2,6 +2,7 @@ package com.cdm.controller;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.mail.MessagingException;
@@ -24,12 +26,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,6 +44,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.cdm.domain.vo.RequestActaVO;
 import com.cdm.domain.vo.ResponseSedeVO;
 import com.cdm.entities.Correo;
 import com.cdm.entities.Servicio;
@@ -45,6 +53,7 @@ import com.cdm.service.external.vo.ResponseResumenAsistenteVO;
 import com.cdm.service1.SedeService;
 import com.cdm.utils.Constantes;
 import com.cdm.utils.ExcelArchivo;
+import com.cdm.utils.ExportarExcel;
 import com.cdm.utils.SmtpMailSender;
 
 @Controller
@@ -59,6 +68,9 @@ public class ControladorServicio {
 	private ServicioExternalService servicioExternalService;
 	
 	private SedeService sedeService;
+	
+	@Autowired
+    private ExportarExcel jxlService;
     
 	public ControladorServicio(ServicioExternalService servicioExternalService, SedeService sedeService) {
 		this.servicioExternalService = servicioExternalService;
@@ -198,4 +210,20 @@ public class ControladorServicio {
 		else
 			throw new NoSuchElementException("No se pudo descargar el documento");
 	}
+	
+	@PostMapping("download/xlsx")
+    public ResponseEntity<byte[]> conteoActas(@RequestParam String usuario, @RequestBody List<RequestActaVO> responseAudienciaActaVO) throws IOException {
+
+        if(null!=responseAudienciaActaVO) {
+            String filename = "api_data_"+ new Random().nextInt(100)+".xlsx";
+            ByteArrayOutputStream  file = jxlService.downloadXls("api_data.xlsx", responseAudienciaActaVO, usuario);
+            System.out.println(usuario);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                    .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+                    .body(file.toByteArray());
+        }
+        return null;
+    
+    }  
 }

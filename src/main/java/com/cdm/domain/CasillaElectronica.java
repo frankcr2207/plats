@@ -51,6 +51,9 @@ public class CasillaElectronica {
 	@Column(name="s_registro")
 	private String registro;
 	
+	@Column(name="s_solicitud_casilla")
+	private String solicitudCasilla;
+	
 	@Column(name="f_sistema")
 	private LocalDateTime fechaSistema;
 	

@@ -23,6 +23,7 @@ public class RequestAudienciaVO {
 	private String idSede;
 	private String especialidad;
 	private String instancia;
+	private String delito;
 	private String tipo;
 	private String parte1;
 	private String parte2;

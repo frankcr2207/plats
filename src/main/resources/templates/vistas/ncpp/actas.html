@@ -145,22 +145,23 @@
 					$("#modalEspera").modal('hide');
 					var html = "";
 					for (var i = 0; i < data.length; i++) {
-						html += '<h4><span class="badge badge-info"><strong>' + data[i].nombres + ' ' + data[i].apellidos + '</strong></span></h4>';
-						html += "<table style='font-size: 11px;'class='table table-sm'><tr><th>F. AUDIENCIA</th><th>F. CREACIÓN</th><th>EXPEDIENTE</th><th>JUZGADO</th><th>ESTADO</th><th>ACTA</th></tr>";
+						html += '<h4><span class="badge badge-info"><label id="lbl'+data[i].id+'"><strong>' + data[i].nombres + ' ' + data[i].apellidos + '</strong></label></span>&nbsp;&nbsp;&nbsp;';
+						html += "<button type='button' class='btn btn-success btn-sm' onclick='exportar(\"" + data[i].id + "\")'><i class='fas fa-file-excel'></i></button></h4>";
+						html += '<table style="font-size: 11px;" class="table table-sm" id="tabla'+data[i].id+'"><tr><th>F. AUDIENCIA</th><th>F. CREACIÓN</th><th>EXPEDIENTE</th><th>JUZGADO</th><th>ESTADO</th><th>ACTA</th></tr>';
 		         	    for (var j = 0; j < data[i].audienciaActas.length; j++) {
 		         	    	var estado;
 		         	    	if(data[i].audienciaActas[j].estado == true)
 		         	    		estado = "<h6><span class='badge badge-success'>CORRECTO</span></h6>";
 		         	    	else
 		         	    		estado = "<h6><span class='badge badge-danger'>PENDIENTE</span></h6>";
-			         	    html += "<tr><td>" + data[i].audienciaActas[j].fecAudiencia + '</td>' + 
+			         	    html += "<tr class='fila'><td>" + data[i].audienciaActas[j].fecAudiencia + '</td>' + 
 			         	    	'<td>' + data[i].audienciaActas[j].fecCreacion + '</td>' +
 			         	    	'<td>' + data[i].audienciaActas[j].expediente + '</td>' +
 			         	    	'<td>' + data[i].audienciaActas[j].instancia + '</td>' + 
 			         	    	'<td>' + estado + '</td>' + 
 			         	    	"<td><button type='button' class='btn btn-outline-primary btn-sm' onclick='descargarDocumento(\"" + $("#txtSede").val() + "\",\"" + data[i].audienciaActas[j].fecDescargo + "\",\"" +data[i].audienciaActas[j].documento + "\")'><i class='fas fa-file-word fa-lg'></i></button></td></tr>";
 		         	    }
-		         	    html += "</table><hr>";
+		         	    html += "</table><hr color='#790000'>";
 		         	}
 					$('#divActas').html(html);
 			    }, delay);
@@ -191,6 +192,86 @@
 			        responseType: 'blob'
 			    },
 				success : function(blob, status, xhr) {
+					var filename = "";
+			        var disposition = xhr.getResponseHeader('Content-Disposition');
+			        if (disposition && disposition.indexOf('attachment') !== -1) {
+			            var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+			            var matches = filenameRegex.exec(disposition);
+			            if (matches != null && matches[1]){
+			            	filename = matches[1].replace(/['"]/g, '');
+			            }
+			        }
+
+			        if (typeof window.navigator.msSaveBlob !== 'undefined') {
+			            window.navigator.msSaveBlob(blob, filename);
+			        } else {
+			            var URL = window.URL || window.webkitURL;
+			            var downloadUrl = URL.createObjectURL(blob);
+
+			            if (filename) {
+			                var a = document.createElement("a");
+			                if (typeof a.download === 'undefined') {
+			                    window.location.href = downloadUrl;
+			                } else {
+			                    a.href = downloadUrl;
+			                    a.download = filename;
+			                    document.body.appendChild(a);
+			                    a.click();
+			                }
+			            } else {
+			                window.location.href = downloadUrl;
+			            }
+
+			            setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100);
+			        }
+			        toastr.clear();
+			        toastr.options = {
+			            "closeButton":true,
+			            "progressBar": true,
+			            "positionClass":"toast-bottom-left"
+			        };
+			        toastr.success("SU ARCHIVO SE DESCARGARÁ AQUÍ!");
+				},
+				error : function(response) {
+					var r = jQuery.parseJSON(response.responseText);
+					toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-topcenter-right"
+					};
+					toastr.error(r.message);
+				}
+			});
+		}
+		
+		function exportar(id){
+			alert(id);
+			var tabla = '#tabla' + id;
+			var actas = [];
+			
+    		$(tabla + ' .fila').each(function() {
+    			var acta = {};
+    			acta["fecAudiencia"] = $(this).find("td:eq(0)").text();
+    			acta["fecCreacion"] = $(this).find("td:eq(1)").text();
+    			acta["expediente"] = $(this).find("td:eq(2)").text();
+    			acta["instancia"] = $(this).find("td:eq(3)").text();
+    			acta["estado"] = $(this).find("td:eq(4)").text();
+    			actas.push(acta);
+    		});
+
+			$.ajax({
+				url: 'download/xlsx?usuario=' + id,
+				method: 'POST',
+				data: JSON.stringify(actas),
+				cache: false,
+				dataType: "json",
+				contentType: "application/json; charset=utf-8",
+				processData: false,
+				xhrFields: {
+			        responseType: 'blob'
+			    },
+			    success : function(blob, status, xhr) {
 					var filename = "";
 			        var disposition = xhr.getResponseHeader('Content-Disposition');
 			        if (disposition && disposition.indexOf('attachment') !== -1) {

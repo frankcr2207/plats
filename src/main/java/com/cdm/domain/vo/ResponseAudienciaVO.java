@@ -34,9 +34,13 @@ public class ResponseAudienciaVO {
 	private String idEstado;
 	private String estado;
 	
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm")
+	private LocalDateTime fecAudiencia;
+	
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
 	@JsonProperty(value = "hora")
-	private LocalDateTime fecAudiencia;
+	private LocalDateTime hora;
+	
 	private LocalDateTime fecSistema;
 	
 }

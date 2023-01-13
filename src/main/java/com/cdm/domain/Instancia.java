@@ -30,11 +30,14 @@ public class Instancia {
 	@Column(name="x_nom_instancia")
 	private String denominacion;
 	
-	@Column(name="s_penal")
+	@Column(name="c_especialidad")
 	private String especialidad;
 	
 	@Column(name="s_salvaguardia")
 	private String salvaguardia;
+	
+	@Column(name="n_orden")
+	private Integer orden;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "c_sede")

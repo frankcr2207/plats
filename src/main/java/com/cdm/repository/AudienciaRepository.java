@@ -18,4 +18,6 @@ public interface AudienciaRepository extends JpaRepository<Audiencia, Integer>{
 	Optional<Audiencia> findByExpedienteAndIdInstanciaAndEspecialidadAndFecAudiencia(String expediente, String idInstancia, String especialidad, LocalDateTime fecAdudiencia);
 	
 	List<Audiencia> findByIdInstanciaInAndFecAudienciaBetween(List<String> instancias, LocalDateTime inicio, LocalDateTime fin);
+	
+	List<Audiencia> findByEspecialidadAndFecAudienciaGreaterThanEqualAndEstadoIn(String especialidad, LocalDateTime ahora, List<String> estado);
 }

@@ -10,4 +10,6 @@ public interface SedeService {
 	
 	List<ResponseSedeVO> getSedes();
 	
+	List<ResponseSedeVO> getSedeAudiencia();
+	
 }

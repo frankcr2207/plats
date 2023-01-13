@@ -31,6 +31,9 @@ public class Sede {
 	@Column(name="s_sede")
 	private String denominacion;
 	
+	@Column(name="s_audiencia")
+	private String audiencia;
+	
 	@OneToMany(mappedBy = "sede")
 	private List<Instancia> instancias;
 }

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseResumenAsistenteVO {
+	
 	private String id;
 	private String nombres;
 	private String apellidos;

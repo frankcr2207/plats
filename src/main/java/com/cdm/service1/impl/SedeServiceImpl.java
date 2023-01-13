@@ -36,4 +36,10 @@ public class SedeServiceImpl implements SedeService{
 		return sedeMapperService.convertir_a_VO(sedes);
 	}
 
+	@Override
+	public List<ResponseSedeVO> getSedeAudiencia() {
+		List<Sede> sedes = sedeRepository.findByAudiencia("S");
+		return sedeMapperService.convertir_a_VO(sedes);
+	}
+
 }

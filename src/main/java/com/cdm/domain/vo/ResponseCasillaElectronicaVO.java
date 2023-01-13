@@ -28,6 +28,8 @@ public class ResponseCasillaElectronicaVO {
 	
 	private String tipo;
 	
+	private String solicitudCasilla;
+	
 	private String ruc;
 	
 	private String direccion;

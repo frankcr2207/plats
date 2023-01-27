@@ -35,14 +35,13 @@ import com.cdm.domain.vo.ResponseCasillaElectronicaVO;
 import com.cdm.domain2.vo.RequestAuxilioJudicialVO;
 import com.cdm.domain2.vo.ResponseArchivoVO;
 import com.cdm.service1.CasillaElectronicaService;
+import com.cdm.utils.Constantes;
 
 @Controller
 public class CasillaElectronicaController {
 	
 	@Autowired
 	private CasillaElectronicaService casillaElectronicaService;
-	
-	private static final String local = "E://temp_cdg/";
 	
 	@GetMapping("/getCasillasElectronicas")
 	public String getCasillasJudiciales(Model model, Principal principal){
@@ -71,7 +70,7 @@ public class CasillaElectronicaController {
 	@RequestMapping(value="/verArchivoCasillaElectronica/{name}", method=RequestMethod.GET)
 	public ResponseEntity<Object> verRespuestaPdfCJ(@PathVariable("name") String nombre) throws FileNotFoundException, MessagingException {
 		ResponseEntity<Object> responseEntity = null;
-		File file = new File(local + nombre);    
+		File file = new File(Constantes.RUTA_SERVIDOR_LOCAL_CDG + nombre);    
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Content-Disposition", String.format("inline; filename=\"%s\"", file.getName()));

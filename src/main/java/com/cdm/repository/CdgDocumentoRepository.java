@@ -4,10 +4,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.cdm.domain.CdgDocumento;
+import com.cdm.domain2.FechaHora;
 
 public interface CdgDocumentoRepository extends JpaRepository<CdgDocumento, Integer>{
+	
+	@Query("select distinct now() as fechaHora from CdgDocumento")
+	public FechaHora getFechaHoraActual();
 	
 	List<CdgDocumento> findBySuperiorAndEstado(String superior, String estado);
 	
@@ -22,5 +27,5 @@ public interface CdgDocumentoRepository extends JpaRepository<CdgDocumento, Inte
 	List<CdgDocumento> findByUsuarioInternoAndEstadoAndSuperior(String usuario, String estado, String superior);
 	
 	List<CdgDocumento> findByUsuarioInternoAndExpedienteContainingOrUsuarioExternoNombresContaining(String usuario, String parametro, String parametro2);
-	
+
 }

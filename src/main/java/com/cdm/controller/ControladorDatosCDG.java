@@ -52,6 +52,7 @@ import com.cdm.entities.Ftp;
 import com.cdm.entities.Parametro;
 import com.cdm.entities.Turno;
 import com.cdm.entities.ValueCriteria;
+import com.cdm.service1.CdgDocumentoService;
 import com.cdm.service1.FtpCdgService;
 import com.cdm.zmappers.ArchivoRowMapper;
 import com.cdm.zmappers.FtpRowMapper;
@@ -409,6 +410,7 @@ public class ControladorDatosCDG {
 	
 	@RequestMapping(value="/guardarTurno", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Map<String,Object> guardarTurno(@RequestBody Turno turno, Principal principal) {
+		
 		Map<String,Object> map = new HashMap<String,Object>();
 
 		try {

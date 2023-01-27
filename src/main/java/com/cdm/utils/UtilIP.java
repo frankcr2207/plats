@@ -7,7 +7,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class UtilIP {
 	
-	public String getClientIp() {
+	public static String getClientIp() {
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest(); 
         return request.getRemoteAddr();
     }   

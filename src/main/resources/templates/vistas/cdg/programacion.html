@@ -4,7 +4,6 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
-	<script src="js/jquery.calendar3.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
 	<link href='fullcalendar/core/main.min.css' rel='stylesheet' />
   	<link href='fullcalendar/daygrid/main.min.css' rel='stylesheet' />
@@ -59,7 +58,7 @@
 					<select id="lstSedesProgramacion" style="width: 350px">
 						<option style="font-size: 12px" value="0">SELECCIONE ...</option>
 						<option style="font-size: 12px" th:each="sede: ${sedes}" 
-	     				th:value="${sede.id_sede}" th:text="${sede.nombre_sede}" ></option>
+	     				th:value="${sede.id}" th:text="${sede.denominacion}" ></option>
 					</select>
 					<br><br>
 					<label>USUARIO: </label><br>
@@ -185,6 +184,61 @@
             });  
 	    })
 	    
+	    function getTurnosCdg(sede) {
+  
+		    var calendarEl = document.getElementById('calendar');
+		  	var calendar = new FullCalendar.Calendar(calendarEl, {
+			    plugins: [ 'interaction', 'dayGrid', 'timeGrid', 'list' ,'bootstrap'],
+			    locale: 'es',
+			    timeZone: 'local',
+			    defaultView: 'dayGridMonth',
+			    themeSystem: 'bootstrap',
+			    header: {
+			      left: 'prev,next today',
+			      center: 'title',
+			      right: ''
+			    },
+			    firstDay: 0,
+			    defaultDate: new Date(),
+			    hiddenDays: [],
+			    //minTime: '08:00:00',
+			    //maxTime: '16:01:00',
+			    slotEventOverlap:false,
+			    allDaySlot: false,
+			    slotLabelFormat: [
+			        {
+			            hour: '2-digit',
+			            minute: '2-digit',
+			            hour12:false
+			        }
+			    ],
+			    displayEventTime: false,
+			    eventBorderColor:'white',
+			    //slotDuration:'00:05:00',
+			    navLinks: false, // can click day/week names to navigate views
+			
+			    weekNumbers: false,
+			    weekNumbersWithinDays: true,
+			    weekNumberCalculation: 'ISO',
+			
+			    editable: false,
+			    eventLimit: false, // allow "more" link when too many events
+			    eventColor: '#FFFFFF',
+			    events: {
+					url: 'getTurnosCdg?sede=' + sede
+				},
+				eventClick: function(info) {
+					$('#txtIdTurno').val(info.event.id);
+					$('.divTituloEvento').html('<strong>USUARIO:</strong> ' + info.event.title);
+					$('.divFechaEvento').html('<strong>FECHA: </strong>' + moment(info.event.start).format('DD/MM/YYYY'));
+					$('.modalTituloEvento').modal('show');
+				},
+		
+		  	});
+		
+		  	calendar.render();
+		};
+	    
 	    $('#btnGuardarTurno').click(function(){
 	    	var tipo;
 	    	var fechas;
@@ -215,90 +269,76 @@
 	    		
     			var json = {
    				   	"sede": sede,
-   				   	"usuario" : usuario,
+   				   	"asistenteCdg" : usuario,
    				   	"tipo"	: tipo,
-   				   	"fechas" : fechas
+   				 	"fechas" : fechas
    				};
     	      	$.ajax({
     	       		type : "POST",
     	       		contentType : "application/json",
     	       		data : JSON.stringify(json),
     	       		url : "guardarTurnoCdg",
-    	       		dataType : 'json',
-    	    		cache:false,
-    	    		beforeSend: function(){
-    	    			$('#modalEspera').modal('show');
-    	    		},
     		        success : function(response) {
-    		        	$('#modalEspera').modal('hide');
-    		        	if(response.Status == 200){ 
-    		        		var $dates = $('.date').datepicker();
-    						$dates.datepicker('setDate', null);
-    		        		$('#txtDias').prop('disabled',false);
-    						$('#txtMes').prop('readonly',true);
-    						$('#txtMes').val('');
-    						$('#rboMesCompleto').prop('checked', false);
-    						$('#rboPorDia').prop('checked', true);
-    						$('#calendar').empty();
-    						obtenerTurnos(sede);
-    						toastr.clear();
-    						toastr.options = {
-    							"closeButton":true,
-    							"progressBar": true,
-    							"positionClass":"toast-bottom-left"
-    						};
-    						toastr.success("TURNOS ASIGNADOS!!");
-    					}
-    		        	else{
-    		        		toastr.clear();
-    						toastr.options = {
-    							"closeButton":true,
-    							"progressBar": true,
-    							"positionClass":"toast-bottom-left"
-    						};
-    						toastr.warning("TURNO DUPLICADO, REVISE!!");
-    		        	}
-    		        }
+   		        		var $dates = $('.date').datepicker();
+   						$dates.datepicker('setDate', null);
+   		        		$('#txtDias').prop('disabled',false);
+   						$('#txtMes').prop('readonly',true);
+   						$('#txtMes').val('');
+   						$('#rboMesCompleto').prop('checked', false);
+   						$('#rboPorDia').prop('checked', true);
+   						$('#calendar').empty();
+   						getTurnosCdg(sede);
+   						toastr.clear();
+   						toastr.options = {
+   							"closeButton":true,
+   							"progressBar": true,
+   							"positionClass":"toast-bottom-left"
+   						};
+   						toastr.success(response);
+    		        },
+    	    		error: function(response) {
+    					var r = jQuery.parseJSON(response.responseText);
+   						toastr.clear();
+   						toastr.options = {
+   							"closeButton":true,
+   							"progressBar": true,
+   							"positionClass":"toast-bottom-left"
+   						};
+   						toastr.error(r.message);
+    	    		}
     	      	});	
 	    	}
 	    	
 	    });
 		
 		$('#btnAnularTurno').click(function(){
-			var evento = $('#txtIdTurno').val();
+			var id = $('#txtIdTurno').val();
 			var sede = $('#lstSedesProgramacion').val();	
-   			var json = {
-  				"id" : evento
-  			};
    	      	$.ajax({
-   	       		type : "POST",
-   	       		contentType : "application/json",
-   	       		data : JSON.stringify(json),
-   	       		url : "eliminarTurno",
-   	       		dataType : 'json',
-   	    		cache:false,
+   	       		type : "DELETE",
+   	       		url : "anularTurnoCdg/" + id,
    		        success : function(response) {
    		        	$('#modalTituloEvento').modal('hide');
-   		        	if(response.Status == 200){ 
-   						$('#calendar').empty();
-   						obtenerTurnos(sede);
-   			        	toastr.clear();
-						toastr.options = {
-							"closeButton":true,
-							"progressBar": true,
-							"positionClass":"toast-bottom-left"
-						};
-						toastr.success("TURNO ELIMINADO CON ÉXITO!!");
-   					}
-   		        	else{
-   		        		toastr.clear();
-						toastr.options = {
-							"closeButton":true,
-							"progressBar": true,
-							"positionClass":"toast-bottom-left"
-						};
-						toastr.danger("NO SE PUDO ELIMINAR EL TURNO!!");
-   		        	}
+  					$('#calendar').empty();
+  					getTurnosCdg(sede);
+  			        toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-bottom-left"
+					};
+					toastr.success(response);
+   		        },
+   		        error: function(response){
+   		        	$('#modalTituloEvento').modal('hide');
+   		        	var r = jQuery.parseJSON(response.responseText);
+  			        toastr.clear();
+					toastr.options = {
+						"closeButton":true,
+						"progressBar": true,
+						"positionClass":"toast-bottom-left"
+					};
+					toastr.error(r.message);
    		        }
    	      	});	
 	    	
@@ -310,15 +350,11 @@
 			
 			$('#calendar').empty();
       		var sede = $(this).find(":selected").val();
-      		var json = {
-       			"id" : sede
-      		};
-      		obtenerTurnos(sede);
+      		getTurnosCdg(sede);
+
 	      	$.ajax({
-	       		type : "POST",
-	       		contentType : "application/json",
-	       		url : "obtenerUsuariosSede",
-	       		data : JSON.stringify(json),
+	       		type : "GET",
+	       		url : "getUsuariosBySede?sede=" + sede,
 		        dataType : 'json',
 		        cache : false,
 		        timeout : 600000,
@@ -328,7 +364,7 @@
 		         	html += '';
 		         	if(len > 0){
 		         		for (var i = 0; i < len; i++) {
-			         		html += '<option style="font-size: 11px" value="' + data[i].user + '">' + data[i].nombres + '</option>';
+			         		html += '<option style="font-size: 11px" value="' + data[i].usuario + '">' + data[i].nombres + ' ' + data[i].nombres + ' ' + data[i].nombres + '</option>';
 				        }
 		         	}
 		         	else
@@ -340,7 +376,7 @@
 	        	 	Swal.fire({
 					  	icon: 'error',
 					  	title: 'ATENCIÓN',
-					  	text: 'Ooops, algo salió mal, no se pudo cargar usuarios.!!',
+					  	text: 'No se pudo cargar usuarios.!!',
 					});
 		     	}
 	      	});

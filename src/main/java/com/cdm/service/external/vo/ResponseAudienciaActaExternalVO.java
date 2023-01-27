@@ -22,6 +22,6 @@ public class ResponseAudienciaActaExternalVO {
 	private String documento;
 	private String expediente;
 	private String instancia;
-	private Boolean estado;
+	private String estado;
 	
 }

@@ -3,9 +3,6 @@ package com.cdm.controller;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import java.security.Principal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.cdm.domain.Instancia;
 import com.cdm.domain.UsuarioInterno;
 import com.cdm.domain.vo.RequestAudienciaVO;
 import com.cdm.domain.vo.ResponseAudienciaVO;
@@ -29,7 +25,6 @@ import com.cdm.domain.vo.ResponseEnlaceAudienciaVO;
 import com.cdm.domain.vo.ResponseInstanciaVO;
 import com.cdm.domain.vo.ResponseSedeVO;
 import com.cdm.mapper.InstanciaMapperService;
-import com.cdm.mapper.SedeMapperService;
 import com.cdm.repository.InstanciaRepository;
 import com.cdm.repository.UsuarioInternoRepository;
 import com.cdm.service.external.ServicioExternalService;
@@ -45,23 +40,16 @@ public class AudienciaController {
 	
 	private InstanciaService instanciaService;
 	
-	private InstanciaRepository instanciaRepository;
-	
 	private UsuarioInternoRepository usuarioInternoRepository;
-	
-	private InstanciaMapperService instanciaMapperService;
 	
 	private ServicioExternalService servicioExternalService;
 	
 	private AudienciaService audienciaService;
 	
 	public AudienciaController(SedeService sedeService, UsuarioInternoRepository usuarioInternoRepository,
-		InstanciaRepository instanciaRepository, InstanciaMapperService instanciaMapperService,
 		ServicioExternalService servicioExternalService, AudienciaService audienciaService, InstanciaService instanciaService) {
 		this.sedeService = sedeService;
 		this.usuarioInternoRepository= usuarioInternoRepository;
-		this.instanciaRepository = instanciaRepository;
-		this.instanciaMapperService = instanciaMapperService;
 		this.servicioExternalService = servicioExternalService;
 		this.audienciaService = audienciaService;
 		this.instanciaService = instanciaService;
@@ -79,45 +67,51 @@ public class AudienciaController {
 	}
 	
 	@GetMapping("/getSedeAudiencia") 
-	public @ResponseBody List<ResponseSedeVO> getSedeAudiencia(String sede, String especialidad) {
-		return this.sedeService.getSedeAudiencia();
+	public @ResponseBody ResponseEntity<List<ResponseSedeVO>> getSedeAudiencia(String sede, String especialidad) {
+		List<ResponseSedeVO> responseSedeVO = this.sedeService.getSedeAudiencia(); 
+		return new ResponseEntity<>(responseSedeVO, HttpStatus.OK);
 	}
 	
 	@GetMapping("/getInstanciaAudiencia") 
-	public @ResponseBody List<ResponseInstanciaVO> getInstanciaAudiencia(String sede, String especialidad) {
-		return this.instanciaService.getInstanciasAudiencia(sede, especialidad);
+	public @ResponseBody ResponseEntity<List<ResponseInstanciaVO>> getInstanciaAudiencia(String sede, String especialidad) {
+		List<ResponseInstanciaVO> responseInstanciaVOS = this.instanciaService.getInstanciasAudiencia(sede, especialidad);
+		return new ResponseEntity<>(responseInstanciaVOS, HttpStatus.OK);
 	}
 	
 	@GetMapping("/getAgendaSij") 
-	public @ResponseBody List<ResponseAudienciaAgendaExternalVO> getAgendaSij(String sede, 
+	public @ResponseBody ResponseEntity<List<ResponseAudienciaAgendaExternalVO>> getAgendaSij(String sede, 
 			@RequestParam(value="instancias") List<String> instancias, String fecha) {
-		return this.servicioExternalService.getAgendaSij(sede, instancias, fecha);  
+		List<ResponseAudienciaAgendaExternalVO> responseAudienciaAgendaExternalVO = this.servicioExternalService.getAgendaSij(sede, instancias, fecha); 
+		return new ResponseEntity<>(responseAudienciaAgendaExternalVO, HttpStatus.OK);
 	}
 	
 	@GetMapping("/getAudienciasPublicadas") 
-	public @ResponseBody List<ResponseAudienciaVO> getAudienciasPublicadas(@RequestParam(value="instancias") List<String> instancias, String fecha, 
+	public @ResponseBody ResponseEntity<List<ResponseAudienciaVO>> getAudienciasPublicadas(@RequestParam(value="instancias") List<String> instancias, String fecha, 
 			String especialidad) {
-		return this.audienciaService.getAudienciasPublicadas(instancias, fecha, especialidad);  
+		List<ResponseAudienciaVO> responseAudienciaVO = this.audienciaService.getAudienciasPublicadas(instancias, fecha, especialidad); 
+		return new ResponseEntity<>(responseAudienciaVO, HttpStatus.OK); 
 	}
 	
 	@GetMapping("/getAudiencia") 
-	public @ResponseBody ResponseAudienciaVO getAudiencia(String sede, @RequestParam(value="id") Integer id) {
-		return this.audienciaService.getAudiencia(id);  
+	public @ResponseBody ResponseEntity<ResponseAudienciaVO> getAudiencia(String sede, @RequestParam(value="id") Integer id) {
+		ResponseAudienciaVO responseAudienciaVO = this.audienciaService.getAudiencia(id);
+		return new ResponseEntity<>(responseAudienciaVO, HttpStatus.OK); 
 	}
 	
 	@GetMapping("/getEnlaceAudiencia") 
-	public @ResponseBody ResponseEnlaceAudienciaVO getEnlaceAudiencia(@RequestParam(value="id") Integer id) {
-		return this.audienciaService.getEnlaceAudiencia(id);  
+	public @ResponseBody ResponseEntity<ResponseEnlaceAudienciaVO> getEnlaceAudiencia(@RequestParam(value="id") Integer id) {
+		ResponseEnlaceAudienciaVO responseEnlaceAudienciaVO = this.audienciaService.getEnlaceAudiencia(id); 
+		return new ResponseEntity<>(responseEnlaceAudienciaVO, HttpStatus.OK); 
 	}
 
 	@PostMapping(value = "/publicarAudiencias", consumes = {"application/json"}, produces = {"application/json"})
-	public ResponseEntity<HttpStatus> publicarAudiencias(@Valid @RequestBody List<RequestAudienciaVO> requestAudienciaVO, Principal principal) {
+	public ResponseEntity<ResponseEntity<HttpStatus>> publicarAudiencias(@Valid @RequestBody List<RequestAudienciaVO> requestAudienciaVO, Principal principal) {
 	    this.audienciaService.publicarAudiencias(requestAudienciaVO);
 		return new ResponseEntity<>(NO_CONTENT);
 	}
 	
 	@PutMapping(value = "/modificarAudiencia", consumes = {"application/json"}, produces = {"application/json"})
-	public ResponseEntity<HttpStatus> modificarAudiencia(@Valid @RequestBody RequestAudienciaVO requestAudienciaVO, Principal principal) {
+	public ResponseEntity<ResponseEntity<HttpStatus>> modificarAudiencia(@Valid @RequestBody RequestAudienciaVO requestAudienciaVO, Principal principal) {
 	    this.audienciaService.modificarAudiencia(requestAudienciaVO);
 		return new ResponseEntity<>(NO_CONTENT);
 	}

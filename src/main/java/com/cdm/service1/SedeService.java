@@ -12,4 +12,6 @@ public interface SedeService {
 	
 	List<ResponseSedeVO> getSedeAudiencia();
 	
+	List<ResponseSedeVO> getSedesPorUsuario(String usuario);
+	
 }

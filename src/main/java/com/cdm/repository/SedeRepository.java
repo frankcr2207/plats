@@ -10,4 +10,6 @@ public interface SedeRepository extends JpaRepository<Sede, String>{
 
 	List<Sede> findByAudiencia(String estado);
 	
+	List<Sede> findByIdIn(List<String> sedes);
+	
 }

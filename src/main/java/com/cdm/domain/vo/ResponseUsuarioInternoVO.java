@@ -13,12 +13,6 @@ public class ResponseUsuarioInternoVO {
 	
 	private String apeMaterno;
 	
-	private String dni;
-	
-	private String clave;
-	
-	private String estado;
-	
 	private Integer perfil;
 	
 }

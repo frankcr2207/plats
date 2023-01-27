@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 public class RequestActaVO {
-
+	
+	private Integer orden;
 	private String fecAudiencia;
 	private String fecCreacion;
 	private String expediente;

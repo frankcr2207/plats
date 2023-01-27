@@ -15,14 +15,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResponseAudienciaActaVO {
 	
+	private Integer orden;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
 	private LocalDateTime fecAudiencia;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm")
 	private LocalDateTime fecCreacion;
 	private LocalDateTime fecDescargo;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm")
+	private LocalDateTime fecDescargoCorto;
 	private String documento;
 	private String expediente;
 	private String instancia;
-	private Boolean estado;
+	private String estado;
 	
 }

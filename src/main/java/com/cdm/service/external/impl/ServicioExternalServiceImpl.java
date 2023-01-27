@@ -39,17 +39,28 @@ public class ServicioExternalServiceImpl implements ServicioExternalService {
 		this.servicioExternalMapperService = servicioExternalMapperService;
 	} 
 	
+	private Integer orden = 0;
+	
 	@Override
-	public List<ResponseResumenAsistenteVO> getConteoActasSij(String sede, String fechaInicio, String fechaFin, boolean estado) {
+	public List<ResponseResumenAsistenteVO> getConteoActasSij(String sede, String fechaInicio, String fechaFin, String estado) {
 		RestTemplate restTemplate = new RestTemplate();
 		List<ResponseResumenAsistenteExternalVO> responseResumenAsistenteExternalVO = new ArrayList<>();
 		String url = END_POINT_SERVICIO + METODO_CONTEO_ACTAS + "?sede=" + sede + "&fechaInicio=" + fechaInicio + "&fechaFin=" + fechaFin + "&estado=" + estado;
 		responseResumenAsistenteExternalVO = Arrays.asList(restTemplate.getForObject(url, ResponseResumenAsistenteExternalVO[].class));
-		return this.servicioExternalMapperService.convertir_a_VO_resumen(responseResumenAsistenteExternalVO);
+		List<ResponseResumenAsistenteVO> responseResumenAsistenteVOS = servicioExternalMapperService.convertir_a_VO_resumen(responseResumenAsistenteExternalVO);
+		responseResumenAsistenteVOS.stream().forEach(r -> {
+			orden = 0;
+			r.getAudienciaActas().stream().forEach(a -> {
+				orden++;
+				a.setOrden(orden);
+				a.setFecDescargoCorto(a.getFecDescargo());
+			});
+		});
+		return responseResumenAsistenteVOS;
 	}
 	
 	@Override
-	public boolean getActaSij(String sede, LocalDateTime descargo, String documento) {
+	public Boolean getActaSij(String sede, LocalDateTime descargo, String documento) {
 		RestTemplate restTemplate = new RestTemplate();
 		String url = END_POINT_SERVICIO + METODO_DESCARGAR_ACTA + "?sede=" + sede + "&descargo=" + descargo + "&documento=" + documento;
 		return restTemplate.getForObject(url, Boolean.class);

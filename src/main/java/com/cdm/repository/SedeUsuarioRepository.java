@@ -10,4 +10,6 @@ public interface SedeUsuarioRepository extends JpaRepository<SedeUsuario, Intege
 	
 	public List<SedeUsuario> findByUsuario(String usuario);
 	
+	public List<SedeUsuario> findBySede(String sede);
+	
 }

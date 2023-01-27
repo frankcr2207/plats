@@ -4,7 +4,12 @@ public class Constantes {
 	
 	private Constantes() {}
 	
+	public static final String RUTA_SERVIDOR_LOCAL = "E://temp/";
+	public static final String RUTA_SERVIDOR_LOCAL_CDG = "E://temp_cdg/";
 	
+	public static final Integer USUARIO_PERFIL_JEFE_CDG = 15;
+	public static final Integer USUARIO_PERFIL_ADMIN_MODULO = 7;
+	public static final Integer USUARIO_PERFIL_ASISTENTE_CDM_CDG = 5;
 	
 	public static final String RESPUESTA_OK = "OK";
 	public static final String RESPUESTA_KO = "KO";
@@ -39,8 +44,11 @@ public class Constantes {
 	public static final String MODULO_AUDIENCIAS_ERR_3 = "ANULADO";
 	public static final String MODULO_AUDIENCIAS_ERR_4 = "ANULADO";
 	
-	public static final String RUTA_SERVIDOR_LOCAL = "E://temp/";
 	public static final String EXTENSION_WORD = ".doc";
+	public static final String EXTENSION_PDF = ".pdf";
+	public static final String EXTENSION_EXCEL = ".xlsx";
+	
+	public static final String PLANTILLA_ACTAS= "plantilla_actas";
 	
 	
 }

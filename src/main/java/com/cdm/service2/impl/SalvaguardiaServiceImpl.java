@@ -35,6 +35,8 @@ import com.cdm.repository2.SalvaguardiaRepository;
 import com.cdm.service1.FtpCdgService;
 import com.cdm.service2.FtpModuloServiceDos;
 import com.cdm.service2.SalvaguardiaService;
+import com.cdm.utils.Constantes;
+import com.cdm.utils.UtilIP;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.pdf.PdfCopy;
 import com.itextpdf.text.pdf.PdfReader;
@@ -145,7 +147,7 @@ public class SalvaguardiaServiceImpl implements SalvaguardiaService{
 			
 			String archivoFinal = String.format("%010d", entero) + "-" + requestSalvaguardiaVO.getAnio()
 				+ "-EXP-" + requestSalvaguardiaVO.getOrgano() + "-" + requestSalvaguardiaVO.getEspecialidad()  
-				+ "-" + ahora.format(formato) + ".pdf";
+				+ "-" + ahora.format(formato) + Constantes.EXTENSION_PDF;
 			
 			this.descargarArchivoGeneralSalvaguardia(salvaguardia, archivoFinal, null);
 			
@@ -164,7 +166,7 @@ public class SalvaguardiaServiceImpl implements SalvaguardiaService{
 		salvaguardia.setEstado(requestSalvaguardiaVO.getTipoRespuesta());
 		salvaguardia.setObservacion(requestSalvaguardiaVO.getTextoRespuesta().toUpperCase());
 		salvaguardia.setFechaAtencion(ahora);
-		salvaguardia.setIp(getClientIp());
+		salvaguardia.setIp(UtilIP.getClientIp());
 		salvaguardiaRepository.save(salvaguardia);		
 	}
 
@@ -201,11 +203,6 @@ public class SalvaguardiaServiceImpl implements SalvaguardiaService{
 		outputStream.flush();
         document.close();
         outputStream.close();
-    }
-
-	private String getClientIp() {
-        HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest(); 
-        return request.getRemoteAddr();
     }
 
 	@Override

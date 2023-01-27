@@ -8,9 +8,9 @@ import com.cdm.service.external.vo.ResponseResumenAsistenteVO;
 
 public interface ServicioExternalService {
 
-	public List<ResponseResumenAsistenteVO> getConteoActasSij(String sede, String fechaInicio, String fechaFin, boolean estado);
+	public List<ResponseResumenAsistenteVO> getConteoActasSij(String sede, String fechaInicio, String fechaFin, String estado);
 	
-	public boolean getActaSij(String sede, LocalDateTime descargo, String documento);
+	public Boolean getActaSij(String sede, LocalDateTime descargo, String documento);
 	
 	public List<ResponseAudienciaAgendaExternalVO> getAgendaSij(String sede, List<String> instancias, String fecha);
 	

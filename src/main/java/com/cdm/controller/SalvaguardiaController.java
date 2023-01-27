@@ -43,6 +43,7 @@ import com.cdm.domain2.vo.ResponseSalvaguardiaVO;
 import com.cdm.service1.InstanciaService;
 import com.cdm.service1.SedeService;
 import com.cdm.service2.SalvaguardiaService;
+import com.cdm.utils.Constantes;
 
 @Controller
 public class SalvaguardiaController {
@@ -51,12 +52,7 @@ public class SalvaguardiaController {
 	private SalvaguardiaService salvaguardiaService;
 	
 	@Autowired
-	private SedeService sedeService;
-	
-	@Autowired
 	private InstanciaService instanciaService;
-	
-	private static final String local = "E://temp_cdg/";
 	
 	@GetMapping("/getSalvaguardias")
 	public String getSalvaguardias(Model model, Principal principal, @RequestParam(required = false) String inicio,
@@ -93,7 +89,7 @@ public class SalvaguardiaController {
 	@RequestMapping(value="/verArchivoSalvaguardia/{name}", method=RequestMethod.GET)
 	public ResponseEntity<Object> verRespuestaPdfCJ(@PathVariable("name") String nombre) throws FileNotFoundException, MessagingException {
 		ResponseEntity<Object> responseEntity = null;
-		File file = new File(local + nombre);    
+		File file = new File(Constantes.RUTA_SERVIDOR_LOCAL_CDG + nombre);    
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Content-Disposition", String.format("inline; filename=\"%s\"", file.getName()));

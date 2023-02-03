@@ -10,4 +10,6 @@ public interface UsuarioInternoRepository extends JpaRepository<UsuarioInterno, 
 	
 	List<UsuarioInterno> findByUsuarioInAndPerfil(List<String> ids, Integer perfil);
 	
+	List<UsuarioInterno> findByUsuarioIn(List<String> ids);
+	
 }

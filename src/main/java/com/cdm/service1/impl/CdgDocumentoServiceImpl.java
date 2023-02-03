@@ -7,7 +7,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -18,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.cdm.domain.CdgDocumento;
 import com.cdm.domain.CdgTurno;
+import com.cdm.domain.SedeUsuario;
 import com.cdm.domain.UsuarioInterno;
 import com.cdm.domain.vo.RequestTurnoVO;
 import com.cdm.domain.vo.ResponseCdgDocumentoVO;
@@ -67,7 +71,7 @@ public class CdgDocumentoServiceImpl implements CdgDocumentoService{
 			fechaFin = LocalDateTime.parse(fecFin + " 23:59", formatter);
 		}
 		
-		if(usuarioInterno.getPerfil() == Constantes.USUARIO_PERFIL_ASISTENTE_CDM_CDG) {
+		if(usuarioInterno.getPerfil() == Constantes.USUARIO_PERFIL_JEFE_CDG) {
 			if(!fecInicio.isEmpty() && !fecFin.isEmpty())
 				cdgDocumentos = this.cdgDocumentoRepository.findByFecSistemaBetween(fechaInicio, fechaFin);
 			else if(!parametro.isEmpty()) 
@@ -183,11 +187,14 @@ public class CdgDocumentoServiceImpl implements CdgDocumentoService{
 	@Override
 	public List<ResponseCdgTurnoVO> getTurnosCdg(String sede, LocalDateTime inicio, LocalDateTime fin) {
 		List<CdgTurno> cdgTurnos = this.cdgTurnoRepository.findBySedeAndFecTurnoBetweenAndFecBajaIsNull(sede, inicio, fin);
+		List<String> idUsuarios = cdgTurnos.stream().map(CdgTurno::getAsistenteCdg).distinct().collect(Collectors.toList());
+		List<UsuarioInterno> usuarioInternos = this.usuarioInternoRepository.findByUsuarioIn(idUsuarios);
+		Map<String, String> mapUsuarios = usuarioInternos.stream().collect(Collectors.toMap(u -> u.getUsuario(), u -> u.getNombres().concat(" ").concat(u.getApePaterno()).concat(" ").concat(u.getApeMaterno())));
 		List<ResponseCdgTurnoVO> responseCdgTurnoVOS = new ArrayList<>();
 		cdgTurnos.stream().forEach(t -> {
 			ResponseCdgTurnoVO responseCdgTurnoVO = new ResponseCdgTurnoVO();
 			responseCdgTurnoVO.setId(t.getId());
-			responseCdgTurnoVO.setTitle(t.getAsistenteCdg());
+			responseCdgTurnoVO.setTitle(mapUsuarios.get(t.getAsistenteCdg()));
 			responseCdgTurnoVO.setStart(t.getFecTurno().toString());
 			responseCdgTurnoVO.setEnd(t.getFecTurno().plusDays(1).toString());
 			responseCdgTurnoVO.setColor("#0086E0");

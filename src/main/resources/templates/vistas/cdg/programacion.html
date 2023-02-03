@@ -357,14 +357,13 @@
 	       		url : "getUsuariosBySede?sede=" + sede,
 		        dataType : 'json',
 		        cache : false,
-		        timeout : 600000,
 		        success : function(data) {
 		         	var html = '';
 		         	var len = data.length;
 		         	html += '';
 		         	if(len > 0){
 		         		for (var i = 0; i < len; i++) {
-			         		html += '<option style="font-size: 11px" value="' + data[i].usuario + '">' + data[i].nombres + ' ' + data[i].nombres + ' ' + data[i].nombres + '</option>';
+			         		html += '<option style="font-size: 11px" value="' + data[i].usuario + '">' + data[i].nombres + ' ' + data[i].apePaterno + ' ' + data[i].apeMaterno + '</option>';
 				        }
 		         	}
 		         	else

@@ -7,6 +7,8 @@ public class Constantes {
 	public static final String RUTA_SERVIDOR_LOCAL = "E://temp/";
 	public static final String RUTA_SERVIDOR_LOCAL_CDG = "E://temp_cdg/";
 	
+	public static final String ROLE_ASISTENTE_CDM_CDG = "ROLE_ASISTENTE-CDM/CDG";
+	public static final String ROLE_JEFE_CDG = "ROLE_JEFE-CDG";
 	public static final Integer USUARIO_PERFIL_JEFE_CDG = 15;
 	public static final Integer USUARIO_PERFIL_ADMIN_MODULO = 7;
 	public static final Integer USUARIO_PERFIL_ASISTENTE_CDM_CDG = 5;
@@ -30,6 +32,10 @@ public class Constantes {
 	public static final Integer LIMITE_MINUTOS_LISTA_AUDIENCIA = 15;
 	public static final Integer LIMITE_MINUTOS_ANTES_AUDIENCIA = 5;
 	public static final Integer LIMITE_MINUTOS_DESPUES_AUDIENCIA = 15;
+	
+	public static final String ESTADO_SUNARP_PS = "PS";
+	public static final String ESTADO_SUNARP_PM = "PM";
+	public static final String ESTADO_SUNARP_T= "T";
 	
 	public static final String ESTADO_AUDIENCIA_PUBLICADO = "P";
 	public static final String ESTADO_AUDIENCIA_ANULADO = "A";

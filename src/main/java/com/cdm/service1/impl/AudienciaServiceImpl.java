@@ -61,9 +61,8 @@ public class AudienciaServiceImpl implements AudienciaService {
 	@Transactional
 	@Override
 	public void publicarAudiencias(List<RequestAudienciaVO> requestAudienciaVO) {
-		UtilIP utilIP = new UtilIP();
-		String ip = utilIP.getClientIp();
 		
+		String ip = UtilIP.getClientIp();
 		String currentUserName = SecurityContextHolder.getContext().getAuthentication().getName();
 		
 		LocalDateTime ahora = this.audienciaRepository.getFechaHoraActual().getFechaHora();

@@ -74,7 +74,7 @@ public class ControladorSunarp {
         return request.getRemoteAddr();
     }
     
-	@GetMapping("/SUNARP")
+	@GetMapping("/SUNARPP")
 	public String sunarp(Principal principal, Model model, String sede) {
 		if(sede == null)
 			sede = "0401";
@@ -106,7 +106,7 @@ public class ControladorSunarp {
 		return "vistas/listaSunarp";
 	}
 	
-	@GetMapping("/detalleSunarp")
+	@GetMapping("/detalleSunarpp")
 	public String detalleSunarp(Model model, String id, String formulario, Principal principal) {
 		String query = "";
 		
